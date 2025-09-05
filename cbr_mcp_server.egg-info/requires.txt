@@ -1,0 +1,12 @@
+mcp
+chromadb
+sentence-transformers
+pydantic
+einops
+
+[dev]
+pytest
+pytest-asyncio
+black
+isort
+mypy

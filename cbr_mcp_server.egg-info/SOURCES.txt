@@ -1,0 +1,7 @@
+pyproject.toml
+cbr_mcp_server.egg-info/PKG-INFO
+cbr_mcp_server.egg-info/SOURCES.txt
+cbr_mcp_server.egg-info/dependency_links.txt
+cbr_mcp_server.egg-info/entry_points.txt
+cbr_mcp_server.egg-info/requires.txt
+cbr_mcp_server.egg-info/top_level.txt
