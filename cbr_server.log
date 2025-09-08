@@ -1,6 +1,0 @@
-<All keys matched successfully>
-<All keys matched successfully>
-INFO:     Started server process [53386]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)

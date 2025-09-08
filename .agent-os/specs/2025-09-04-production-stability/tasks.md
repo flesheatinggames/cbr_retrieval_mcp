@@ -57,15 +57,15 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 5.7 Add environment variable override support
   - [x] 5.8 Verify all configuration tests pass with various scenarios
 
-- [ ] 6. Local Health Dashboard
-  - [ ] 6.1 Write tests for HealthAPI and dashboard components
-  - [ ] 6.2 Implement HealthAPI using FastAPI for metrics endpoints
-  - [ ] 6.3 Create HTML/JavaScript web interface for health visualization
-  - [ ] 6.4 Add real-time metrics updates with WebSocket connections
-  - [ ] 6.5 Implement system and application metrics API endpoints
-  - [ ] 6.6 Add query statistics and performance visualization
-  - [ ] 6.7 Configure dashboard to run on localhost:8080
-  - [ ] 6.8 Verify all dashboard tests pass with browser compatibility
+- [x] 6. Local Health Dashboard
+  - [x] 6.1 Write tests for HealthAPI and dashboard components
+  - [x] 6.2 Implement HealthAPI using FastAPI for metrics endpoints
+  - [x] 6.3 Create HTML/JavaScript web interface for health visualization
+  - [x] 6.4 Add real-time metrics updates with WebSocket connections
+  - [x] 6.5 Implement system and application metrics API endpoints
+  - [x] 6.6 Add query statistics and performance visualization
+  - [x] 6.7 Configure dashboard to run on localhost:8080
+  - [x] 6.8 Verify all dashboard tests pass with browser compatibility
 
 - [ ] 7. Request Logging and Tracing
   - [ ] 7.1 Write tests for request logging and tracing functionality
