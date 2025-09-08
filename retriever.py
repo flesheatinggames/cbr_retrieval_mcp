@@ -1,26 +1,52 @@
 import chromadb
-from sentence_transformers import SentenceTransformer
+# Import SentenceTransformer lazily to avoid slow import times
 
 class CBRRetriever:
     def __init__(self, db_path="./db", collection_name="code_solutions_case_base"):
         """
-        Initializes the retriever by loading the embedding model and connecting to the vector DB.
+        Initializes the retriever with lazy loading for the embedding model.
         """
-        try:
-            # 1. Initialize the Embedding Model (runs locally)
-            self.embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
-            
-            # 2. Initialize ChromaDB Persistent Client
-            self.db_client = chromadb.PersistentClient(path=db_path)
-            
-            # 3. Get the collection
-            self.collection = self.db_client.get_collection(name=collection_name)
-            
-            print("CBR Retriever initialized successfully.")
-        except Exception as e:
-            print(f"Error initializing CBR Retriever: {e}")
-            print("Please ensure you have run 'setup_vectordb.py' to create and populate the database.")
-            raise
+        self.db_path = db_path
+        self.collection_name = collection_name
+        self._embedding_model = None
+        self._db_client = None
+        self._collection = None
+    
+    @property
+    def embedding_model(self):
+        """Lazy load the embedding model only when needed."""
+        if self._embedding_model is None:
+            try:
+                from sentence_transformers import SentenceTransformer
+                self._embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
+            except Exception as e:
+                print(f"Error loading embedding model: {e}")
+                raise
+        return self._embedding_model
+    
+    @property
+    def db_client(self):
+        """Lazy load the database client only when needed."""
+        if self._db_client is None:
+            try:
+                self._db_client = chromadb.PersistentClient(path=self.db_path)
+            except Exception as e:
+                print(f"Error connecting to ChromaDB: {e}")
+                print("Please ensure you have run 'setup_vectordb.py' to create and populate the database.")
+                raise
+        return self._db_client
+    
+    @property
+    def collection(self):
+        """Lazy load the collection only when needed."""
+        if self._collection is None:
+            try:
+                self._collection = self.db_client.get_collection(name=self.collection_name)
+            except Exception as e:
+                print(f"Error accessing collection '{self.collection_name}': {e}")
+                print("Please ensure you have run 'setup_vectordb.py' to create and populate the database.")
+                raise
+        return self._collection
     
     def retrieve_relevant_examples(self, query: str, n_results: int = 3):
         """
@@ -77,5 +103,5 @@ class CBRRetriever:
             
         return retrieved_examples
 
-# Create a single, reusable instance of the retriever
-cbr_retriever = CBRRetriever()
+# Note: Global instance removed to prevent expensive model loading at import time.
+# Applications should create CBRRetriever instances when needed.

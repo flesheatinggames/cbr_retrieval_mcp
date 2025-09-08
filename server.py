@@ -14,7 +14,7 @@ app = FastAPI(
 )
 
 # Create a single instance of the retriever for the server's lifetime
-# This is now very fast because the model is not loaded here.
+# This is now very fast because the model is lazy-loaded on first use.
 cbr_retriever = CBRRetriever()
 
 class RetrievalRequest(BaseModel):
