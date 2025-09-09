@@ -74,8 +74,9 @@ class TestHealthAPI:
     @pytest.fixture
     def mock_health_monitor(self):
         """Mock HealthMonitor for testing."""
+        from unittest.mock import AsyncMock
         monitor = Mock(spec=HealthMonitor)
-        monitor.health_check.return_value = {
+        monitor.health_check = AsyncMock(return_value={
             "status": "healthy",
             "timestamp": "2025-09-08T10:00:00Z",
             "version": "0.1.0",
@@ -83,12 +84,47 @@ class TestHealthAPI:
                 "database": {"status": "healthy"},
                 "cache": {"status": "healthy", "hit_rate": 0.85}
             }
-        }
+        })
         monitor.get_system_metrics.return_value = {
             "cpu_percent": 25.0,
             "memory_percent": 60.0,
-            "disk_percent": 45.0
+            "disk_percent": 45.0,
+            "network": {"bytes_sent": 1024000, "bytes_recv": 2048000}
         }
+        # Add missing methods for other endpoints
+        monitor.get_application_metrics.return_value = {
+            "timestamp": "2025-09-08T10:00:00Z",
+            "requests": {"total": 1500, "success": 1425, "error": 75, "rate": 25.0},
+            "cache": {"hit_rate": 0.85, "hits": 1275, "misses": 225, "size": 150},
+            "database": {"connections": 5, "queries": 2000, "avg_latency": 0.025},
+            "embeddings": {"model_loaded": True, "cache_size": 1000, "cache_hit_rate": 0.9}
+        }
+        monitor.get_query_statistics.return_value = {
+            "timestamp": "2025-09-08T10:00:00Z",
+            "recent_queries": [
+                {"query": "authentication code", "similarity": 0.92, "response_time": 0.045},
+                {"query": "database connection", "similarity": 0.88, "response_time": 0.032}
+            ],
+            "performance": {
+                "avg_response_time": 0.038,
+                "p95_response_time": 0.075,
+                "p99_response_time": 0.120
+            },
+            "patterns": {
+                "top_categories": [{"name": "authentication", "count": 45}, {"name": "database", "count": 32}],
+                "success_rate": 0.95,
+                "error_rate": 0.05
+            }
+        }
+        # Add get_current_metrics as an AsyncMock
+        monitor.get_current_metrics = AsyncMock(return_value={
+            "requests": {"total": 100, "successful": 95, "failed": 5, "error_rate_percent": 5.0},
+            "performance": {"average_response_time_ms": 150.0, "recent_response_times": []},
+            "cache": {"hits": 80, "misses": 20, "hit_rate_percent": 80.0},
+            "system": {"cpu_percent": 25.0, "memory_percent": 60.0, "disk_percent": 45.0},
+            "application": {"version": "0.1.0", "uptime": "1h 30m"},
+            "queries": {"total": 50, "average_latency": 120.0}
+        })
         return monitor
 
     @pytest.fixture
