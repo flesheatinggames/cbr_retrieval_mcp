@@ -1,0 +1,244 @@
+# CBR MCP Server Configuration Template
+# Copy this file and customize for your environment
+# 
+# Configuration Priority (highest to lowest):
+# 1. Environment Variables (CBR_ prefixed)
+# 2. YAML Configuration Files
+# 3. Default Values
+
+# =============================================================================
+# CORE CBR CONFIGURATION
+# =============================================================================
+
+# Database Configuration
+database:
+  # Path to ChromaDB database directory
+  # Can be relative (./db) or absolute (/opt/cbr/data/db)
+  path: "./db"
+  
+  # ChromaDB collection name for storing code solutions
+  collection_name: "code_solutions_case_base"
+  
+  # Sentence transformer embedding model
+  # Options: nomic-ai/nomic-embed-text-v1.5 (recommended)
+  embedding_model: "nomic-ai/nomic-embed-text-v1.5"
+
+# Query Defaults
+query:
+  # Default maximum results returned by CBR queries
+  max_results_default: 10
+  
+  # Default similarity threshold (0.0-1.0)
+  # Higher values = more strict similarity matching
+  similarity_threshold_default: 0.7
+
+# =============================================================================
+# ENHANCED LOGGING SYSTEM
+# =============================================================================
+
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: "INFO"
+  
+  # Log format: json, text, colored
+  format: "json"
+  
+  # Optional log file path (null = no file logging)
+  output_file: null
+  
+  # Enable console output
+  console_output: true
+  
+  # Console format (can differ from file format)
+  console_format: "text"
+  
+  # File Rotation Settings
+  max_file_size: 10485760        # 10MB in bytes
+  backup_count: 5                # Number of backup files
+  rotation_enabled: true         # Enable log rotation
+  cleanup_enabled: true          # Enable automatic cleanup
+  
+  # Display Options
+  enable_colors: false           # Colored console output
+  
+  # Advanced Logging Features
+  performance_logging: true      # Log performance metrics
+  request_correlation: true      # Enable correlation IDs
+  thread_safe: true             # Thread-safe logging
+  
+  # Disk Space Monitoring
+  disk_space_monitoring: false   # Monitor disk space for logs
+  min_free_space_percent: 10.0  # Minimum free space percentage
+  handle_permissions: true       # Handle log file permissions
+
+# =============================================================================
+# SYSTEM RESOURCE MONITORING
+# =============================================================================
+
+monitoring:
+  # Enable system resource monitoring
+  enabled: true
+  
+  # Monitoring interval in seconds
+  interval: 30.0
+  
+  # Path to monitoring database
+  db_path: "./monitoring.db"
+  
+  # Data retention in hours (default: 7 days)
+  retention_hours: 168
+  
+  # Alert Settings
+  alert_cooldown: 300            # Alert cooldown in seconds (5 minutes)
+  max_alerts_per_hour: 100      # Maximum alerts per hour
+  
+  # Resource Thresholds (percentages)
+  thresholds:
+    cpu:
+      warning: 70.0              # CPU warning threshold
+      critical: 85.0             # CPU critical threshold  
+      emergency: 95.0            # CPU emergency threshold
+    memory:
+      warning: 75.0              # Memory warning threshold
+      critical: 90.0             # Memory critical threshold
+      emergency: 98.0            # Memory emergency threshold
+    disk:
+      warning: 80.0              # Disk warning threshold
+      critical: 90.0             # Disk critical threshold
+      emergency: 95.0            # Disk emergency threshold
+
+# =============================================================================
+# HEALTH DASHBOARD
+# =============================================================================
+
+dashboard:
+  # Dashboard host binding
+  # Use "localhost" for local access only, "0.0.0.0" for external access
+  host: "localhost"
+  
+  # Dashboard port
+  port: 8080
+  
+  # Enable debug mode (shows more detailed information)
+  debug: false
+  
+  # CORS origins for cross-origin requests
+  cors_origins:
+    - "http://localhost:3000"
+  
+  # WebSocket Configuration
+  websocket_enabled: true        # Enable real-time updates
+  metrics_update_interval: 5     # Update interval in seconds
+  max_websocket_connections: 100 # Maximum WebSocket connections
+  
+  # Security
+  security_headers: true         # Enable security headers
+  max_payload_size: 1048576     # Maximum payload size (1MB)
+
+# =============================================================================
+# PRODUCTION FEATURES
+# =============================================================================
+
+production:
+  # Authentication Settings
+  require_auth: false            # Enable authentication
+  api_keys: []                   # List of valid API keys
+  admin_keys: []                 # List of admin keys (full access)
+  
+  # Rate Limiting
+  rate_limit_enabled: true       # Enable rate limiting
+  rate_limit_requests: 100       # Requests per time window
+  rate_limit_window: 3600       # Time window in seconds (1 hour)
+  
+  # Performance Features
+  cache_enabled: true            # Enable result caching
+  cache_ttl: 3600               # Cache TTL in seconds (1 hour)
+  performance_monitoring: true   # Enable performance monitoring
+  
+  # Reliability Features
+  retry_enabled: true            # Enable automatic retries
+  max_retries: 3                # Maximum retry attempts
+  circuit_breaker: true         # Enable circuit breaker pattern
+  
+  # Input Validation
+  input_validation: "strict"     # strict, normal, permissive
+  sanitization: true            # Enable input sanitization
+  max_query_length: 10000       # Maximum query length in characters
+
+# =============================================================================
+# HEALTH CHECKS
+# =============================================================================
+
+health:
+  # Enable health check endpoints
+  enabled: true
+  
+  # Health check timeout in seconds
+  timeout: 30
+
+# =============================================================================
+# ENVIRONMENT-SPECIFIC OVERRIDES
+# =============================================================================
+
+# The following sections show examples of environment-specific configurations.
+# Uncomment and modify as needed for your deployment environment.
+
+# Development Overrides (uncomment for development)
+#development:
+#  logging:
+#    level: "DEBUG"
+#    console_format: "colored"
+#    enable_colors: true
+#  production:
+#    require_auth: false
+#    rate_limit_enabled: false
+#    input_validation: "permissive"
+#  monitoring:
+#    interval: 10.0
+
+# Production Overrides (uncomment for production)  
+#production_overrides:
+#  database:
+#    path: "/opt/cbr/data/db"
+#  logging:
+#    level: "INFO"
+#    format: "json"
+#    output_file: "/var/log/cbr/server.log"
+#    console_output: false
+#  production:
+#    require_auth: true
+#    api_keys:
+#      - "your-secure-api-key-1"
+#      - "your-secure-api-key-2"
+
+# Docker Overrides (uncomment for container deployment)
+#docker:
+#  database:
+#    path: "/app/data/db"
+#  logging:
+#    console_output: true
+#    console_format: "json"
+#    output_file: null
+#  dashboard:
+#    host: "0.0.0.0"
+
+# =============================================================================
+# NOTES AND TIPS
+# =============================================================================
+
+# Configuration Tips:
+# 1. Use absolute paths for production deployments
+# 2. Enable authentication for production environments  
+# 3. Adjust monitoring thresholds based on your hardware
+# 4. Use JSON logging for production log aggregation
+# 5. Monitor disk space if using file logging
+# 6. Set appropriate cache TTL based on your use case
+# 7. Configure CORS origins for dashboard access
+
+# Environment Variable Equivalents:
+# Most settings can be overridden with CBR_ prefixed environment variables
+# Example: database.path -> CBR_DATABASE_PATH
+#          logging.level -> CBR_LOG_LEVEL
+#          dashboard.port -> CBR_DASHBOARD_PORT
+
+# For complete environment variable reference, see .env.template

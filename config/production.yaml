@@ -1,0 +1,143 @@
+# CBR MCP Server - Production Configuration
+# Optimized for production deployment with security, performance, and reliability
+
+# Core Configuration
+database:
+  path: "/opt/cbr/data/db"        # Production data directory
+  collection_name: "production_case_base"
+  embedding_model: "nomic-ai/nomic-embed-text-v1.5"
+
+query:
+  max_results_default: 10
+  similarity_threshold_default: 0.75  # Higher threshold for quality results
+
+# Production Logging
+logging:
+  level: "INFO"                   # Standard production logging
+  format: "json"                  # Structured logging for aggregation
+  console_output: false           # No console logging in production
+  console_format: "json"
+  output_file: "/var/log/cbr/server.log"  # Production log file
+  max_file_size: 52428800        # 50MB files
+  backup_count: 10               # Keep more backups
+  rotation_enabled: true
+  cleanup_enabled: true
+  enable_colors: false
+  performance_logging: true       # Track performance metrics
+  request_correlation: true       # Essential for production debugging
+  thread_safe: true
+  disk_space_monitoring: true     # Critical for production
+  min_free_space_percent: 15.0   # Conservative disk space monitoring
+  handle_permissions: true
+
+# Production Monitoring
+monitoring:
+  enabled: true
+  interval: 60.0                  # Less frequent to reduce overhead
+  db_path: "/opt/cbr/data/monitoring.db"
+  retention_hours: 720           # 30 days retention
+  alert_cooldown: 300            # 5 minutes between alerts
+  max_alerts_per_hour: 50        # Controlled alert rate
+  
+  thresholds:
+    cpu:
+      warning: 60.0               # Conservative thresholds for production
+      critical: 75.0
+      emergency: 90.0
+    memory:
+      warning: 70.0
+      critical: 85.0
+      emergency: 95.0
+    disk:
+      warning: 75.0
+      critical: 85.0
+      emergency: 95.0
+
+# Production Dashboard
+dashboard:
+  host: "0.0.0.0"                # Bind to all interfaces
+  port: 8080
+  debug: false                    # No debug info in production
+  cors_origins:
+    - "https://yourdomain.com"    # Replace with your domain
+  websocket_enabled: true
+  metrics_update_interval: 15     # Less frequent updates
+  security_headers: true          # Enable all security headers
+  max_websocket_connections: 50   # Conservative limit
+  max_payload_size: 1048576      # 1MB limit
+
+# Production Features
+production:
+  # Authentication - CRITICAL for production
+  require_auth: true
+  api_keys:
+    # IMPORTANT: Replace with your secure API keys
+    - "REPLACE_WITH_SECURE_API_KEY_1"
+    - "REPLACE_WITH_SECURE_API_KEY_2"
+  admin_keys:
+    # IMPORTANT: Replace with your secure admin keys  
+    - "REPLACE_WITH_SECURE_ADMIN_KEY"
+  
+  # Rate Limiting - Essential for production
+  rate_limit_enabled: true
+  rate_limit_requests: 500        # Higher limits for production load
+  rate_limit_window: 3600        # 1 hour window
+  
+  # Performance Optimization
+  cache_enabled: true             # Essential for production performance
+  cache_ttl: 1800                # 30 minutes cache
+  performance_monitoring: true    # Track all performance metrics
+  
+  # Reliability Features
+  retry_enabled: true
+  max_retries: 5                 # More retries in production
+  circuit_breaker: true          # Critical for reliability
+  
+  # Strict Security
+  input_validation: "strict"      # Strictest validation
+  sanitization: true             # Always sanitize inputs
+  max_query_length: 5000         # Conservative query size limit
+
+# Production Health Checks
+health:
+  enabled: true
+  timeout: 15                    # Quick timeout for orchestration
+
+# PRODUCTION DEPLOYMENT CHECKLIST:
+# 
+# 1. SECURITY:
+#    - Replace all "REPLACE_WITH_SECURE_*" values with real keys
+#    - Ensure /opt/cbr/data/ has proper permissions (700 or 750)
+#    - Set up log rotation for /var/log/cbr/server.log
+#    - Configure firewall to only allow necessary ports
+#
+# 2. MONITORING:
+#    - Set up alerts for disk space on /opt/cbr/data/
+#    - Monitor the health dashboard on port 8080
+#    - Set up log aggregation for /var/log/cbr/server.log
+#    - Configure backup strategy for /opt/cbr/data/db
+#
+# 3. PERFORMANCE:
+#    - Monitor cache hit rates via dashboard
+#    - Adjust thresholds based on actual hardware
+#    - Consider SSD storage for /opt/cbr/data/db
+#    - Monitor API response times
+#
+# 4. RELIABILITY:
+#    - Test circuit breaker functionality
+#    - Verify retry behavior under load
+#    - Set up process monitoring (systemd, supervisor, etc.)
+#    - Configure log rotation to prevent disk full
+#
+# 5. CAPACITY PLANNING:
+#    - Monitor memory usage trends
+#    - Plan database growth (ChromaDB files)
+#    - Set up disk space alerts
+#    - Monitor WebSocket connection limits
+
+# Environment Variables for Production Secrets:
+# Instead of hardcoding keys in this file, use environment variables:
+# export CBR_API_KEYS="key1,key2,key3"
+# export CBR_ADMIN_KEYS="admin1,admin2"
+# 
+# Then remove the keys from this file or set them to empty arrays

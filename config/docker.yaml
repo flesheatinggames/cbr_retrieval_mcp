@@ -1,0 +1,180 @@
+# CBR MCP Server - Docker Container Configuration
+# Optimized for containerized deployment with proper volume mounts and logging
+
+# Core Configuration
+database:
+  path: "/app/data/db"            # Container volume mount point
+  collection_name: "container_case_base"
+  embedding_model: "nomic-ai/nomic-embed-text-v1.5"
+
+query:
+  max_results_default: 10
+  similarity_threshold_default: 0.7
+
+# Container-Optimized Logging  
+logging:
+  level: "INFO"
+  format: "json"                  # JSON for container log aggregation
+  console_output: true            # Docker captures stdout/stderr
+  console_format: "json"          # Structured logs to stdout
+  output_file: null               # No file logging in containers
+  max_file_size: 10485760        # Not used when output_file is null
+  backup_count: 0                # Not applicable for stdout logging
+  rotation_enabled: false        # Docker handles log rotation
+  cleanup_enabled: false         # Not applicable for stdout
+  enable_colors: false           # No colors in container logs
+  performance_logging: true
+  request_correlation: true       # Important for distributed systems
+  thread_safe: true
+  disk_space_monitoring: false    # Container orchestrator handles this
+  min_free_space_percent: 10.0
+  handle_permissions: true
+
+# Container Monitoring
+monitoring:
+  enabled: true
+  interval: 30.0
+  db_path: "/app/data/monitoring.db"  # Persistent volume
+  retention_hours: 168           # 7 days
+  alert_cooldown: 300
+  max_alerts_per_hour: 100
+  
+  # Container-optimized thresholds
+  thresholds:
+    cpu:
+      warning: 70.0               # Standard container thresholds
+      critical: 85.0
+      emergency: 95.0
+    memory:
+      warning: 80.0               # Higher memory threshold for containers
+      critical: 90.0
+      emergency: 95.0
+    disk:
+      warning: 85.0               # Higher disk threshold (volume mounts)
+      critical: 92.0
+      emergency: 96.0
+
+# Container Dashboard
+dashboard:
+  host: "0.0.0.0"                # Bind to all interfaces for container access
+  port: 8080
+  debug: false
+  cors_origins:
+    - "*"                        # Allow all origins (configure ingress/proxy for security)
+  websocket_enabled: true
+  metrics_update_interval: 10     # Reasonable update interval
+  security_headers: true
+  max_websocket_connections: 100
+  max_payload_size: 1048576      # 1MB
+
+# Container Production Features
+production:
+  # Authentication via environment variables
+  require_auth: true
+  api_keys: []                   # Set via CBR_API_KEYS environment variable
+  admin_keys: []                 # Set via CBR_ADMIN_KEYS environment variable
+  
+  # Standard rate limiting
+  rate_limit_enabled: true
+  rate_limit_requests: 300
+  rate_limit_window: 3600
+  
+  # Performance features
+  cache_enabled: true
+  cache_ttl: 3600
+  performance_monitoring: true
+  
+  # Reliability features
+  retry_enabled: true
+  max_retries: 3
+  circuit_breaker: true
+  
+  # Strict validation for containers
+  input_validation: "strict"
+  sanitization: true
+  max_query_length: 8000
+
+# Health Checks
+health:
+  enabled: true
+  timeout: 10                    # Quick health checks for orchestration
+
+# DOCKER DEPLOYMENT GUIDE:
+#
+# 1. DOCKERFILE CONSIDERATIONS:
+#    - Use multi-stage builds for smaller images
+#    - Run as non-root user for security
+#    - Set proper working directory (/app)
+#    - Install system dependencies in base layer
+#
+# 2. VOLUME MOUNTS:
+#    - Mount persistent volume to /app/data for database and monitoring
+#    - Consider mounting /tmp if needed for temporary files
+#    - Example: docker run -v cbr-data:/app/data cbr-mcp-server
+#
+# 3. ENVIRONMENT VARIABLES:
+#    - Set CBR_API_KEYS and CBR_ADMIN_KEYS via secrets
+#    - Override any config values via CBR_ prefixed env vars
+#    - Example: -e CBR_LOG_LEVEL=DEBUG -e CBR_API_KEYS=key1,key2
+#
+# 4. NETWORKING:
+#    - Expose port 8080 for health dashboard
+#    - Consider using internal networks for security
+#    - Example: -p 8080:8080 (or use reverse proxy)
+#
+# 5. RESOURCE LIMITS:
+#    - Set memory limits based on your case base size
+#    - Set CPU limits based on expected load
+#    - Example: --memory=1g --cpus=1.0
+#
+# 6. LOGGING:
+#    - Container logs go to stdout (JSON format)
+#    - Use docker logs or external log aggregation
+#    - Configure log rotation in Docker daemon
+#
+# 7. HEALTH CHECKS:
+#    - Docker HEALTHCHECK instruction can use health endpoint
+#    - Example: HEALTHCHECK --interval=30s --timeout=10s \
+#              CMD curl -f http://localhost:8080/health || exit 1
+#
+# 8. SECURITY:
+#    - Run as non-root user (USER 1000:1000)
+#    - Use secrets management for API keys
+#    - Consider read-only root filesystem
+#    - Scan images for vulnerabilities
+
+# Sample Docker Commands:
+#
+# Build:
+# docker build -t cbr-mcp-server .
+#
+# Run with volume:
+# docker run -d --name cbr-server \
+#   -p 8080:8080 \
+#   -v cbr-data:/app/data \
+#   -e CBR_API_KEYS="your-api-key" \
+#   cbr-mcp-server
+#
+# Run with custom config:
+# docker run -d --name cbr-server \
+#   -p 8080:8080 \
+#   -v cbr-data:/app/data \
+#   -v $(pwd)/config/docker.yaml:/app/config.yaml \
+#   cbr-mcp-server --config config.yaml
+
+# Docker Compose Example:
+# version: '3.8'
+# services:
+#   cbr-server:
+#     image: cbr-mcp-server:latest
+#     ports:
+#       - "8080:8080"
+#     volumes:
+#       - cbr-data:/app/data
+#       - ./config/docker.yaml:/app/config.yaml
+#     environment:
+#       - CBR_API_KEYS=your-api-key
+#       - CBR_LOG_LEVEL=INFO
+#     restart: unless-stopped
+# volumes:
+#   cbr-data:

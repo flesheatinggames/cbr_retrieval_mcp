@@ -1,0 +1,112 @@
+# CBR MCP Server - Development Configuration
+# Optimized for local development with verbose logging and relaxed limits
+
+# Core Configuration
+database:
+  path: "./dev_db"
+  collection_name: "dev_case_base"
+  embedding_model: "nomic-ai/nomic-embed-text-v1.5"
+
+query:
+  max_results_default: 20          # More results for exploration
+  similarity_threshold_default: 0.6  # Lower threshold for testing
+
+# Development-Friendly Logging
+logging:
+  level: "DEBUG"                   # Verbose logging for development
+  format: "text"                   # Human-readable format
+  console_output: true
+  console_format: "colored"        # Colored output for better readability
+  enable_colors: true
+  output_file: "dev.log"          # Development log file
+  max_file_size: 5242880          # 5MB (smaller for dev)
+  backup_count: 3
+  rotation_enabled: true
+  cleanup_enabled: true
+  performance_logging: true        # Track performance in development
+  request_correlation: true
+  thread_safe: true
+  disk_space_monitoring: false     # Not needed in dev
+  min_free_space_percent: 5.0     # Lower threshold for dev
+  handle_permissions: true
+
+# Relaxed Monitoring for Development
+monitoring:
+  enabled: true
+  interval: 10.0                   # More frequent monitoring for testing
+  db_path: "./dev_monitoring.db"
+  retention_hours: 24             # Keep only 1 day in dev
+  alert_cooldown: 60              # Shorter cooldown for testing
+  max_alerts_per_hour: 200        # Higher alert limit
+  
+  thresholds:
+    cpu:
+      warning: 80.0                # Higher thresholds for dev machines
+      critical: 90.0
+      emergency: 98.0
+    memory:
+      warning: 85.0
+      critical: 95.0
+      emergency: 99.0
+    disk:
+      warning: 90.0
+      critical: 95.0
+      emergency: 98.0
+
+# Development Dashboard
+dashboard:
+  host: "localhost"                # Local access only in dev
+  port: 8080
+  debug: true                      # Enable debug features
+  cors_origins:
+    - "http://localhost:3000"
+    - "http://localhost:3001"      # Additional dev ports
+    - "http://127.0.0.1:3000"
+  websocket_enabled: true
+  metrics_update_interval: 2       # Frequent updates for testing
+  security_headers: false          # Relaxed for dev
+  max_websocket_connections: 20    # Lower limit for dev
+  max_payload_size: 2097152       # 2MB for dev testing
+
+# Relaxed Production Features for Development
+production:
+  # No authentication in development
+  require_auth: false
+  api_keys: []
+  admin_keys: []
+  
+  # No rate limiting in development
+  rate_limit_enabled: false
+  rate_limit_requests: 1000        # High limit if enabled
+  rate_limit_window: 60           # Short window
+  
+  # Performance features for testing
+  cache_enabled: false            # Disable cache for testing
+  cache_ttl: 300                  # Short TTL if enabled
+  performance_monitoring: true     # Monitor performance in dev
+  
+  # Reliability features
+  retry_enabled: true
+  max_retries: 2                  # Fewer retries in dev
+  circuit_breaker: false          # Disable for easier testing
+  
+  # Relaxed validation for development
+  input_validation: "permissive"   # Allow more flexible inputs
+  sanitization: false             # Disable for easier debugging
+  max_query_length: 20000         # Higher limit for testing
+
+# Health Checks
+health:
+  enabled: true
+  timeout: 10                     # Shorter timeout in dev
+
+# Development Notes:
+# - Database path is separate (dev_db) to avoid conflicts
+# - Verbose DEBUG logging for troubleshooting
+# - Colored console output for better readability  
+# - No authentication or rate limiting for easier testing
+# - Higher resource thresholds to reduce noise on dev machines
+# - Disabled caching to see immediate results during development
+# - Permissive input validation for testing edge cases
+# - Frequent monitoring updates for immediate feedback
+# - Shorter retention periods to save disk space
