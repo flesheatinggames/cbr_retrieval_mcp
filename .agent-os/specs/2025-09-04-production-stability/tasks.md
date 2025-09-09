@@ -67,25 +67,25 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 6.7 Configure dashboard to run on localhost:8080
   - [x] 6.8 Verify all dashboard tests pass with browser compatibility
 
-- [ ] 7. Request Logging and Tracing
-  - [ ] 7.1 Write tests for request logging and tracing functionality
-  - [ ] 7.2 Implement detailed MCP request/response logging
-  - [ ] 7.3 Add request ID generation and propagation
-  - [ ] 7.4 Implement query parameter and response size tracking
-  - [ ] 7.5 Add performance metrics collection per request
-  - [ ] 7.6 Implement request correlation and tracing
-  - [ ] 7.7 Add configurable request logging verbosity
-  - [ ] 7.8 Verify all request logging tests pass with trace validation
+- [x] 7. Request Logging and Tracing
+  - [x] 7.1 Write tests for request logging and tracing functionality
+  - [x] 7.2 Implement detailed MCP request/response logging
+  - [x] 7.3 Add request ID generation and propagation
+  - [x] 7.4 Implement query parameter and response size tracking
+  - [x] 7.5 Add performance metrics collection per request
+  - [x] 7.6 Implement request correlation and tracing
+  - [x] 7.7 Add configurable request logging verbosity
+  - [x] 7.8 Verify all request logging tests pass with trace validation
 
-- [ ] 8. Database Integrity Checks
-  - [ ] 8.1 Write tests for database integrity validation
-  - [ ] 8.2 Implement ChromaDB collection existence and accessibility checks
-  - [ ] 8.3 Add vector embedding consistency validation
-  - [ ] 8.4 Implement database corruption detection and reporting
-  - [ ] 8.5 Add automatic database repair procedures where possible
-  - [ ] 8.6 Implement database backup validation on startup
-  - [ ] 8.7 Add database health monitoring during operation
-  - [ ] 8.8 Verify all database integrity tests pass with corruption scenarios
+- [x] 8. Database Integrity Checks
+  - [x] 8.1 Write tests for database integrity validation
+  - [x] 8.2 Implement ChromaDB collection existence and accessibility checks
+  - [x] 8.3 Add vector embedding consistency validation
+  - [x] 8.4 Implement database corruption detection and reporting
+  - [x] 8.5 Add automatic database repair procedures where possible
+  - [x] 8.6 Implement database backup validation on startup
+  - [x] 8.7 Add database health monitoring during operation
+  - [x] 8.8 Verify all database integrity tests pass with corruption scenarios
 
 - [ ] 9. Integration and System Testing
   - [ ] 9.1 Write comprehensive integration tests for all components

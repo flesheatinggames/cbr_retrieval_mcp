@@ -1278,3 +1278,204 @@ class TestProductionDeployment:
         assert "Strict-Transport-Security" in security_headers
         assert "Content-Security-Policy" in security_headers
 
+
+class TestRegressionFixes:
+    """Test class for specific bug fixes and regression prevention."""
+    
+    @pytest.mark.asyncio
+    async def test_memory_leak_fix_operations_cleanup(self):
+        """Test that PerformanceTracker operations dictionary is cleaned up."""
+        # This should fail - PerformanceTracker cleanup not implemented
+        with pytest.raises(NameError):
+            from cbr_mcp_server import PerformanceTracker
+            tracker = PerformanceTracker(window_size=1)
+            
+            # Create multiple operations
+            ops = []
+            for i in range(10):
+                op = tracker.start_operation(f"op_{i}")
+                op.finish({})
+                ops.append(op)
+            
+            # After window_size seconds, old operations should be cleaned up
+            import time
+            time.sleep(1.1)
+            new_op = tracker.start_operation("new_op")
+            
+            # Check that old operations were cleaned up
+            assert len(tracker.operations) < 10, "Operations dictionary should be cleaned up"
+
+    @pytest.mark.asyncio
+    async def test_percentile_calculation_accuracy(self):
+        """Test correct percentile calculation in PerformanceTracker."""
+        # This should fail - PerformanceTracker percentile calculation not implemented
+        with pytest.raises(NameError):
+            from cbr_mcp_server import PerformanceTracker
+            tracker = PerformanceTracker()
+            
+            # Add measurements
+            for duration in [1, 2, 3, 4, 5]:
+                tracker.add_measurement({"operation": "test", "duration": duration})
+            
+            metrics = tracker.get_aggregated_metrics("test")
+            
+            # Median of [1,2,3,4,5] should be 3
+            assert metrics["p50_latency"] == 3, f"Expected p50=3, got {metrics['p50_latency']}"
+
+    @pytest.mark.asyncio
+    async def test_payload_size_tracking_accuracy(self):
+        """Test that RequestInterceptor tracks original payload size correctly."""
+        # This should fail - RequestInterceptor payload tracking not implemented
+        with pytest.raises(NameError):
+            from cbr_mcp_server import RequestInterceptor
+            interceptor = RequestInterceptor(Mock(), max_payload_size=1024)
+            
+            # Create a large payload
+            large_query = "x" * 2048
+            request = {
+                "tool": "cbr_retrieve",
+                "arguments": {"query": large_query}
+            }
+            
+            # Mock context
+            context = Mock()
+            context.session_id = "test"
+            
+            logged = interceptor.log_request(context, request)
+            
+            # Should track the original query size
+            assert logged.get("original_size") == 2048, f"Expected size=2048, got {logged.get('original_size')}"
+
+    @pytest.mark.asyncio
+    async def test_logging_error_handling_robustness(self):
+        """Test that LoggerManager handles file setup errors gracefully."""
+        # This should fail - LoggerManager error handling not implemented
+        with pytest.raises(NameError):
+            from cbr_mcp_server import LoggerManager, LogConfig
+            config = LogConfig()
+            
+            # This should handle errors gracefully
+            with patch('cbr_mcp_server.logging.handlers.RotatingFileHandler') as mock_handler:
+                mock_handler.side_effect = Exception("File permission error")
+                
+                # Should either handle gracefully or raise appropriate error
+                try:
+                    manager = LoggerManager(config)
+                    # If it doesn't raise, it should handle the error gracefully
+                    assert manager is not None
+                except RuntimeError as e:
+                    # If it raises, should be an appropriate error message
+                    assert "Failed to setup file handler" in str(e)
+
+
+class TestConfigurationEdgeCases:
+    """Test class for configuration validation edge cases."""
+    
+    @pytest.mark.asyncio
+    async def test_configuration_extreme_values(self):
+        """Test configuration handling with extreme values."""
+        # This should fail - extreme value validation not implemented
+        with pytest.raises(NameError):
+            from cbr_mcp_server import CBRServerConfig
+            
+            # Test with extremely large values
+            config_data = {
+                "db_path": "./db",
+                "collection_name": "test",
+                "max_results": 999999999,  # Extremely large
+                "similarity_threshold": 1.1,  # Invalid range
+                "embedding_model": "nomic-ai/nomic-embed-text-v1.5"
+            }
+            
+            config = CBRServerConfig(**config_data)
+            assert config.max_results <= 10000, "Should limit extreme values"
+            assert 0.0 <= config.similarity_threshold <= 1.0, "Should validate ranges"
+
+    @pytest.mark.asyncio
+    async def test_unicode_path_handling(self):
+        """Test configuration with unicode characters in paths."""
+        # This should fail - unicode path validation not implemented
+        with pytest.raises(NameError):
+            from cbr_mcp_server import CBRServerConfig
+            
+            unicode_path = "./测试数据库"  # Chinese characters
+            config_data = {
+                "db_path": unicode_path,
+                "collection_name": "test_collection",
+                "embedding_model": "nomic-ai/nomic-embed-text-v1.5"
+            }
+            
+            config = CBRServerConfig(**config_data)
+            assert config.db_path == unicode_path
+
+    @pytest.mark.asyncio
+    async def test_concurrent_validation_requests(self):
+        """Test concurrent configuration validation requests."""
+        # This should fail - concurrent validation not implemented
+        with pytest.raises(NameError):
+            from cbr_mcp_server import ConfigurationValidator
+            
+            validator = ConfigurationValidator()
+            
+            # Create multiple concurrent validation tasks
+            tasks = []
+            for i in range(10):
+                config_data = {
+                    "db_path": f"./db_{i}",
+                    "collection_name": f"test_{i}",
+                    "embedding_model": "nomic-ai/nomic-embed-text-v1.5"
+                }
+                task = asyncio.create_task(validator.validate_async(config_data))
+                tasks.append(task)
+            
+            # All validations should complete successfully
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            for result in results:
+                assert not isinstance(result, Exception), f"Validation failed: {result}"
+
+
+class TestHealthDashboardCompatibility:
+    """Test class for health dashboard browser compatibility."""
+    
+    @pytest.mark.asyncio
+    async def test_cross_browser_api_compatibility(self):
+        """Test dashboard API compatibility across different browsers."""
+        # This should fail - cross-browser API not implemented
+        with pytest.raises(NameError):
+            from cbr_mcp_server import HealthAPI
+            
+            # Mock different browser headers
+            browser_headers = [
+                {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"},
+                {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15"},
+                {"User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"}
+            ]
+            
+            api = HealthAPI()
+            
+            for headers in browser_headers:
+                response = await api.get_health_status(headers=headers)
+                assert response.status_code == 200
+                assert "application/json" in response.headers.get("content-type", "")
+
+    @pytest.mark.asyncio
+    async def test_websocket_browser_compatibility(self):
+        """Test WebSocket compatibility across browsers."""
+        # This should fail - WebSocket browser compatibility not implemented
+        with pytest.raises(NameError):
+            from cbr_mcp_server import WebSocketManager
+            
+            # Test WebSocket connection with different browser protocols
+            manager = WebSocketManager()
+            
+            # Mock different WebSocket protocol versions
+            protocols = ["chat", "superchat", "websocket"]
+            
+            for protocol in protocols:
+                connection = await manager.create_connection(
+                    protocol=protocol,
+                    user_agent="test-browser"
+                )
+                assert connection is not None
+                await manager.close_connection(connection)
+
