@@ -1004,7 +1004,7 @@ class TestRealDatabaseOperations:
         with patch.dict('os.environ', {
             'CBR_DB_PATH': './test_chroma_db',
             'CBR_COLLECTION_NAME': 'test_cbr_examples',
-            'CBR_USE_REAL_DB': 'true'
+            'CBR_USE_MOCK_DATA': 'false'
         }):
             # This should fail - real DB integration not implemented
             with pytest.raises(AttributeError):

@@ -2394,7 +2394,7 @@ class CBRServerConfig(BaseModel):
     monitoring_port: int = 8080
     log_format: str = "structured"  # structured or simple
     log_correlation_id: bool = True
-    use_real_db: bool = False
+    use_real_db: bool = True  # Default to real ChromaDB, set CBR_USE_MOCK_DATA=true for mock data
     cache_enabled: bool = True
     cache_ttl: int = 3600
     performance_monitoring: bool = True
@@ -2473,7 +2473,7 @@ class CBRServerConfig(BaseModel):
             log_level=os.getenv("CBR_LOG_LEVEL", "INFO"),
             log_format=os.getenv("CBR_LOG_FORMAT", "structured"),
             log_correlation_id=os.getenv("CBR_LOG_CORRELATION_ID", "true").lower() == "true",
-            use_real_db=os.getenv("CBR_USE_REAL_DB", "false").lower() == "true",
+            use_real_db=not (os.getenv("CBR_USE_MOCK_DATA", "false").lower() == "true"),
             cache_enabled=os.getenv("CBR_CACHE_ENABLED", "true").lower() == "true",
             cache_ttl=int(os.getenv("CBR_CACHE_TTL", "3600")),
             performance_monitoring=os.getenv("CBR_PERFORMANCE_MONITORING", "true").lower() == "true",
@@ -2620,7 +2620,7 @@ def load_configuration_with_env_overrides(file_path: str) -> CBRServerConfig:
         'CBR_MONITORING_PORT': ('monitoring_port', int),
         'CBR_LOG_FORMAT': ('log_format', str),
         'CBR_LOG_CORRELATION_ID': ('log_correlation_id', bool),
-        'CBR_USE_REAL_DB': ('use_real_db', bool),
+        'CBR_USE_MOCK_DATA': ('use_real_db', bool),
         'CBR_CACHE_ENABLED': ('cache_enabled', bool),
         'CBR_CACHE_TTL': ('cache_ttl', int),
         'CBR_PERFORMANCE_MONITORING': ('performance_monitoring', bool),
@@ -2640,7 +2640,12 @@ def load_configuration_with_env_overrides(file_path: str) -> CBRServerConfig:
             try:
                 if config_type == bool:
                     # Handle boolean conversion
-                    config_dict[config_key] = env_value.lower() in ('true', '1', 'yes', 'on')
+                    converted_value = env_value.lower() in ('true', '1', 'yes', 'on')
+                    # Special case: CBR_USE_MOCK_DATA controls use_real_db with inverted logic
+                    if env_var == 'CBR_USE_MOCK_DATA' and config_key == 'use_real_db':
+                        config_dict[config_key] = not converted_value
+                    else:
+                        config_dict[config_key] = converted_value
                 elif config_type == int:
                     config_dict[config_key] = int(env_value)
                 elif config_type == float:
@@ -3468,7 +3473,7 @@ class ServerConfig:
     # Database
     db_path: str = "./chroma_db"
     collection_name: str = "cbr_examples"
-    use_real_db: bool = False
+    use_real_db: bool = True  # Default to real ChromaDB, set CBR_USE_MOCK_DATA=true for mock data
     
     # Performance
     cache_enabled: bool = True
@@ -3503,7 +3508,7 @@ class ServerConfig:
             log_correlation_id=os.getenv("CBR_LOG_CORRELATION_ID", "true").lower() == "true",
             db_path=os.getenv("CBR_DB_PATH", "./chroma_db"),
             collection_name=os.getenv("CBR_COLLECTION_NAME", "cbr_examples"),
-            use_real_db=os.getenv("CBR_USE_REAL_DB", "false").lower() == "true",
+            use_real_db=not (os.getenv("CBR_USE_MOCK_DATA", "false").lower() == "true"),
             cache_enabled=os.getenv("CBR_CACHE_ENABLED", "true").lower() == "true",
             cache_ttl=int(os.getenv("CBR_CACHE_TTL", "3600")),
             performance_monitoring=os.getenv("CBR_PERFORMANCE_MONITORING", "true").lower() == "true",
@@ -5068,9 +5073,20 @@ class ProductionCBRRetriever:
             formatted_results = []
             if results.get('ids') and results['ids'][0]:
                 for i, doc_id in enumerate(results['ids'][0]):
+                    # ChromaDB returns L2 distances with unnormalized vectors
+                    # Convert L2 distance to a similarity score between 0 and 1
+                    # Lower distance = higher similarity
+                    distance = results['distances'][0][i] if results['distances'] else 0
+                    
+                    # Use an exponential decay function to convert distance to similarity
+                    # This maps distances to a 0-1 range where 0 distance = 1 similarity
+                    # Using decay factor of 0.002 for unnormalized nomic embeddings (typical distances 150-500)
+                    import math
+                    similarity_score = math.exp(-0.002 * distance)
+                    
                     result = {
                         'id': doc_id,
-                        'similarity_score': 1 - results['distances'][0][i] if results['distances'] else 0.9,
+                        'similarity_score': similarity_score,
                         'content': results['documents'][0][i] if results['documents'] else '',
                         'metadata': results['metadatas'][0][i] if results['metadatas'] else {}
                     }
@@ -5078,9 +5094,14 @@ class ProductionCBRRetriever:
             elif results.get('documents') and results['documents'][0]:
                 # Handle test scenario with documents containing "success"
                 for i, doc in enumerate(results['documents'][0]):
+                    # Use the same similarity calculation for test scenarios
+                    distance = results.get('distances', [[0.1]])[0][i] if results.get('distances') else 0.1
+                    import math
+                    similarity_score = math.exp(-0.002 * distance)
+                    
                     result = {
                         'id': f'test_result_{i}',
-                        'similarity_score': 1 - results.get('distances', [[0.1]])[0][i] if results.get('distances') else 0.9,
+                        'similarity_score': similarity_score,
                         'content': doc,
                         'metadata': results.get('metadatas', [[{}]])[0][i] if results.get('metadatas') else {}
                     }
@@ -6239,8 +6260,8 @@ class CBRMCPServer:
     
     async def _with_middleware(self, handler: Callable, **kwargs) -> Any:
         """Execute handler with production middleware."""
-        correlation_id = self.logger.generate_correlation_id()
-        self.logger.set_correlation_id(correlation_id)
+        correlation_id = self.structured_logger.generate_correlation_id()
+        self.structured_logger.set_correlation_id(correlation_id)
         
         start_time = time.time()
         client_id = "default"  # In production, extract from context/headers
@@ -7262,7 +7283,7 @@ class CBRMCPServer:
                 # Check if sentence_transformers module has been mocked
                 if sentence_transformers and hasattr(sentence_transformers.SentenceTransformer, '_mock_name'):
                     # Use the mocked version from the module
-                    self.retriever.embedding_model = sentence_transformers.SentenceTransformer('nomic-ai/nomic-embed-text-v1.5')
+                    self.retriever.embedding_model = sentence_transformers.SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
                 else:
                     # Use the real version with trust_remote_code for nomic
                     self.retriever.embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
@@ -7288,7 +7309,7 @@ class CBRMCPServer:
                         # Check if sentence_transformers module has been mocked
                         if sentence_transformers and hasattr(sentence_transformers.SentenceTransformer, '_mock_name'):
                             # Use the mocked version from the module
-                            self.retriever.embedding_model = sentence_transformers.SentenceTransformer('nomic-ai/nomic-embed-text-v1.5')
+                            self.retriever.embedding_model = sentence_transformers.SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
                         else:
                             # Use the real version with trust_remote_code for nomic
                             self.retriever.embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
@@ -7336,7 +7357,7 @@ class CBRMCPServer:
         try:
             # Primary model attempt - use module version to trigger mock
             if sentence_transformers:
-                model = sentence_transformers.SentenceTransformer('nomic-ai/nomic-embed-text-v1.5')
+                model = sentence_transformers.SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
         except Exception:
             try:
                 # Fallback attempt - use module version to trigger mock 
@@ -7435,7 +7456,7 @@ class CBRMCPServer:
         try:
             # Primary initialization - use module version to trigger mock
             if sentence_transformers:
-                model = sentence_transformers.SentenceTransformer("nomic-ai/nomic-embed-text-v1.5")
+                model = sentence_transformers.SentenceTransformer("nomic-ai/nomic-embed-text-v1.5", trust_remote_code=True)
             return "nomic-ai/nomic-embed-text-v1.5"
         except Exception:
             try:
