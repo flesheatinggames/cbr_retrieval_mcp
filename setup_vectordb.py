@@ -5,7 +5,7 @@ from case_base import CASE_BASE
 
 # 1. Initialize the Embedding Model (runs locally)
 # Nomic Embed Code is specialized for code retrieval tasks
-embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
+embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5')
 
 # 2. Initialize ChromaDB Client
 # This creates a persistent database in the 'db' directory

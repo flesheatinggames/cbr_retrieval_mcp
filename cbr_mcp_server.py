@@ -2534,8 +2534,8 @@ class ConfigurationValidator:
         """Validate embedding model can be loaded."""
         try:
             from sentence_transformers import SentenceTransformer
-            # Try to load the model with trust_remote_code=True for nomic-ai models
-            SentenceTransformer(model_name, trust_remote_code=True)
+            # Load the model without trust_remote_code for security
+            SentenceTransformer(model_name)
             return True
         except Exception as e:
             raise e
@@ -5019,8 +5019,7 @@ class ProductionCBRRetriever:
             try:
                 self.logger.debug("Loading SentenceTransformer model lazily")
                 self.embedding_model = SentenceTransformer(
-                    'nomic-ai/nomic-embed-text-v1.5',
-                    trust_remote_code=True
+                    'nomic-ai/nomic-embed-text-v1.5'
                 )
                 self.logger.info("Embedding model loaded successfully")
             except Exception as e:
@@ -7283,10 +7282,10 @@ class CBRMCPServer:
                 # Check if sentence_transformers module has been mocked
                 if sentence_transformers and hasattr(sentence_transformers.SentenceTransformer, '_mock_name'):
                     # Use the mocked version from the module
-                    self.retriever.embedding_model = sentence_transformers.SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
+                    self.retriever.embedding_model = sentence_transformers.SentenceTransformer('nomic-ai/nomic-embed-text-v1.5')
                 else:
-                    # Use the real version with trust_remote_code for nomic
-                    self.retriever.embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
+                    # Use the real version without trust_remote_code for security
+                    self.retriever.embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5')
         
         def _embed_operation():
             if hasattr(self.retriever, 'embedding_model') and self.retriever.embedding_model:
@@ -7309,10 +7308,10 @@ class CBRMCPServer:
                         # Check if sentence_transformers module has been mocked
                         if sentence_transformers and hasattr(sentence_transformers.SentenceTransformer, '_mock_name'):
                             # Use the mocked version from the module
-                            self.retriever.embedding_model = sentence_transformers.SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
+                            self.retriever.embedding_model = sentence_transformers.SentenceTransformer('nomic-ai/nomic-embed-text-v1.5')
                         else:
-                            # Use the real version with trust_remote_code for nomic
-                            self.retriever.embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
+                            # Use the real version without trust_remote_code for security
+                            self.retriever.embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5')
                     # Try again after reload
                     embeddings = self.retriever.embedding_model.encode(text)
                     if hasattr(embeddings, 'tolist'):
@@ -7357,7 +7356,7 @@ class CBRMCPServer:
         try:
             # Primary model attempt - use module version to trigger mock
             if sentence_transformers:
-                model = sentence_transformers.SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
+                model = sentence_transformers.SentenceTransformer('nomic-ai/nomic-embed-text-v1.5')
         except Exception:
             try:
                 # Fallback attempt - use module version to trigger mock 
@@ -7456,7 +7455,7 @@ class CBRMCPServer:
         try:
             # Primary initialization - use module version to trigger mock
             if sentence_transformers:
-                model = sentence_transformers.SentenceTransformer("nomic-ai/nomic-embed-text-v1.5", trust_remote_code=True)
+                model = sentence_transformers.SentenceTransformer("nomic-ai/nomic-embed-text-v1.5")
             return "nomic-ai/nomic-embed-text-v1.5"
         except Exception:
             try:
@@ -10466,7 +10465,7 @@ class DatabaseRepairer:
             
             if sentence_transformers and documents_data['documents']:
                 # Initialize embedding model
-                model = sentence_transformers.SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
+                model = sentence_transformers.SentenceTransformer('nomic-ai/nomic-embed-text-v1.5')
                 
                 for i, doc_id in enumerate(affected_ids):
                     try:
@@ -10558,7 +10557,7 @@ class DatabaseRepairer:
                         else:
                             # Regenerate if document available
                             if doc_data['documents'] and doc_data['documents'][0] and sentence_transformers:
-                                model = sentence_transformers.SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
+                                model = sentence_transformers.SentenceTransformer('nomic-ai/nomic-embed-text-v1.5')
                                 embedding_result = model.encode([doc_data['documents'][0]])[0]
                                 if hasattr(embedding_result, 'tolist'):
                                     fixed_embedding = embedding_result.tolist()
@@ -10779,8 +10778,7 @@ class DatabaseRepairer:
                             if (doc_data['documents'] and doc_data['documents'][0] and 
                                 sentence_transformers):
                                 model = sentence_transformers.SentenceTransformer(
-                                    'nomic-ai/nomic-embed-text-v1.5', 
-                                    trust_remote_code=True
+                                    'nomic-ai/nomic-embed-text-v1.5'
                                 )
                                 embedding_result = model.encode([doc_data['documents'][0]])[0]
                                 if hasattr(embedding_result, 'tolist'):
@@ -10804,8 +10802,7 @@ class DatabaseRepairer:
                             if (doc_data['documents'] and doc_data['documents'][0] and 
                                 sentence_transformers):
                                 model = sentence_transformers.SentenceTransformer(
-                                    'nomic-ai/nomic-embed-text-v1.5', 
-                                    trust_remote_code=True
+                                    'nomic-ai/nomic-embed-text-v1.5'
                                 )
                                 embedding_result = model.encode([doc_data['documents'][0]])[0]
                                 if hasattr(embedding_result, 'tolist'):
@@ -11276,7 +11273,7 @@ class DatabaseRepairer:
                 }
             
             # Initialize embedding model
-            model = sentence_transformers.SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
+            model = sentence_transformers.SentenceTransformer('nomic-ai/nomic-embed-text-v1.5')
             collection = self.client.get_collection(self.collection_name)
             
             repaired_count = 0

@@ -88,7 +88,7 @@ async def test_comprehensive():
         print("✓ ALL TESTS PASSED!")
         print("\nThe CBR MCP Server is now working correctly:")
         print("  • Configuration: use_real_db=True by default")
-        print("  • Embedding model: Loads with trust_remote_code=True")
+        print("  • Embedding model: Loads securely without trust_remote_code")
         print("  • Similarity calculation: Fixed for unnormalized vectors")
         print("  • Results: Successfully returning relevant examples")
     else:

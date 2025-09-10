@@ -18,7 +18,7 @@ if sample and 'embeddings' in sample and sample['embeddings'] is not None and le
     print(f"Embedding dimension: {len(sample['embeddings'][0])}")
     
 # Test with normalized vectors
-model = SentenceTransformer("nomic-ai/nomic-embed-text-v1.5", trust_remote_code=True)
+model = SentenceTransformer("nomic-ai/nomic-embed-text-v1.5")
 test_query = "test query"
 embedding = model.encode(test_query)
 

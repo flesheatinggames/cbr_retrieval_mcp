@@ -18,7 +18,7 @@ class CBRRetriever:
         if self._embedding_model is None:
             try:
                 from sentence_transformers import SentenceTransformer
-                self._embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
+                self._embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5')
             except Exception as e:
                 print(f"Error loading embedding model: {e}")
                 raise
