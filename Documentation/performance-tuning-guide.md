@@ -703,7 +703,7 @@ class IndexOptimizer:
         from sentence_transformers import SentenceTransformer
         
         # Load embedding model (same as CBR server)
-        model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5')
+        model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
         
         latencies = []
         

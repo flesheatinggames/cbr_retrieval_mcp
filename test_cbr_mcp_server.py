@@ -499,7 +499,7 @@ class TestCBRRetrieverIntegration:
                 mock_chroma_client.assert_called_once_with(path="./chroma_db")
                 
                 # Verify SentenceTransformer was initialized
-                mock_transformer.assert_called_once_with('nomic-ai/nomic-embed-text-v1.5')
+                mock_transformer.assert_called_once_with('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
                 
                 assert retriever is not None
 

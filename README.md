@@ -327,7 +327,7 @@ ls -la ./db
 python -c "from cbr_mcp_server import CBRServerConfig; print(CBRServerConfig.from_environment())"
 
 # Check embedding model availability
-python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('nomic-ai/nomic-embed-text-v1.5')"
+python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)"
 ```
 
 #### Performance Issues

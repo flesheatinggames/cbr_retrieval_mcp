@@ -194,7 +194,7 @@ class TestEmbeddingModelValidation:
         result = validator.validate_embedding_model(config.embedding_model)
         
         assert result is True
-        mock_transformer.assert_called_once_with("nomic-ai/nomic-embed-text-v1.5")
+        mock_transformer.assert_called_once_with("nomic-ai/nomic-embed-text-v1.5", trust_remote_code=True)
     
     @patch('sentence_transformers.SentenceTransformer')
     def test_embedding_model_loading_failure(self, mock_transformer):

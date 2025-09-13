@@ -14,7 +14,8 @@ dependencies = [
     "chromadb",
     "sentence-transformers",
     "pydantic",
-    "einops"
+    "einops",
+    "psutil",
 ]
 requires-python = ">=3.10"
 

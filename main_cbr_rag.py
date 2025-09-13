@@ -10,7 +10,7 @@ if not ANTHROPIC_API_KEY:
     raise ValueError("Please set the ANTHROPIC_API_KEY environment variable.")
 
 # 1. Initialize models and database client
-embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5')
+embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
 db_client = chromadb.PersistentClient(path="./db")
 collection = db_client.get_collection(name="code_solutions_case_base")
 claude_client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)

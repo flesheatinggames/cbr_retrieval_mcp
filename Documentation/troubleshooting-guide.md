@@ -99,7 +99,7 @@ curl -I https://huggingface.co
 # Test model loading manually
 python -c "
 from sentence_transformers import SentenceTransformer
-model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5')
+model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
 print('Model loaded successfully')
 "
 
@@ -397,7 +397,7 @@ if torch.cuda.is_available():
 # Test embedding generation
 python -c "
 from sentence_transformers import SentenceTransformer
-model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5')
+model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
 embeddings = model.encode(['test query'])
 print(f'Embedding shape: {embeddings.shape}')
 print('Embedding generation successful')
