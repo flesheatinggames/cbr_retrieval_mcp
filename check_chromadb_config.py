@@ -20,7 +20,7 @@ if sample and 'embeddings' in sample and sample['embeddings'] is not None and le
 # Test with normalized vectors
 model = SentenceTransformer("nomic-ai/nomic-embed-text-v1.5", trust_remote_code=True)
 test_query = "test query"
-embedding = model.encode(test_query)
+embedding = model.encode(test_query, normalize_embeddings=True)
 
 # Check if embeddings are normalized
 norm = np.linalg.norm(embedding)

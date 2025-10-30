@@ -4208,6 +4208,26 @@ class InputValidator:
                     raise ValueError(f"Parameter '{key}' must be a string")
                 validated[key] = self.sanitize_input(value)
             
+            elif key == "category":
+                if not isinstance(value, str):
+                    raise ValueError(f"Parameter '{key}' must be a string")
+                sanitized_category = self.sanitize_input(value)
+                # Optional: validate against VALID_CATEGORIES
+                # For now, just sanitize and pass through
+                validated[key] = sanitized_category
+            
+            elif key == "subcategory":
+                # subcategory is optional and can be None
+                if value is None:
+                    validated[key] = None
+                elif isinstance(value, str):
+                    # Handle empty strings and whitespace
+                    sanitized_subcategory = self.sanitize_input(value).strip()
+                    # Treat empty string as None
+                    validated[key] = sanitized_subcategory if sanitized_subcategory else None
+                else:
+                    raise ValueError(f"Parameter '{key}' must be a string or None")
+            
             elif key in ["max_results", "limit"]:
                 if isinstance(value, str):
                     try:
@@ -4971,6 +4991,16 @@ class SignalHandler:
 # Production CBR Retriever with Real Database Operations
 # ============================================================================
 
+# Valid categories as defined in metadata schema
+VALID_CATEGORIES = ["code", "orchestration", "best-practice", "anti-pattern"]
+
+VALID_SUBCATEGORIES = {
+    "code": ["firebase-auth", "react-components", "api-routes", "database", "testing", "general"],
+    "orchestration": ["remediation", "planning", "delegation", "verification", "completion"],
+    "best-practice": ["planning", "verification", "error-handling"],
+    "anti-pattern": ["completion-bias", "verification-skip", "protocol-violation"]
+}
+
 class ProductionCBRRetriever:
     """Production-ready CBR retriever with real ChromaDB operations."""
     
@@ -5121,8 +5151,8 @@ class ProductionCBRRetriever:
                 # Ensure embedding model is loaded
                 self._ensure_embedding_model_loaded()
                 if self.embedding_model:
-                    # Use real embeddings
-                    query_embedding = self.embedding_model.encode(query).tolist()
+                    # Use real embeddings - normalize for consistent similarity scoring
+                    query_embedding = self.embedding_model.encode(query, normalize_embeddings=True).tolist()
                     results = await self.query_vectors(query_embedding, max_results)
                     
                     # Filter by similarity threshold
@@ -5144,8 +5174,8 @@ class ProductionCBRRetriever:
                     # Ensure embedding model is loaded for retry
                     self._ensure_embedding_model_loaded()
                     if self.embedding_model:
-                        # Retry the query
-                        query_embedding = self.embedding_model.encode(query).tolist()
+                        # Retry the query - normalize for consistent similarity scoring
+                        query_embedding = self.embedding_model.encode(query, normalize_embeddings=True).tolist()
                         results = await self.query_vectors(query_embedding, max_results)
                     else:
                         self.logger.error("Embedding model not available for retry")
@@ -5179,17 +5209,186 @@ class ProductionCBRRetriever:
         ]
         
         return [r for r in mock_results[:max_results] if r['similarity_score'] >= similarity_threshold]
-    
-    async def search_by_category(self, category: str, query: str = "", limit: int = 10) -> List[Dict[str, Any]]:
-        """Search for cases within a specific category."""
-        search_query = f"{category} {query}".strip()
-        results = await self.retrieve_relevant_examples(search_query, limit)
-        
-        # Enhance results with category information
-        for result in results:
-            result['category'] = category
-        
-        return results
+
+    def _format_query_results(self, results: Dict[str, Any]) -> List[Dict[str, Any]]:
+        """Format ChromaDB query or get results into standard format.
+
+        Handles both query() results (with distances) and get() results (without distances).
+        Handles various mock test data structures.
+        """
+        formatted_results = []
+
+        # Handle query() results (with distances)
+        if 'distances' in results and results.get('distances'):
+            # Normalize distance structure - handle both [[d1, d2]] and [[d1], [d2]]
+            distances_raw = results['distances']
+            if isinstance(distances_raw[0], list):
+                # Check if it's [[d1, d2, ...]] format (standard ChromaDB)
+                if len(distances_raw) == 1 or (len(distances_raw) > 0 and len(distances_raw[0]) > 1):
+                    distances = distances_raw[0]
+                else:
+                    # It's [[d1], [d2], ...] format (test mock format) - flatten it
+                    distances = [d[0] for d in distances_raw]
+            else:
+                distances = distances_raw
+
+            # Normalize ids, documents, metadatas
+            ids = results['ids'][0] if (isinstance(results['ids'][0], list)) else results['ids']
+            documents = results['documents'][0] if (isinstance(results['documents'][0], list)) else results['documents']
+            metadatas = results['metadatas'][0] if (isinstance(results['metadatas'][0], list)) else results['metadatas']
+
+            for i, doc_id in enumerate(ids):
+                distance = distances[i] if i < len(distances) else 0
+                # Convert L2 distance to similarity score
+                import math
+                similarity_score = math.exp(-0.002 * distance)
+
+                result = {
+                    'id': doc_id,
+                    'similarity_score': similarity_score,
+                    'content': documents[i] if i < len(documents) else '',
+                    'metadata': metadatas[i] if i < len(metadatas) else {}
+                }
+                formatted_results.append(result)
+
+        # Handle get() results (without distances)
+        elif 'ids' in results and results['ids']:
+            ids = results['ids']
+            documents = results.get('documents', [])
+            metadatas = results.get('metadatas', [])
+
+            for i, doc_id in enumerate(ids):
+                result = {
+                    'id': doc_id,
+                    'similarity_score': 1.0,  # No distance, assume perfect match
+                    'content': documents[i] if i < len(documents) else '',
+                    'metadata': metadatas[i] if i < len(metadatas) else {}
+                }
+                formatted_results.append(result)
+
+        return formatted_results
+
+    async def search_by_category(
+        self,
+        category: str,
+        subcategory: Optional[str] = None,
+        query: str = "",
+        limit: int = 10
+    ) -> List[Dict[str, Any]]:
+        """Search for cases within a specific category and optional subcategory.
+
+        Args:
+            category: Required top-level category (code, orchestration, best-practice, anti-pattern)
+            subcategory: Optional subcategory filter
+            query: Optional query text for similarity search
+            limit: Maximum number of results
+
+        Returns:
+            List of cases matching the filters
+
+        Raises:
+            ValueError: If category is invalid
+        """
+        # 1. Validate category
+        if category not in VALID_CATEGORIES:
+            raise ValueError(
+                f"Invalid category: '{category}'. Valid categories are: {', '.join(VALID_CATEGORIES)}"
+            )
+
+        # 2. Validate limit parameter
+        if limit < 1:
+            raise ValueError("limit must be at least 1")
+        if limit > 1000:
+            raise ValueError("limit must not exceed 1000")
+
+        # 3. Build ChromaDB where filter with subcategory validation
+        # ChromaDB requires $and operator for multiple conditions
+        where_conditions = [{"category": category}]
+
+        # Treat empty string subcategory as None
+        if subcategory and subcategory.strip():
+            # SECURITY: Explicit subcategory validation to prevent injection via configuration drift (CWE-20)
+            if category not in VALID_SUBCATEGORIES:
+                # Category exists but has no defined subcategories - reject any subcategory
+                raise ValueError(
+                    f"Category '{category}' does not support subcategories. "
+                    f"Please omit the subcategory parameter."
+                )
+
+            # Category has defined subcategories - validate against whitelist
+            valid_subcats = VALID_SUBCATEGORIES[category]
+            if subcategory not in valid_subcats:
+                raise ValueError(
+                    f"Invalid subcategory '{subcategory}' for category '{category}'. "
+                    f"Must be one of {valid_subcats}"
+                )
+
+            where_conditions.append({"subcategory": subcategory})
+
+        # Build final where filter - use $and if multiple conditions, else single condition
+        where_filter = {"$and": where_conditions} if len(where_conditions) > 1 else where_conditions[0]
+
+        # 4. Handle query embedding if query provided
+        query_embedding = None
+        if query and query.strip():
+            try:
+                self._ensure_embedding_model_loaded()
+                if self.embedding_model:
+                    # Normalize embeddings for consistent similarity scoring
+                    query_embedding = self.embedding_model.encode(query, normalize_embeddings=True).tolist()
+            except Exception as e:
+                self.logger.warning(
+                    "Failed to generate query embedding, falling back to category browse without similarity ranking",
+                    {"error": str(e), "query": query}
+                )
+                # Continue with query_embedding = None, will use get() below instead of query()
+                query_embedding = None
+
+        # 5. Query ChromaDB with where filter
+        try:
+            if query_embedding:
+                # Use query() with similarity search
+                results = self.collection.query(
+                    query_embeddings=[query_embedding],
+                    where=where_filter,
+                    n_results=limit
+                )
+            else:
+                # Use get() without similarity search
+                results = self.collection.get(
+                    where=where_filter,
+                    limit=limit
+                )
+
+            # 6. Format results with data integrity checks
+            formatted_results = self._format_query_results(results)
+            for result in formatted_results:
+                # Verify actual category matches requested (data integrity check)
+                actual_category = result.get('metadata', {}).get('category', '')
+                if actual_category and actual_category != category:
+                    self.logger.warning(
+                        "Category mismatch in results",
+                        {"requested": category, "actual": actual_category, "id": result.get('id', 'unknown')}
+                    )
+                # Use actual category from metadata, not requested category
+                result['category'] = actual_category if actual_category else category
+                result['subcategory'] = result.get('metadata', {}).get('subcategory', '')
+
+            return formatted_results
+
+        except Exception as e:
+            # 7. Error handling - fail fast without fallback
+            # SECURITY: Log full error details internally for debugging
+            self.logger.error(
+                "Category filter query failed",
+                {"error": str(e), "filter": where_filter, "category": category, "subcategory": subcategory}
+            )
+            # SECURITY: Raise sanitized error - no internal details exposed to client (CWE-209)
+            # from None prevents stack trace exposure
+            raise RuntimeError(
+                f"Failed to query cases for category '{category}'. "
+                f"Please verify the category exists and try again."
+            ) from None
     
     async def find_similar_cases(self, example_id: str, similarity_threshold: float = 0.8, max_results: int = 10) -> List[Dict[str, Any]]:
         """Find cases similar to a given example."""
@@ -5234,15 +5433,52 @@ class ProductionCBRRetriever:
         }
     
     async def get_categories(self) -> List[Dict[str, Any]]:
-        """Get available categories from the case base."""
-        return [
-            {"name": "brewing", "count": 450, "description": "Beer brewing techniques"},
-            {"name": "fermentation", "count": 320, "description": "Fermentation processes"},
-            {"name": "packaging", "count": 180, "description": "Bottling and kegging"},
-            {"name": "ingredients", "count": 275, "description": "Hops, malt, yeast selection"},
-            {"name": "recipes", "count": 400, "description": "Beer recipes and formulations"},
-            {"name": "troubleshooting", "count": 125, "description": "Problem solving"}
-        ]
+        """Get hierarchical category structure with counts."""
+
+        categories = {
+            "code": {
+                "name": "code",
+                "description": "Code examples and implementations",
+                "subcategories": []
+            },
+            "orchestration": {
+                "name": "orchestration",
+                "description": "Agent orchestration flow patterns",
+                "subcategories": []
+            },
+            "best-practice": {
+                "name": "best-practice",
+                "description": "Best practice patterns and guidelines",
+                "subcategories": []
+            },
+            "anti-pattern": {
+                "name": "anti-pattern",
+                "description": "Common mistakes and corrections",
+                "subcategories": []
+            }
+        }
+
+        # Query collection to get actual counts per category/subcategory
+        for category_name in categories.keys():
+            results = self.collection.get(
+                where={"category": category_name},
+                include=["metadatas"]
+            )
+
+            # Count subcategories
+            subcategory_counts = {}
+            for metadata in results.get("metadatas", []):
+                subcategory = metadata.get("subcategory", "unknown")
+                subcategory_counts[subcategory] = subcategory_counts.get(subcategory, 0) + 1
+
+            # Build subcategory list
+            categories[category_name]["count"] = len(results.get("ids", []))
+            categories[category_name]["subcategories"] = [
+                {"name": subcategory, "count": count}
+                for subcategory, count in sorted(subcategory_counts.items())
+            ]
+
+        return list(categories.values())
     
     async def get_stats(self) -> Dict[str, Any]:
         """Get system statistics."""
@@ -6194,14 +6430,68 @@ class CBRMCPServer:
         @self.mcp.tool()
         async def cbr_search_category(
             category: str,
+            subcategory: str = None,
             query: str = "",
             limit: int = 10,
             ctx: Context = None
         ) -> Dict[str, Any]:
-            """Search for cases within a specific category."""
+            """Search for cases within a specific category with optional subcategory filtering.
+
+            This tool enables targeted case retrieval by filtering the case base by category
+            and optionally by subcategory. When subcategory is None, all cases in the category
+            are searched. When subcategory is specified, only cases matching both category and
+            subcategory are returned.
+
+            Valid Categories:
+                - "code": Programming and implementation examples
+                - "orchestration": AI agent orchestration patterns
+                - "best-practice": Recommended approaches and patterns
+                - "anti-pattern": Common pitfalls and what to avoid
+
+            Valid Subcategories by Category:
+                - code: firebase-auth, react-components, api-routes, database, testing, general
+                - orchestration: remediation, planning, delegation, verification, completion
+                - best-practice: planning, verification, error-handling
+                - anti-pattern: completion-bias, verification-skip, protocol-violation
+
+            Args:
+                category (str): The category to search within. Must be one of the valid categories.
+                subcategory (str, optional): Optional subcategory to filter results within the
+                    category. When None (default), returns all cases in the category. When
+                    specified, filters results to only cases matching both category and subcategory.
+                    Default: None.
+                query (str, optional): Optional search query string to further filter results
+                    using semantic similarity. Empty string returns all cases matching the
+                    category/subcategory filters. Default: "".
+                limit (int, optional): Maximum number of results to return. Must be a positive
+                    integer, capped at 1000. Default: 10.
+                ctx (Context, optional): MCP context for logging and debugging. Default: None.
+
+            Returns:
+                Dict[str, Any]: Dictionary containing:
+                    - "category" (str): The category that was searched
+                    - "results" (List[Dict]): List of matching cases with metadata
+
+            Examples:
+                # Search all cases in a category (no subcategory filter)
+                result = cbr_search_category(
+                    category="code",
+                    query="authentication",
+                    limit=5
+                )
+
+                # Search specific subcategory within a category
+                result = cbr_search_category(
+                    category="code",
+                    subcategory="firebase-auth",
+                    query="user login",
+                    limit=10
+                )
+            """
             return await self._with_middleware(
                 self.cbr_search_category,
                 category=category,
+                subcategory=subcategory,
                 query=query,
                 limit=limit,
                 ctx=ctx
@@ -6305,19 +6595,14 @@ class CBRMCPServer:
         query: str,
         max_results: int = 5,
         similarity_threshold: float = 0.8,
-        ctx: Context = None,
-        limit: Optional[int] = None
+        ctx: Context = None
     ) -> Dict[str, Any]:
         """Retrieve relevant examples from the case base with production features."""
-        
+
         # Input validation
         if query is None:
             raise ValueError("query is required")
-        
-        # Handle limit parameter as alias for max_results
-        if limit is not None:
-            max_results = limit
-        
+
         await self.input_validator.validate_input_size(query)
         await self.input_validator.detect_injection(query)
         
@@ -6382,36 +6667,107 @@ class CBRMCPServer:
     async def cbr_search_category(
         self,
         category: str,
+        subcategory: str = None,
         query: str = "",
         limit: int = 10,
         ctx: Context = None
     ) -> Dict[str, Any]:
-        """Search for cases within a specific category."""
-        
+        """Search for cases within a specific category with optional subcategory filtering.
+
+        This method enables targeted case retrieval by filtering the case base by category
+        and optionally by subcategory. When subcategory is None, all cases in the category
+        are searched. When subcategory is specified, only cases matching both category and
+        subcategory are returned.
+
+        Valid Categories:
+            - "code": Programming and implementation examples
+            - "orchestration": AI agent orchestration patterns
+            - "best-practice": Recommended approaches and patterns
+            - "anti-pattern": Common pitfalls and what to avoid
+
+        Valid Subcategories by Category:
+            - code: firebase-auth, react-components, api-routes, database, testing, general
+            - orchestration: remediation, planning, delegation, verification, completion
+            - best-practice: planning, verification, error-handling
+            - anti-pattern: completion-bias, verification-skip, protocol-violation
+
+        Args:
+            category (str): The category to search within. Must be one of the valid categories.
+            subcategory (str, optional): Optional subcategory to filter results within the
+                category. When None (default), returns all cases in the category. When
+                specified, filters results to only cases matching both category and subcategory.
+                Default: None.
+            query (str, optional): Optional search query string to further filter results
+                using semantic similarity. Empty string returns all cases matching the
+                category/subcategory filters. Default: "".
+            limit (int, optional): Maximum number of results to return. Must be a positive
+                integer, capped at 1000. Default: 10.
+            ctx (Context, optional): MCP context for logging and debugging. Default: None.
+
+        Returns:
+            Dict[str, Any]: Dictionary containing:
+                - "category" (str): The category that was searched
+                - "results" (List[Dict]): List of matching cases with metadata including
+                  id, content, category, subcategory, and similarity_score
+
+        Raises:
+            ValueError: If parameters fail validation (e.g., invalid types, negative limit)
+            Exception: If the database query fails or other errors occur
+
+        Examples:
+            # Search all cases in a category (no subcategory filter)
+            >>> result = await server.cbr_search_category(
+            ...     category="code",
+            ...     query="authentication",
+            ...     limit=5
+            ... )
+
+            # Search specific subcategory within a category
+            >>> result = await server.cbr_search_category(
+            ...     category="code",
+            ...     subcategory="firebase-auth",
+            ...     query="user login",
+            ...     limit=10
+            ... )
+
+            # Get all cases in category+subcategory (empty query)
+            >>> result = await server.cbr_search_category(
+            ...     category="best-practice",
+            ...     subcategory="verification",
+            ...     query="",
+            ...     limit=20
+            ... )
+        """
+
         # Input validation
         validated_params = await self.input_validator.validate_parameters({
+            "category": category,
+            "subcategory": subcategory,
             "query": query,
             "limit": limit
         })
-        
+
+        category = validated_params["category"]
+        subcategory = validated_params["subcategory"]
         query = validated_params["query"]
         limit = validated_params["limit"]
-        
+
         try:
             circuit_breaker = self.error_recovery.get_circuit_breaker("database")
-            
+
             results = await circuit_breaker.call(
                 self.retriever.search_by_category,
                 category=category,
+                subcategory=subcategory,
                 query=query,
                 limit=limit
             )
-            
+
             return {
                 "category": category,
                 "results": results
             }
-            
+
         except Exception as e:
             if ctx:
                 await ctx.error(f"Failed to search category: {str(e)}")
@@ -7260,7 +7616,7 @@ class CBRMCPServer:
         async def _embed_operation():
             if hasattr(self.retriever, 'embedding_model') and self.retriever.embedding_model:
                 # Use retriever's embedding model
-                embeddings = self.retriever.embedding_model.encode(text)
+                embeddings = self.retriever.embedding_model.encode(text, normalize_embeddings=True)
                 return embeddings.tolist() if hasattr(embeddings, 'tolist') else list(embeddings)
             else:
                 # Fallback: return dummy embeddings for testing
@@ -7299,7 +7655,7 @@ class CBRMCPServer:
             if hasattr(self.retriever, 'embedding_model') and self.retriever.embedding_model:
                 try:
                     # Use retriever's embedding model
-                    embeddings = self.retriever.embedding_model.encode(text)
+                    embeddings = self.retriever.embedding_model.encode(text, normalize_embeddings=True)
                     if hasattr(embeddings, 'tolist'):
                         result = embeddings.tolist()
                     else:
@@ -7321,7 +7677,7 @@ class CBRMCPServer:
                             # Use the real version without trust_remote_code for security
                             self.retriever.embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
                     # Try again after reload
-                    embeddings = self.retriever.embedding_model.encode(text)
+                    embeddings = self.retriever.embedding_model.encode(text, normalize_embeddings=True)
                     if hasattr(embeddings, 'tolist'):
                         result = embeddings.tolist()
                     else:
@@ -7408,7 +7764,7 @@ class CBRMCPServer:
             if hasattr(self.retriever, 'embedding_model') and self.retriever.embedding_model:
                 # Test model with a simple embedding
                 test_text = "health check"
-                embeddings = self.retriever.embedding_model.encode(test_text)
+                embeddings = self.retriever.embedding_model.encode(test_text, normalize_embeddings=True)
                 return {
                     "healthy": True,
                     "model_loaded": True,
@@ -7566,7 +7922,7 @@ class CBRMCPServer:
         with self._embedding_lock:
             try:
                 if hasattr(self.retriever, 'embedding_model') and self.retriever.embedding_model:
-                    embeddings = self.retriever.embedding_model.encode(text)
+                    embeddings = self.retriever.embedding_model.encode(text, normalize_embeddings=True)
                     return embeddings.tolist() if hasattr(embeddings, 'tolist') else list(embeddings)
                 else:
                     # Return dummy embeddings for testing
@@ -10484,7 +10840,7 @@ class DatabaseRepairer:
                     try:
                         if i < len(documents_data['documents']) and documents_data['documents'][i]:
                             # Generate new embedding
-                            embedding_result = model.encode([documents_data['documents'][i]])[0]
+                            embedding_result = model.encode([documents_data['documents'][i]], normalize_embeddings=True)[0]
                             if hasattr(embedding_result, 'tolist'):
                                 new_embedding = embedding_result.tolist()
                             elif isinstance(embedding_result, (list, tuple)):
@@ -10571,7 +10927,7 @@ class DatabaseRepairer:
                             # Regenerate if document available
                             if doc_data['documents'] and doc_data['documents'][0] and sentence_transformers:
                                 model = sentence_transformers.SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
-                                embedding_result = model.encode([doc_data['documents'][0]])[0]
+                                embedding_result = model.encode([doc_data['documents'][0]], normalize_embeddings=True)[0]
                                 if hasattr(embedding_result, 'tolist'):
                                     fixed_embedding = embedding_result.tolist()
                                 elif isinstance(embedding_result, (list, tuple)):
@@ -10788,13 +11144,13 @@ class DatabaseRepairer:
                         # Check for NaN or inf values
                         if np.any(np.isnan(embedding)) or np.any(np.isinf(embedding)):
                             # Try to regenerate from document
-                            if (doc_data['documents'] and doc_data['documents'][0] and 
+                            if (doc_data['documents'] and doc_data['documents'][0] and
                                 sentence_transformers):
                                 model = sentence_transformers.SentenceTransformer(
                                     'nomic-ai/nomic-embed-text-v1.5',
                                     trust_remote_code=True
                                 )
-                                embedding_result = model.encode([doc_data['documents'][0]])[0]
+                                embedding_result = model.encode([doc_data['documents'][0]], normalize_embeddings=True)[0]
                                 if hasattr(embedding_result, 'tolist'):
                                     new_embedding = embedding_result.tolist()
                                 elif isinstance(embedding_result, (list, tuple)):
@@ -10813,13 +11169,13 @@ class DatabaseRepairer:
                         
                         # Check for zero vectors
                         elif np.allclose(embedding, 0):
-                            if (doc_data['documents'] and doc_data['documents'][0] and 
+                            if (doc_data['documents'] and doc_data['documents'][0] and
                                 sentence_transformers):
                                 model = sentence_transformers.SentenceTransformer(
                                     'nomic-ai/nomic-embed-text-v1.5',
                                     trust_remote_code=True
                                 )
-                                embedding_result = model.encode([doc_data['documents'][0]])[0]
+                                embedding_result = model.encode([doc_data['documents'][0]], normalize_embeddings=True)[0]
                                 if hasattr(embedding_result, 'tolist'):
                                     new_embedding = embedding_result.tolist()
                                 elif isinstance(embedding_result, (list, tuple)):
@@ -11298,10 +11654,10 @@ class DatabaseRepairer:
                 try:
                     doc_id = doc.get('id')
                     document_text = doc.get('document')
-                    
+
                     if doc_id and document_text:
                         # Generate new embedding
-                        embedding_result = model.encode([document_text])[0]
+                        embedding_result = model.encode([document_text], normalize_embeddings=True)[0]
                         if hasattr(embedding_result, 'tolist'):
                             new_embedding = embedding_result.tolist()
                         elif isinstance(embedding_result, (list, tuple)):

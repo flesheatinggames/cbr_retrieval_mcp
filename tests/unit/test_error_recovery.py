@@ -616,7 +616,7 @@ class TestChromaDBReconnectionIntegration:
         server = CBRMCPServer(config=config)
         
         # Should handle connection failure gracefully with fallback data
-        result = await server.cbr_retrieve("test", limit=1)
+        result = await server.cbr_retrieve("test", max_results=1)
         
         # Validate that system provided fallback results despite connection failure
         assert isinstance(result, dict), "Result should be a dictionary"

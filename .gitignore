@@ -79,6 +79,7 @@ debug.log
 *.sqlite*
 chroma.sqlite3
 monitoring.db
+monitoring.db-*
 
 # ChromaDB
 chroma_settings.json
@@ -86,11 +87,14 @@ chroma_settings.json
 
 # Test directories and files
 test_db/
+test_db_*/
+*_test_db/
 demo_db/
 test_chroma_db/
 chroma_db/
 test_traces/
 traces/
+stability_test_results/
 *test_backup*/
 backup/
 test_backup/

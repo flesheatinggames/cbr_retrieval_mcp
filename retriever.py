@@ -56,7 +56,7 @@ class CBRRetriever:
             return []
         
         # Generate embedding for the user's query
-        query_embedding = self.embedding_model.encode(query)
+        query_embedding = self.embedding_model.encode(query, normalize_embeddings=True)
         
         # Query the collection
         results = self.collection.query(

@@ -18,7 +18,7 @@ claude_client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 # 2. The CBR/RAG Retrieval Function
 def retrieve_relevant_cases(query, n_results=3):
     """Retrieves the most relevant cases from the vector database."""
-    query_embedding = embedding_model.encode(query)
+    query_embedding = embedding_model.encode(query, normalize_embeddings=True)
 
     results = collection.query(
         query_embeddings=[query_embedding.tolist()],

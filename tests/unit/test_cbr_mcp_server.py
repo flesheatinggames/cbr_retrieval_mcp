@@ -280,7 +280,8 @@ class TestCBRMCPTools:
         # Verify category search was called
         mock_cbr_retriever.search_by_category.assert_called_once_with(
             category="brewing",
-            query="IPA techniques", 
+            subcategory=None,
+            query="IPA techniques",
             limit=10
         )
         
@@ -530,8 +531,8 @@ class TestCBRRetrieverIntegration:
                     n_results=2
                 )
                 
-                # Verify embedding was computed
-                mock_transformer.return_value.encode.assert_called_once_with("How to brew IPA?")
+                # Verify embedding was computed with normalization
+                mock_transformer.return_value.encode.assert_called_once_with("How to brew IPA?", normalize_embeddings=True)
                 
                 # Verify ChromaDB query was called
                 mock_collection.query.assert_called_once()

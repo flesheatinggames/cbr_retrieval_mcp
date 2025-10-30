@@ -10,13 +10,67 @@ This server converts the existing FastAPI-based CBR system to the MCP protocol, 
 
 ### MCP Tools
 - **`cbr_retrieve`** - Retrieve relevant examples from the case base
-- **`cbr_search_category`** - Search for cases within a specific category
+- **`cbr_search_category`** - Search for cases within a specific category with optional subcategory filtering
 - **`cbr_find_similar`** - Find cases similar to a given example
 
 ### MCP Resources
-- **`cbr://categories`** - Get available categories from the case base
+- **`cbr://categories`** - Get hierarchical category structure with subcategories and counts
 - **`cbr://examples/{id}`** - Get a specific example by ID
 - **`cbr://stats`** - Get system statistics
+
+## Category Taxonomy
+
+The CBR MCP Server organizes code examples using a hierarchical category system that enables precise filtering and discovery of relevant cases.
+
+### Hierarchical Structure
+
+Cases are organized using a two-level taxonomy: **Category** → **Subcategory**
+
+### Top-Level Categories
+
+| Category | Description | Use Case |
+|----------|-------------|----------|
+| **code** | Code examples and implementations | Finding specific code patterns, implementation examples, and technical solutions |
+| **orchestration** | Agent orchestration flow patterns | Understanding AI agent workflows, delegation patterns, and coordination strategies |
+| **best-practice** | Best practice patterns and guidelines | Learning recommended approaches, protocols, and proven patterns |
+| **anti-pattern** | Common mistakes and corrections | Identifying what to avoid and how to fix common problems |
+
+### Subcategories by Category
+
+#### Code Category
+- `firebase-auth` - Firebase authentication examples
+- `react-components` - React component patterns
+- `api-routes` - API endpoint implementations
+- `database` - Database operations and queries
+- `testing` - Test patterns and strategies
+- `general` - Uncategorized code examples
+
+#### Orchestration Category
+- `remediation` - Remediation Protocol patterns for fixing issues
+- `planning` - Planning and decomposition patterns for task breakdown
+- `delegation` - Agent delegation patterns for distributing work
+- `verification` - Karen verification workflows for quality assurance
+- `completion` - Task completion protocols and checkpoints
+
+#### Best-Practice Category
+- `planning` - How to structure plans and task breakdowns
+- `verification` - Verification protocols and quality checks
+- `error-handling` - Error recovery patterns and resilience
+
+#### Anti-Pattern Category
+- `completion-bias` - Premature completion patterns to avoid
+- `verification-skip` - Skipped verification issues and their consequences
+- `protocol-violation` - Protocol violations and how to correct them
+
+### Category Path Format
+
+Categories are referenced using the format: `category/subcategory`
+
+Examples:
+- `code/react-components` - React component examples
+- `orchestration/remediation` - Remediation workflow patterns
+- `best-practice/verification` - Verification best practices
+- `anti-pattern/completion-bias` - Completion bias examples to avoid
 
 ## Production Features
 
@@ -130,13 +184,22 @@ cbr-mcp-server
 ### MCP Tools Usage
 
 #### Retrieve Relevant Examples
+
+Semantic search across all cases using vector similarity.
+
+**Parameters:**
+- `query` (string, required) - Natural language query describing what you're looking for
+- `max_results` (integer, optional, default: 5) - Maximum number of results to return
+- `similarity_threshold` (float, optional, default: 0.8) - Minimum similarity score (0.0-1.0)
+
+**Example:**
 ```python
 {
   "method": "tools/call",
   "params": {
     "name": "cbr_retrieve",
     "arguments": {
-      "query": "How to brew an IPA?",
+      "query": "How to implement Firebase authentication in React?",
       "max_results": 5,
       "similarity_threshold": 0.8
     }
@@ -145,21 +208,102 @@ cbr-mcp-server
 ```
 
 #### Search by Category
+
+Search for cases within a specific category with optional subcategory filtering and semantic query.
+
+**Parameters:**
+- `category` (string, required) - Top-level category: `code`, `orchestration`, `best-practice`, or `anti-pattern`
+- `subcategory` (string, optional) - Specific subcategory within the category (see Category Taxonomy section)
+- `query` (string, optional, default: "") - Optional semantic query to filter results within the category
+- `limit` (integer, optional, default: 10) - Maximum number of results to return
+
+**Backward Compatibility:** The `subcategory` parameter is optional. Existing code using only `category` will continue to work.
+
+**Example 1: Category-only filtering** (browse all cases in a category)
 ```python
 {
-  "method": "tools/call", 
+  "method": "tools/call",
   "params": {
     "name": "cbr_search_category",
     "arguments": {
-      "category": "brewing",
-      "query": "IPA techniques",
+      "category": "orchestration",
       "limit": 10
     }
   }
 }
 ```
 
+**Example 2: Category + subcategory filtering** (narrow down to specific pattern type)
+```python
+{
+  "method": "tools/call",
+  "params": {
+    "name": "cbr_search_category",
+    "arguments": {
+      "category": "orchestration",
+      "subcategory": "remediation",
+      "limit": 10
+    }
+  }
+}
+```
+
+**Example 3: Category + subcategory + semantic query** (find specific patterns within category)
+```python
+{
+  "method": "tools/call",
+  "params": {
+    "name": "cbr_search_category",
+    "arguments": {
+      "category": "code",
+      "subcategory": "react-components",
+      "query": "authentication form with validation",
+      "limit": 5
+    }
+  }
+}
+```
+
+**Example 4: Best practice patterns**
+```python
+{
+  "method": "tools/call",
+  "params": {
+    "name": "cbr_search_category",
+    "arguments": {
+      "category": "best-practice",
+      "subcategory": "verification",
+      "query": "how to verify task completion"
+    }
+  }
+}
+```
+
+**Example 5: Anti-patterns to avoid**
+```python
+{
+  "method": "tools/call",
+  "params": {
+    "name": "cbr_search_category",
+    "arguments": {
+      "category": "anti-pattern",
+      "subcategory": "completion-bias",
+      "limit": 5
+    }
+  }
+}
+```
+
 #### Find Similar Cases
+
+Find cases similar to a specific example by ID.
+
+**Parameters:**
+- `example_id` (string, required) - Unique identifier of the reference example
+- `similarity_threshold` (float, optional, default: 0.85) - Minimum similarity score (0.0-1.0)
+- `max_results` (integer, optional, default: 8) - Maximum number of results to return
+
+**Example:**
 ```python
 {
   "method": "tools/call",
@@ -172,6 +316,48 @@ cbr-mcp-server
     }
   }
 }
+```
+
+### Practical Use Cases
+
+#### Use Case 1: Finding Code Implementation Patterns
+When implementing a new feature, search for similar code patterns:
+```python
+# Step 1: Search for relevant code category
+cbr_search_category(category="code", subcategory="react-components", query="user profile card")
+
+# Step 2: Find similar implementations
+cbr_find_similar(example_id="result_from_step_1", max_results=5)
+```
+
+#### Use Case 2: Learning Orchestration Workflows
+When understanding how to structure AI agent workflows:
+```python
+# Browse all orchestration patterns
+cbr_search_category(category="orchestration", limit=20)
+
+# Focus on specific workflow type
+cbr_search_category(category="orchestration", subcategory="delegation", query="multi-agent task breakdown")
+```
+
+#### Use Case 3: Avoiding Common Mistakes
+When planning a task, check for common pitfalls:
+```python
+# Review all anti-patterns
+cbr_search_category(category="anti-pattern", limit=15)
+
+# Check specific anti-pattern type
+cbr_search_category(category="anti-pattern", subcategory="verification-skip")
+```
+
+#### Use Case 4: Following Best Practices
+When implementing a new protocol or pattern:
+```python
+# Find verification best practices
+cbr_search_category(category="best-practice", subcategory="verification")
+
+# Search for specific best practice guidance
+cbr_search_category(category="best-practice", subcategory="planning", query="task decomposition checklist")
 ```
 
 ## Architecture

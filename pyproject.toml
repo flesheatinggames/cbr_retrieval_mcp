@@ -17,7 +17,7 @@ dependencies = [
     "einops",
     "psutil",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.8"
 
 [project.scripts]
 cbr-mcp-server = "cbr_mcp_server:main"
@@ -50,7 +50,8 @@ warn_unused_configs = true
 disallow_untyped_defs = true
 
 [tool.pytest.ini_options]
-testpaths = ["."]
+pythonpath = ["."]
+testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]

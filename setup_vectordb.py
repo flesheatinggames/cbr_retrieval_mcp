@@ -28,7 +28,7 @@ if collection.count() == 0:
     ids = [f"id{i}" for i in range(len(problems))]
 
     # Generate embeddings for all the 'problem' descriptions
-    problem_embeddings = embedding_model.encode(problems)
+    problem_embeddings = embedding_model.encode(problems, normalize_embeddings=True)
 
     # Add the data to the collection
     collection.add(
