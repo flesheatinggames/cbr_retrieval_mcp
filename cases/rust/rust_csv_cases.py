@@ -1,10 +1,9 @@
 
 RUST_CSV_CASES = [
-    # ============================================
-    # CSV PROCESSING
-    # ============================================
     {
-        "problem": "High-performance CSV reading, writing, and data transformation.",
+        "problem": """
+High-performance CSV reading, writing, and data transformation.
+""",
         "solution": """
 use csv::{Reader, Writer, StringRecord};
 use serde::{Deserialize, Serialize};
@@ -273,6 +272,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     Ok(())
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'csv',
+        "tags": ['csv', 'filter', 'form', 'orm', 'performance', 'rayon', 'rust']
     }
 ]

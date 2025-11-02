@@ -13,7 +13,9 @@ subtasks have been verified and completed.
 
 ORCHESTRATION_COMPLETION_CASES = [
     {
-        "problem": "After karen verifies that the LoginButton component implementation is complete, how do I properly finalize the workflow and report completion to the user?",
+        "problem": """
+After karen verifies that the LoginButton component implementation is complete, how do I properly finalize the workflow and report completion to the user?
+""",
         "solution": """
 <thinking>
 Karen has just responded with "VERIFIED COMPLETE" for the LoginButton component. According to the Task Completion Protocol, I must now:
@@ -138,20 +140,8 @@ The LoginButton component is ready for production use. All tests pass, documenta
 
 The entire task is now complete. Is there anything else you'd like me to work on?
 """,
-        "category": "orchestration",
-        "subcategory": "completion",
-        "tags": [
-            "orchestration",
-            "completion",
-            "workflow",
-            "tasks",
-            "summary",
-            "finalization",
-            "TodoWrite",
-            "reporting",
-            "task-completion-protocol",
-            "verification-complete"
-        ]
+        "category": 'orchestration',
+        "subcategory": 'completion',
+        "tags": ['orchestration', 'completion', 'workflow', 'tasks', 'summary', 'finalization', 'todowrite']
     }
-    
 ]

@@ -6,9 +6,11 @@ fetch operations, async/await patterns, error handling, and REST API interaction
 """
 
 WEBDEV_API_INTEGRATION_CASES = [
-{
- "problem": "A reusable async function to fetch data from a REST API with proper headers and response handling.",
- "solution": """
+    {
+        "problem": """
+A reusable async function to fetch data from a REST API with proper headers and response handling.
+""",
+        "solution": """
 // api/client.ts
 interface FetchOptions {
 method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
@@ -149,13 +151,15 @@ if (response.error) {
 return response.status === 204;
 }
 """,
- "category": "webdev",
- "subcategory": "api-integration",
- "tags": ["api", "fetch", "async", "rest", "http", "request", "response", "typescript", "async-await"]
-},
-{
- "problem": "Implement robust error handling for API calls with retry logic, timeout handling, and user-friendly error messages.",
- "solution": """
+        "category": 'webdev',
+        "subcategory": 'api-integration',
+        "tags": ['api', 'fetch', 'async', 'rest', 'http', 'request', 'response']
+    },
+    {
+        "problem": """
+Implement robust error handling for API calls with retry logic, timeout handling, and user-friendly error messages.
+""",
+        "solution": """
 // api/errorHandling.ts
 interface RetryOptions {
 maxRetries?: number;
@@ -385,8 +389,8 @@ return (
 );
 }
 """,
- "category": "webdev",
- "subcategory": "api-integration",
- "tags": ["error-handling", "api", "retry", "async", "fetch", "timeout", "rest", "http", "typescript", "hooks"]
-}
+        "category": 'webdev',
+        "subcategory": 'api-integration',
+        "tags": ['error-handling', 'api', 'retry', 'async', 'fetch', 'timeout', 'rest']
+    }
 ]

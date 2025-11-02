@@ -1,11 +1,9 @@
 
 RUST_UUID_CASES = [
-    
-    # ============================================
-    # UUID GENERATION AND VALIDATION
-    # ============================================
     {
-        "problem": "UUID generation, parsing, and validation for distributed systems.",
+        "problem": """
+UUID generation, parsing, and validation for distributed systems.
+""",
         "solution": """
 use uuid::{Uuid, uuid, Builder, Variant, Version};
 use std::collections::HashMap;
@@ -234,25 +232,27 @@ fn main() {
     let id1 = registry.register("Entity 1".to_string());
     let id2 = registry.register("Entity 2".to_string());
     
-    println!("\\nRegistry count: {}", registry.count());
+    println!("\nRegistry count: {}", registry.count());
     println!("Entity 1: {:?}", registry.get(&id1));
     
     // Distributed ID generation
     let generator = DistributedIdGenerator::new(42);
     let ids: Vec<_> = (0..5).map(|_| generator.generate()).collect();
-    println!("\\nGenerated distributed IDs:");
+    println!("\nGenerated distributed IDs:");
     for id in ids {
         println!("  {}", id);
     }
 
     // UUID utilities
-    println!("\\nUUID formats:");
+    println!("\nUUID formats:");
     let uuid = Uuid::new_v4();
     println!("  Hyphenated: {}", uuid_utils::to_hyphenated(&uuid));
     println!("  Simple: {}", uuid_utils::to_simple(&uuid));
     println!("  URN: {}", uuid_utils::to_urn(&uuid));
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'uuid',
+        "tags": ['form', 'node', 'orm', 'rust', 'serde', 'ui', 'uuid']
     }
-
 ]

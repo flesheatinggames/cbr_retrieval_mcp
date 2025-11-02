@@ -8,7 +8,9 @@ with validation, and responsive grid layouts.
 
 BOOTSTRAP_UI_CASES = [
     {
-        "problem": "A responsive navigation bar in a React component using react-bootstrap.",
+        "problem": """
+A responsive navigation bar in a React component using react-bootstrap.
+""",
         "solution": """
 import { Navbar, Nav, Container, NavDropdown, Button } from 'react-bootstrap';
 import Link from 'next/link';
@@ -108,12 +110,14 @@ const AppNavbar = () => {
 
 export default AppNavbar;
 """,
-        "category": "bootstrap",
-        "subcategory": "ui",
-        "tags": ["bootstrap", "react-bootstrap", "navbar", "navigation", "responsive", "ui", "component"]
+        "category": 'bootstrap',
+        "subcategory": 'ui',
+        "tags": ['bootstrap', 'react-bootstrap', 'navbar', 'navigation', 'responsive', 'ui', 'component']
     },
     {
-        "problem": "A React component that displays a Bootstrap modal dialog.",
+        "problem": """
+A React component that displays a Bootstrap modal dialog.
+""",
         "solution": """
 import { useState } from 'react';
 import { Button, Modal, Form } from 'react-bootstrap';
@@ -187,12 +191,14 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
 export default ConfirmationModal;
 """,
-        "category": "bootstrap",
-        "subcategory": "ui",
-        "tags": ["bootstrap", "react-bootstrap", "modal", "dialog", "ui", "component", "overlay"]
+        "category": 'bootstrap',
+        "subcategory": 'ui',
+        "tags": ['bootstrap', 'react-bootstrap', 'modal', 'dialog', 'ui', 'component', 'overlay']
     },
     {
-        "problem": "A Bootstrap-styled form with validation feedback in React.",
+        "problem": """
+A Bootstrap-styled form with validation feedback in React.
+""",
         "solution": """
 import { useState } from 'react';
 import { Form, Button, Col, Row, Alert } from 'react-bootstrap';
@@ -332,12 +338,14 @@ const ValidatedForm = () => {
 
 export default ValidatedForm;
 """,
-        "category": "bootstrap",
-        "subcategory": "ui",
-        "tags": ["bootstrap", "react-bootstrap", "form", "validation", "feedback", "ui", "component"]
+        "category": 'bootstrap',
+        "subcategory": 'ui',
+        "tags": ['bootstrap', 'react-bootstrap', 'form', 'validation', 'feedback', 'ui', 'component']
     },
     {
-        "problem": "A React component that displays data in a responsive Bootstrap grid.",
+        "problem": """
+A React component that displays data in a responsive Bootstrap grid.
+""",
         "solution": """
 import { Container, Row, Col, Card, Badge, Button } from 'react-bootstrap';
 
@@ -435,8 +443,8 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, onAddToCart }) => {
 
 export default ProductGrid;
 """,
-        "category": "bootstrap",
-        "subcategory": "ui",
-        "tags": ["bootstrap", "react-bootstrap", "grid", "card", "layout", "responsive", "display data", "ui", "component"]
+        "category": 'bootstrap',
+        "subcategory": 'ui',
+        "tags": ['bootstrap', 'ui', 'react-bootstrap', 'grid', 'card', 'layout', 'responsive']
     }
 ]

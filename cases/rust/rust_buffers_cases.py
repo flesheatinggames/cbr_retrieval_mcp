@@ -1,11 +1,9 @@
 
 RUST_BUFFERS_CASES = [
-    
-    # ============================================
-    # BYTES AND BUFFER HANDLING
-    # ============================================
     {
-        "problem": "Efficient binary data handling using bytes crate with zero-copy operations.",
+        "problem": """
+Efficient binary data handling using bytes crate with zero-copy operations.
+""",
         "solution": """
 use bytes::{Bytes, BytesMut, Buf, BufMut};
 use std::io::{self, Read, Write};
@@ -314,7 +312,7 @@ fn main() {
     println!("Decoded string: {}", decoded_str);
 
     // Zero-copy reading
-    let data = Bytes::from(&b"ABCD\x01\x00\x00\x00\x02\x00\x00\x00"[..]);
+    let data = Bytes::from(&b"ABCD"[..]);
     let mut reader = BufferReader::new(data);
     
     if let Some(slice) = reader.read_slice(4) {
@@ -333,7 +331,9 @@ fn main() {
     pool.release(buf1);
     pool.release(buf2);
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'buffers',
+        "tags": ['buffers', 'parser', 'rust', 'serialization', 'sse', 'ui']
     }
-
 ]

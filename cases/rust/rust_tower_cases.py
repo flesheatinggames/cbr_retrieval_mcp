@@ -1,11 +1,9 @@
 
 RUST_TOWER_CASES = [
-    
-    # ============================================
-    # TOWER MIDDLEWARE
-    # ============================================
     {
-        "problem": "Building composable middleware layers using Tower for service abstraction.",
+        "problem": """
+Building composable middleware layers using Tower for service abstraction.
+""",
         "solution": """
 use tower::{Service, ServiceBuilder, ServiceExt, Layer};
 use tower::limit::RateLimitLayer;
@@ -268,7 +266,9 @@ where
 async fn main() {
     build_service().await;
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'tower',
+        "tags": ['api', 'async', 'auth', 'authentication', 'form', 'http', 'logging']
     }
-
 ]

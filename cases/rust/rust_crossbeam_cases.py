@@ -1,11 +1,9 @@
 
 RUST_CROSSBEAM_CASES = [
-    
-    # ============================================
-    # CROSSBEAM CONCURRENT DATA STRUCTURES
-    # ============================================
     {
-        "problem": "Lock-free concurrent programming using crossbeam channels and atomic operations.",
+        "problem": """
+Lock-free concurrent programming using crossbeam channels and atomic operations.
+""",
         "solution": """
 use crossbeam::{
     channel::{bounded, unbounded, select, Sender, Receiver},
@@ -239,14 +237,16 @@ fn main() {
     queue.shutdown();
 
     // Pipeline
-    println!("\\nRunning pipeline...");
+    println!("\nRunning pipeline...");
     create_pipeline();
 
     // Fan-out/Fan-in
-    println!("\\nRunning fan-out/fan-in...");
+    println!("\nRunning fan-out/fan-in...");
     fan_out_fan_in();
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'crossbeam',
+        "tags": ['crossbeam', 'rust', 'sse']
     }
-
 ]

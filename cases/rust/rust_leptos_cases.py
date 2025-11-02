@@ -1,12 +1,14 @@
+"""
+    },
+    {
+        "problem": "A Leptos server function for fetching and caching data with error handling.",
+        "solution": """
 
-
- # ============================================
-    # LEPTOS WEB FRAMEWORK
-    # ============================================
 RUST_LEPTOS_CASES = [
-
-  {
-        "problem": "A Leptos component for a user authentication form with reactive state management and validation.",
+    {
+        "problem": """
+A Leptos component for a user authentication form with reactive state management and validation.
+""",
         "solution": """
 use leptos::*;
 use serde::{Deserialize, Serialize};
@@ -190,10 +192,15 @@ async fn login_user(form_data: LoginForm) -> Result<(), String> {
         Err("Invalid credentials".to_string())
     }
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'leptos',
+        "tags": ['api', 'async', 'auth', 'authentication', 'event', 'form', 'leptos']
     },
     {
-        "problem": "A Leptos server function for fetching and caching data with error handling.",
+        "problem": """
+A Leptos server function for fetching and caching data with error handling.
+""",
         "solution": """
 use leptos::*;
 use serde::{Deserialize, Serialize};
@@ -369,10 +376,15 @@ pub fn UserList() -> impl IntoView {
         </div>
     }
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'leptos',
+        "tags": ['api', 'async', 'caching', 'database', 'error-handling', 'form', 'leptos']
     },
     {
-        "problem": "A Leptos component with a custom hook for managing complex form state with nested objects.",
+        "problem": """
+A Leptos component with a custom hook for managing complex form state with nested objects.
+""",
         "solution": """
 use leptos::*;
 use serde::{Deserialize, Serialize};
@@ -608,6 +620,9 @@ pub fn UserProfileForm() -> impl IntoView {
         </div>
     }
 }
-"""
-    },
+""",
+        "category": 'rust',
+        "subcategory": 'leptos',
+        "tags": ['api', 'async', 'event', 'filter', 'form', 'leptos', 'orm']
+    }
 ]

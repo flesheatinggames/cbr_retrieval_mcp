@@ -8,7 +8,9 @@ document management.
 
 FIREBASE_FIRESTORE_CASES = [
     {
-        "problem": "A function to add a new document to a 'users' collection in Firestore.",
+        "problem": """
+A function to add a new document to a 'users' collection in Firestore.
+""",
         "solution": """
 import { getFirestore, collection, addDoc, serverTimestamp, doc, setDoc } from 'firebase/firestore';
 
@@ -57,12 +59,14 @@ const setUserProfile = async (userId: string, userData: UserData) => {
 
 export { addUserProfile, setUserProfile };
 """,
-        "category": "firebase",
-        "subcategory": "firestore",
-        "tags": ["firestore", "create", "add", "document", "database", "crud", "collection", "firebase", "nosql", "document-write"]
+        "category": 'firebase',
+        "subcategory": 'firestore',
+        "tags": ['firebase', 'firestore', 'create', 'add', 'document', 'database', 'crud']
     },
     {
-        "problem": "A React hook to fetch a single document from Firestore by its ID.",
+        "problem": """
+A React hook to fetch a single document from Firestore by its ID.
+""",
         "solution": """
 import { useState, useEffect } from 'react';
 import { getFirestore, doc, getDoc, onSnapshot } from 'firebase/firestore';
@@ -140,12 +144,14 @@ const useFirestoreDocument = <T = any>(
 
 export default useFirestoreDocument;
 """,
-        "category": "firebase",
-        "subcategory": "firestore",
-        "tags": ["firestore", "read", "fetch", "document", "database", "query", "firebase", "react", "hook", "realtime"]
+        "category": 'firebase',
+        "subcategory": 'firestore',
+        "tags": ['firebase', 'firestore', 'read', 'fetch', 'document', 'database', 'query']
     },
     {
-        "problem": "A React hook to listen for real-time updates on a Firestore collection.",
+        "problem": """
+A React hook to listen for real-time updates on a Firestore collection.
+""",
         "solution": """
 import { useState, useEffect } from 'react';
 import { getFirestore, collection, onSnapshot, query, orderBy, where, limit, QueryConstraint } from 'firebase/firestore';
@@ -223,12 +229,14 @@ const useFirestoreCollection = <T = any>(
 
 export default useFirestoreCollection;
 """,
-        "category": "firebase",
-        "subcategory": "firestore",
-        "tags": ["firestore", "read", "collection", "query", "database", "firebase", "react", "hook", "realtime", "snapshot"]
+        "category": 'firebase',
+        "subcategory": 'firestore',
+        "tags": ['firebase', 'firestore', 'read', 'collection', 'query', 'database', 'react']
     },
     {
-        "problem": "A function to update an existing document in Firestore.",
+        "problem": """
+A function to update an existing document in Firestore.
+""",
         "solution": """
 import { getFirestore, doc, updateDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 
@@ -283,8 +291,274 @@ const batchUpdateDocuments = async (
 
 export { updateUserProfile, batchUpdateDocuments };
 """,
-        "category": "firebase",
-        "subcategory": "firestore",
-        "tags": ["firestore", "update", "modify", "document", "database", "crud", "firebase", "batch", "batch-write", "document-delete"]
+        "category": 'firebase',
+        "subcategory": 'firestore',
+        "tags": ['firebase', 'firestore', 'update', 'modify', 'document', 'database', 'crud']
+    },
+    {
+        "problem": """
+Secure Firebase Storage uploads with file validation, size limits, and malware scanning simulation.
+""",
+        "solution": """
+import { getStorage, ref, uploadBytesResumable, deleteObject } from 'firebase/storage';
+import { getAuth } from 'firebase/auth';
+import crypto from 'crypto';
+
+interface FileValidationOptions {
+  maxSizeMB?: number;
+  allowedTypes?: string[];
+  requireAuth?: boolean;
+  scanForMalware?: boolean;
+}
+
+interface ValidationResult {
+  isValid: boolean;
+  error?: string;
+}
+
+class SecureStorageService {
+  private storage = getStorage();
+  private auth = getAuth();
+
+  // File validation
+  private validateFile(file: File, options: FileValidationOptions): ValidationResult {
+    const {
+      maxSizeMB = 10,
+      allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'],
+      requireAuth = true,
+      scanForMalware = true
+    } = options;
+
+    // Check authentication
+    if (requireAuth && !this.auth.currentUser) {
+      return { isValid: false, error: 'User must be authenticated to upload files' };
+    }
+
+    // Check file size
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+    if (file.size > maxSizeBytes) {
+      return { isValid: false, error: `File size exceeds ${maxSizeMB}MB limit` };
+    }
+
+    // Check file type
+    if (!allowedTypes.includes(file.type)) {
+      return { isValid: false, error: `File type ${file.type} is not allowed` };
+    }
+
+    // Check file extension matches MIME type
+    const extension = file.name.split('.').pop()?.toLowerCase();
+    const expectedExtensions: { [key: string]: string[] } = {
+      'image/jpeg': ['jpg', 'jpeg'],
+      'image/png': ['png'],
+      'image/gif': ['gif'],
+      'application/pdf': ['pdf']
+    };
+
+    const validExtensions = expectedExtensions[file.type];
+    if (validExtensions && !validExtensions.includes(extension || '')) {
+      return { isValid: false, error: 'File extension does not match file type' };
+    }
+
+    // Check for suspicious file names
+    const suspiciousPatterns = [
+      /\.exe$/i,
+      /\.dll$/i,
+      /\.bat$/i,
+      /\.cmd$/i,
+      /\.scr$/i,
+      /\.vbs$/i,
+      /\.js$/i,
+      /\.jar$/i,
+      /\.zip$/i,
+      /\.rar$/i,
+      /<script/i,
+      /javascript:/i,
+      /on\w+=/i
+    ];
+
+    for (const pattern of suspiciousPatterns) {
+      if (pattern.test(file.name)) {
+        return { isValid: false, error: 'Suspicious filename detected' };
+      }
+    }
+
+    return { isValid: true };
+  }
+
+  // Simulate malware scanning (in production, use a real service like VirusTotal API)
+  private async scanForMalware(file: File): Promise<boolean> {
+    return new Promise((resolve) => {
+      // Read first few bytes to check for known malicious signatures
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const arr = new Uint8Array(reader.result as ArrayBuffer);
+
+        // Check for common malicious file signatures
+        const signatures = [
+          [0x4D, 0x5A], // EXE files
+          [0x7F, 0x45, 0x4C, 0x46], // ELF files
+          [0x50, 0x4B, 0x03, 0x04], // ZIP files (could contain malware)
+        ];
+
+        for (const signature of signatures) {
+          if (arr.length >= signature.length) {
+            let match = true;
+            for (let i = 0; i < signature.length; i++) {
+              if (arr[i] !== signature[i]) {
+                match = false;
+                break;
+              }
+            }
+            if (match) {
+              resolve(false); // Potentially malicious
+              return;
+            }
+          }
+        }
+
+        resolve(true); // Appears safe
+      };
+
+      // Read first 512 bytes
+      reader.readAsArrayBuffer(file.slice(0, 512));
+    });
+  }
+
+  // Generate secure file path
+  private generateSecurePath(userId: string, file: File): string {
+    const timestamp = Date.now();
+    const randomString = crypto.randomBytes(16).toString('hex');
+    const sanitizedFileName = file.name.replace(/[^a-z0-9.-]/gi, '_');
+    const extension = sanitizedFileName.split('.').pop();
+
+    // Structure: users/{userId}/uploads/{year}/{month}/{timestamp}_{random}.{ext}
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+
+    return `users/${userId}/uploads/${year}/${month}/${timestamp}_${randomString}.${extension}`;
+  }
+
+  // Secure upload with validation
+  async secureUpload(
+    file: File,
+    options: FileValidationOptions = {},
+    onProgress?: (progress: number) => void
+  ): Promise<{ url: string; path: string } | { error: string }> {
+    try {
+      // Validate file
+      const validation = this.validateFile(file, options);
+      if (!validation.isValid) {
+        return { error: validation.error! };
+      }
+
+      // Scan for malware if enabled
+      if (options.scanForMalware !== false) {
+        const isSafe = await this.scanForMalware(file);
+        if (!isSafe) {
+          console.error('Malware detected in file:', file.name);
+          return { error: 'File failed security scan' };
+        }
+      }
+
+      const user = this.auth.currentUser;
+      if (!user) {
+        return { error: 'User not authenticated' };
+      }
+
+      // Generate secure path
+      const path = this.generateSecurePath(user.uid, file);
+      const storageRef = ref(this.storage, path);
+
+      // Create metadata with security context
+      const metadata = {
+        contentType: file.type,
+        customMetadata: {
+          uploadedBy: user.uid,
+          uploadedAt: new Date().toISOString(),
+          originalName: file.name,
+          fileSize: String(file.size),
+          validated: 'true',
+          scanned: options.scanForMalware !== false ? 'true' : 'false'
+        },
+        // Set cache control for security
+        cacheControl: 'private, max-age=3600',
+        // Add content disposition to prevent XSS via file uploads
+        contentDisposition: 'attachment'
+      };
+
+      // Upload with resumable upload for reliability
+      const uploadTask = uploadBytesResumable(storageRef, file, metadata);
+
+      return new Promise((resolve, reject) => {
+        uploadTask.on(
+          'state_changed',
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            onProgress?.(progress);
+          },
+          (error) => {
+            console.error('Upload error:', error);
+            reject({ error: 'Upload failed: ' + error.message });
+          },
+          async () => {
+            try {
+              const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+
+              // Log successful upload for audit
+              console.log('Secure upload completed:', {
+                userId: user.uid,
+                path,
+                timestamp: new Date().toISOString()
+              });
+
+              resolve({ url: downloadURL, path });
+            } catch (error) {
+              reject({ error: 'Failed to get download URL' });
+            }
+          }
+        );
+      });
+    } catch (error: any) {
+      console.error('Secure upload error:', error);
+      return { error: error.message || 'Upload failed' };
+    }
+  }
+
+  // Secure file deletion with ownership check
+  async secureDelete(path: string): Promise<boolean> {
+    try {
+      const user = this.auth.currentUser;
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Verify the file belongs to the current user
+      if (!path.startsWith(`users/${user.uid}/`)) {
+        throw new Error('Unauthorized: Cannot delete files from other users');
+      }
+
+      const storageRef = ref(this.storage, path);
+      await deleteObject(storageRef);
+
+      console.log('File securely deleted:', {
+        userId: user.uid,
+        path,
+        timestamp: new Date().toISOString()
+      });
+
+      return true;
+    } catch (error: any) {
+      console.error('Secure delete error:', error);
+      return false;
+    }
+  }
+}
+
+export const secureStorage = new SecureStorageService();
+""",
+        "category": 'firebase',
+        "subcategory": 'firestore',
+        "tags": ['api', 'async', 'auth', 'authentication', 'event', 'firebase', 'firestore']
     }
 ]

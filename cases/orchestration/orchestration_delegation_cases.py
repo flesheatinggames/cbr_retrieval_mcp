@@ -5,7 +5,9 @@ Examples: Multi-agent coordination, task delegation, workflow handoffs
 
 ORCHESTRATION_DELEGATION_CASES = [
     {
-        "problem": "How should I delegate the refactoring of the PaymentProcessor service to use the new StripeClient instead of the legacy BraintreeClient across multiple specialized agents?",
+        "problem": """
+How should I delegate the refactoring of the PaymentProcessor service to use the new StripeClient instead of the legacy BraintreeClient across multiple specialized agents?
+""",
         "solution": """
 <sequential-thinking>
 The user wants to refactor a service. This involves changing implementation details while ensuring behavior remains the same. A Test-Driven Development (TDD) approach is safest.
@@ -61,19 +63,8 @@ This translates to 5 delegation steps.
 
 Do you approve this plan?
 """,
-        "category": "orchestration",
-        "subcategory": "delegation",
-        "tags": [
-            "delegation",
-            "multi-agent",
-            "coordination",
-            "workflow",
-            "task-assignment",
-            "orchestration",
-            "tdd",
-            "refactoring",
-            "agent-handoff",
-            "verification"
-        ]
+        "category": 'orchestration',
+        "subcategory": 'delegation',
+        "tags": ['orchestration', 'delegation', 'multi-agent', 'coordination', 'workflow', 'task-assignment', 'tdd']
     }
 ]

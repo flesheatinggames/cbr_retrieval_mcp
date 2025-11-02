@@ -15,7 +15,9 @@ security vulnerabilities while providing good user experience.
 
 WEBDEV_ERROR_HANDLING_CASES = [
     {
-        "problem": "Implement secure error handling and logging that doesn't expose sensitive information in production.",
+        "problem": """
+Implement secure error handling and logging that doesn't expose sensitive information in production.
+""",
         "solution": """
 // lib/secure-logger.ts
 import winston from 'winston';
@@ -54,19 +56,19 @@ class SecureLogger {
     // Define sensitive data patterns to redact
     this.sensitivePatterns = [
       // API Keys and tokens
-      { pattern: /\b([A-Za-z0-9_\-]{20,})\b/g, replacement: '[REDACTED_TOKEN]' },
-      { pattern: /(api[_-]?key|apikey|api_secret)([\"']?\s*[:=]\s*[\"']?)([^\"'\s]+)/gi, replacement: '$1$2[REDACTED_API_KEY]' },
+      { pattern: /([A-Za-z0-9_\-]{20,})/g, replacement: '[REDACTED_TOKEN]' },
+      { pattern: /(api[_-]?key|apikey|api_secret)(["']?\s*[:=]\s*["']?)([^"'\s]+)/gi, replacement: '$1$2[REDACTED_API_KEY]' },
       { pattern: /(bearer|token|jwt)[\s:]+([^\s]+)/gi, replacement: '$1 [REDACTED_TOKEN]' },
 
       // Passwords
-      { pattern: /(password|passwd|pwd)([\"']?\s*[:=]\s*[\"']?)([^\"'\s]+)/gi, replacement: '$1$2[REDACTED_PASSWORD]' },
+      { pattern: /(password|passwd|pwd)(["']?\s*[:=]\s*["']?)([^"'\s]+)/gi, replacement: '$1$2[REDACTED_PASSWORD]' },
 
       // Credit cards
-      { pattern: /\b\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/g, replacement: '[REDACTED_CARD]' },
-      { pattern: /\b\d{3,4}\b/g, replacement: '[CVV]' },
+      { pattern: /\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}/g, replacement: '[REDACTED_CARD]' },
+      { pattern: /\d{3,4}/g, replacement: '[CVV]' },
 
       // Social Security Numbers
-      { pattern: /\b\d{3}-\d{2}-\d{4}\b/g, replacement: '[REDACTED_SSN]' },
+      { pattern: /\d{3}-\d{2}-\d{4}/g, replacement: '[REDACTED_SSN]' },
 
       // Email addresses (partial redaction)
       { pattern: /([a-zA-Z0-9._%+-]+)@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g, replacement: (match, user, domain) => {
@@ -75,10 +77,10 @@ class SecureLogger {
       }},
 
       // Phone numbers
-      { pattern: /\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, replacement: '[REDACTED_PHONE]' },
+      { pattern: /\d{3}[-.]?\d{3}[-.]?\d{4}/g, replacement: '[REDACTED_PHONE]' },
 
       // IP addresses (partial redaction)
-      { pattern: /\b(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})\b/g, replacement: '$1.$2.XXX.XXX' },
+      { pattern: /(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/g, replacement: '$1.$2.XXX.XXX' },
 
       // Firebase keys
       { pattern: /(AIza[0-9A-Za-z_-]{35})/g, replacement: '[REDACTED_FIREBASE_KEY]' },
@@ -520,12 +522,14 @@ export class ErrorBoundary extends React.Component<
   }
 }
 """,
-        "category": "webdev",
-        "subcategory": "error-handling",
-        "tags": ["errors", "logging", "winston", "sentry", "boundaries", "react", "security", "monitoring", "exception-handling"]
+        "category": 'webdev',
+        "subcategory": 'error-handling',
+        "tags": ['errors', 'logging', 'winston', 'sentry', 'boundaries', 'react', 'security']
     },
     {
-        "problem": "Implement React error boundaries for graceful error handling and recovery in component trees.",
+        "problem": """
+Implement React error boundaries for graceful error handling and recovery in component trees.
+""",
         "solution": """
 // components/ErrorBoundary.tsx
 import React from 'react';
@@ -733,12 +737,14 @@ export const AsyncErrorBoundary: React.FC<{
   );
 };
 """,
-        "category": "webdev",
-        "subcategory": "error-handling",
-        "tags": ["react", "error-boundaries", "componentDidCatch", "error-recovery", "fallback", "error-ui", "errors"]
+        "category": 'webdev',
+        "subcategory": 'error-handling',
+        "tags": ['react', 'error-boundaries', 'componentdidcatch', 'error-recovery', 'fallback', 'error-ui', 'errors']
     },
     {
-        "problem": "Implement user-friendly error notifications and recovery UI with toast messages and fallback states.",
+        "problem": """
+Implement user-friendly error notifications and recovery UI with toast messages and fallback states.
+""",
         "solution": """
 // components/ToastNotification.tsx
 import React, { createContext, useContext, useState, useCallback } from 'react';
@@ -1016,8 +1022,8 @@ const ExamplePage = () => {
   );
 };
 """,
-        "category": "webdev",
-        "subcategory": "error-handling",
-        "tags": ["error-notifications", "toast", "recovery", "user-feedback", "error-messages", "ui", "alerts", "errors"]
+        "category": 'webdev',
+        "subcategory": 'error-handling',
+        "tags": ['error-notifications', 'toast', 'recovery', 'user-feedback', 'error-messages', 'ui', 'alerts']
     }
 ]

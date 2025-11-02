@@ -1,12 +1,10 @@
 
 
 RUST_ACTIX_CASES = [
-    
-    # ============================================
-    # ACTIX-WEB FRAMEWORK
-    # ============================================
     {
-        "problem": "An Actix-web application with middleware, state management, WebSockets, and SSE support.",
+        "problem": """
+An Actix-web application with middleware, state management, WebSockets, and SSE support.
+""",
         "solution": """
 use actix_web::{
     get, post, web, App, Error, HttpRequest, HttpResponse, HttpServer, Responder,
@@ -242,7 +240,9 @@ async fn events() -> impl Responder {
 
     let stream = stream::unfold(0, |state| async move {
         tokio::time::sleep(Duration::from_secs(1)).await;
-        let message = format!("data: {{\"count\": {}, \"timestamp\": \"{}\"}}\n\n", 
+        let message = format!("data: {{"count": {}, "timestamp": "{}"}}
+
+", 
             state, 
             chrono::Utc::now().to_rfc3339()
         );
@@ -361,6 +361,9 @@ async fn main() -> std::io::Result<()> {
     .run()
     .await
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'actix',
+        "tags": ['actix', 'api', 'async', 'database', 'event', 'form', 'handler']
     }
 ]

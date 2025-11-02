@@ -11,11 +11,13 @@ Cases:
 
 WEBDEV_TESTING_CASES = [
     {
-        "problem": "Write Jest unit tests for a utility function that validates email addresses and handles edge cases.",
+        "problem": """
+Write Jest unit tests for a utility function that validates email addresses and handles edge cases.
+""",
         "solution": """
 // utils/validation.ts
 export const validateEmail = (email: string): boolean => {
-  const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
 
@@ -115,13 +117,15 @@ describe('validatePassword', () => {
     expect(result.errors).toContain('Password must contain at least one number');
   });
 });
-        """,
-        "category": "webdev",
-        "subcategory": "testing",
-        "tags": ["jest", "unit-tests", "testing", "validation", "mocking", "assertions", "typescript"]
+""",
+        "category": 'webdev',
+        "subcategory": 'testing',
+        "tags": ['jest', 'unit-tests', 'testing', 'validation', 'mocking', 'assertions', 'typescript']
     },
     {
-        "problem": "Write React Testing Library tests for a login form component with user interactions and async validation.",
+        "problem": """
+Write React Testing Library tests for a login form component with user interactions and async validation.
+""",
         "solution": """
 // components/LoginForm.tsx
 import React, { useState } from 'react';
@@ -320,9 +324,9 @@ describe('LoginForm', () => {
     });
   });
 });
-        """,
-        "category": "webdev",
-        "subcategory": "testing",
-        "tags": ["testing-library", "react", "jest", "unit-tests", "component-testing", "user-interaction", "async", "mocking", "fireEvent", "waitFor"]
+""",
+        "category": 'webdev',
+        "subcategory": 'testing',
+        "tags": ['testing-library', 'react', 'jest', 'unit-tests', 'component-testing', 'user-interaction', 'async']
     }
 ]

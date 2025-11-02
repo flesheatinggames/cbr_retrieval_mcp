@@ -1,11 +1,9 @@
 
 RUST_WEBSOCKETS_CASES = [
-    
-    # ============================================
-    # TOKIO-TUNGSTENITE WEBSOCKETS
-    # ============================================
     {
-        "problem": "A WebSocket client and server implementation using tokio-tungstenite with message routing and reconnection logic.",
+        "problem": """
+A WebSocket client and server implementation using tokio-tungstenite with message routing and reconnection logic.
+""",
         "solution": """
 use tokio_tungstenite::{
     connect_async, tungstenite::protocol::Message, MaybeTlsStream, WebSocketStream,
@@ -412,7 +410,9 @@ async fn main() -> anyhow::Result<()> {
 
     Ok(())
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'websockets',
+        "tags": ['async', 'auth', 'error-handling', 'handler', 'json', 'listener', 'orm']
     }
-
 ]

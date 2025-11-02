@@ -1,11 +1,9 @@
 
 RUST_REQWEST_CASES = [
-    
-    # ============================================
-    # REQWEST HTTP CLIENT
-    # ============================================
     {
-        "problem": "A comprehensive HTTP client with retry logic, timeout handling, and structured error management using reqwest.",
+        "problem": """
+A comprehensive HTTP client with retry logic, timeout handling, and structured error management using reqwest.
+""",
         "solution": """
 use reqwest::{Client, ClientBuilder, StatusCode};
 use serde::{Deserialize, Serialize};
@@ -355,7 +353,9 @@ async fn main() -> anyhow::Result<()> {
 
     Ok(())
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'reqwest',
+        "tags": ['api', 'async', 'auth', 'authorization', 'concurrency', 'form', 'http']
     }
-
 ]

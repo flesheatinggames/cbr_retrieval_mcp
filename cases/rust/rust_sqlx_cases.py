@@ -1,11 +1,9 @@
 
 RUST_SQLX_CASES = [
-    
-    # ============================================
-    # SQLX DATABASE
-    # ============================================
     {
-        "problem": "A complete SQLx repository pattern with transactions, complex queries, and connection pooling.",
+        "problem": """
+A complete SQLx repository pattern with transactions, complex queries, and connection pooling.
+""",
         "solution": """
 use sqlx::{PgPool, Postgres, Transaction, postgres::PgPoolOptions, FromRow};
 use chrono::{DateTime, Utc};
@@ -433,7 +431,9 @@ pub async fn create_pool(database_url: &str) -> anyhow::Result<PgPool> {
 
     Ok(pool)
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'sqlx',
+        "tags": ['async', 'database', 'form', 'hashing', 'migration', 'orm', 'query']
     }
-
 ]

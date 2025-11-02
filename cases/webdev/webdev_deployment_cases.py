@@ -12,7 +12,9 @@ Examples:
 
 WEBDEV_DEPLOYMENT_CASES = [
     {
-        "problem": "Configure Vercel deployment with custom build settings, environment variables, and routing rules for a Next.js application.",
+        "problem": """
+Configure Vercel deployment with custom build settings, environment variables, and routing rules for a Next.js application.
+""",
         "solution": """
 // vercel.json - Vercel deployment configuration
 {
@@ -174,7 +176,7 @@ SESSION_SECRET=your-session-secret
 
 # Firebase
 FIREBASE_PROJECT_ID=your-project
-FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----"
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"
 FIREBASE_CLIENT_EMAIL=firebase-adminsdk@project.iam.gserviceaccount.com
 
 # API Keys (stored as Vercel secrets)
@@ -217,12 +219,14 @@ fi
 
 echo "✅ Deployment complete!"
 """,
-        "category": "webdev",
-        "subcategory": "deployment",
-        "tags": ["vercel", "deployment", "nextjs", "production", "config", "build", "environment", "ci-cd", "hosting"]
+        "category": 'webdev',
+        "subcategory": 'deployment',
+        "tags": ['deployment', 'vercel', 'nextjs', 'production', 'config', 'build', 'environment']
     },
     {
-        "problem": "Implement secure API key management and environment variable validation for production deployments.",
+        "problem": """
+Implement secure API key management and environment variable validation for production deployments.
+""",
         "solution": """
 // lib/config-validator.ts
 import { z } from 'zod';
@@ -445,7 +449,7 @@ export class ConfigValidator {
 
     if (errors.length > 0) {
       this.validationErrors.push(...errors);
-      throw new Error('Custom validation failed:\\n' + errors.join('\\n'));
+      throw new Error('Custom validation failed:\n' + errors.join('\n'));
     }
   }
 
@@ -495,7 +499,7 @@ export function generateEnvExample(): void {
     // Firebase Admin
     FIREBASE_PROJECT_ID: 'your-project-id',
     FIREBASE_CLIENT_EMAIL: 'firebase-adminsdk@your-project.iam.gserviceaccount.com',
-    FIREBASE_PRIVATE_KEY: '-----BEGIN PRIVATE KEY-----\\nYOUR_PRIVATE_KEY\\n-----END PRIVATE KEY-----',
+    FIREBASE_PRIVATE_KEY: '-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY\n-----END PRIVATE KEY-----',
 
     // Firebase Client
     NEXT_PUBLIC_FIREBASE_API_KEY: 'your-api-key',
@@ -525,9 +529,9 @@ export function generateEnvExample(): void {
 
   const content = Object.entries(examples)
     .map(([key, value]) => `${key}="${value}"`)
-    .join('\\n');
+    .join('\n');
 
-  console.log('# Environment Variables Example\\n');
+  console.log('# Environment Variables Example\n');
   console.log(content);
 }
 
@@ -548,8 +552,8 @@ const apiKey = config.getApiKey('stripe');
 const isProduction = config.isProduction();
 const allowedOrigins = config.get('ALLOWED_ORIGINS');
 """,
-        "category": "webdev",
-        "subcategory": "deployment",
-        "tags": ["environment", "env", "config", "validation", "production", "api-keys", "secrets", "zod", "typescript", "deployment"]
+        "category": 'webdev',
+        "subcategory": 'deployment',
+        "tags": ['deployment', 'environment', 'env', 'config', 'validation', 'production', 'api-keys']
     }
 ]

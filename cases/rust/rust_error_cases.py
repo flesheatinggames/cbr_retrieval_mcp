@@ -1,12 +1,10 @@
 
 
 RUST_ERROR_CASES = [
-    
-    # ============================================
-    # ANYHOW/THISERROR ERROR HANDLING
-    # ============================================
     {
-        "problem": "Comprehensive error handling system using thiserror for library errors and anyhow for application errors with context.",
+        "problem": """
+Comprehensive error handling system using thiserror for library errors and anyhow for application errors with context.
+""",
         "solution": """
 use thiserror::Error;
 use anyhow::{Context, Result as AnyhowResult, bail, ensure};
@@ -496,6 +494,9 @@ struct CreateUserRequest {
     email: String,
     name: String,
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'error',
+        "tags": ['api', 'async', 'auth', 'authentication', 'axum', 'database', 'error']
     }
 ]

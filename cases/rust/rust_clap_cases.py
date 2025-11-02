@@ -1,11 +1,9 @@
 
 RUST_CLAP_CASES = [
-    
-    # ============================================
-    # CLAP CLI PARSING
-    # ============================================
     {
-        "problem": "A CLI application using clap with subcommands, arguments, environment variables, and configuration file support.",
+        "problem": """
+A CLI application using clap with subcommands, arguments, environment variables, and configuration file support.
+""",
         "solution": """
 use clap::{Parser, Subcommand, Args, ValueEnum};
 use serde::{Deserialize, Serialize};
@@ -517,7 +515,9 @@ async fn main() -> Result<()> {
     let app = App::new(cli)?;
     app.run().await
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'clap',
+        "tags": ['api', 'async', 'auth', 'authentication', 'caching', 'clap', 'csv']
     }
-
 ]

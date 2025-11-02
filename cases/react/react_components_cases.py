@@ -8,7 +8,9 @@ data display patterns.
 
 REACT_COMPONENTS_CASES = [
     {
-        "problem": "A responsive navigation bar in a React component using react-bootstrap.",
+        "problem": """
+A responsive navigation bar in a React component using react-bootstrap.
+""",
         "solution": """
 import { Navbar, Nav, Container, NavDropdown, Button } from 'react-bootstrap';
 import Link from 'next/link';
@@ -108,12 +110,14 @@ const AppNavbar = () => {
 
 export default AppNavbar;
 """,
-        "category": "react",
-        "subcategory": "components",
-        "tags": ["react", "component", "bootstrap", "navbar", "navigation", "responsive", "ui"]
+        "category": 'react',
+        "subcategory": 'components',
+        "tags": ['react', 'component', 'bootstrap', 'navbar', 'navigation', 'responsive', 'ui']
     },
     {
-        "problem": "A React component that displays a Bootstrap modal dialog.",
+        "problem": """
+A React component that displays a Bootstrap modal dialog.
+""",
         "solution": """
 import { useState } from 'react';
 import { Button, Modal, Form } from 'react-bootstrap';
@@ -187,12 +191,14 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
 export default ConfirmationModal;
 """,
-        "category": "react",
-        "subcategory": "components",
-        "tags": ["react", "component", "bootstrap", "modal", "dialog", "ui", "useState"]
+        "category": 'react',
+        "subcategory": 'components',
+        "tags": ['react', 'component', 'bootstrap', 'modal', 'dialog', 'ui', 'usestate']
     },
     {
-        "problem": "A Bootstrap-styled form with validation feedback in React.",
+        "problem": """
+A Bootstrap-styled form with validation feedback in React.
+""",
         "solution": """
 import { useState } from 'react';
 import { Form, Button, Col, Row, Alert } from 'react-bootstrap';
@@ -332,12 +338,14 @@ const ValidatedForm = () => {
 
 export default ValidatedForm;
 """,
-        "category": "react",
-        "subcategory": "components",
-        "tags": ["react", "component", "bootstrap", "form", "validation", "input", "feedback", "useState"]
+        "category": 'react',
+        "subcategory": 'components',
+        "tags": ['react', 'component', 'bootstrap', 'form', 'validation', 'input', 'feedback']
     },
     {
-        "problem": "A React component that displays data in a responsive Bootstrap grid.",
+        "problem": """
+A React component that displays data in a responsive Bootstrap grid.
+""",
         "solution": """
 import { Container, Row, Col, Card, Badge, Button } from 'react-bootstrap';
 
@@ -435,12 +443,14 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, onAddToCart }) => {
 
 export default ProductGrid;
 """,
-        "category": "react",
-        "subcategory": "components",
-        "tags": ["react", "component", "bootstrap", "grid", "layout", "card", "responsive", "display data"]
+        "category": 'react',
+        "subcategory": 'components',
+        "tags": ['react', 'component', 'bootstrap', 'grid', 'layout', 'card', 'responsive']
     },
     {
-        "problem": "A React component that fetches a list of items from Firestore and displays them as Bootstrap Cards.",
+        "problem": """
+A React component that fetches a list of items from Firestore and displays them as Bootstrap Cards.
+""",
         "solution": """
 import { Card, Container, Row, Col, Spinner, Alert, Button, Badge } from 'react-bootstrap';
 import useFirestoreCollection from '../hooks/useFirestoreCollection';
@@ -552,12 +562,14 @@ const ItemList = () => {
 
 export default ItemList;
 """,
-        "category": "react",
-        "subcategory": "components",
-        "tags": ["react", "component", "bootstrap", "firestore", "list", "display", "fetch", "data", "card"]
+        "category": 'react',
+        "subcategory": 'components',
+        "tags": ['react', 'component', 'bootstrap', 'firestore', 'list', 'display', 'fetch']
     },
     {
-        "problem": "A React component with a button that triggers a Firebase Cloud Function when clicked.",
+        "problem": """
+A React component with a button that triggers a Firebase Cloud Function when clicked.
+""",
         "solution": """
 import { useState } from 'react';
 import { getFunctions, httpsCallable } from 'firebase/functions';
@@ -683,8 +695,133 @@ const CloudFunctionButton = () => {
 
 export default CloudFunctionButton;
 """,
-        "category": "react",
-        "subcategory": "components",
-        "tags": ["react", "component", "bootstrap", "button", "click", "trigger", "action", "cloud function", "firebase"]
+        "category": 'react',
+        "subcategory": 'components',
+        "tags": ['react', 'component', 'bootstrap', 'button', 'click', 'trigger', 'action']
+    },
+    {
+        "problem": """
+A higher-order component (HOC) in React to protect routes based on Firebase auth state.
+""",
+        "solution": """
+import { useRouter } from 'next/router';
+import { useAuth } from '../hooks/useAuth';
+import { Container, Spinner, Alert } from 'react-bootstrap';
+import { useEffect, ComponentType, useState } from 'react';
+
+interface WithAuthOptions {
+  redirectTo?: string;
+  requireEmailVerification?: boolean;
+  allowedRoles?: string[];
+  LoadingComponent?: ComponentType;
+  UnauthorizedComponent?: ComponentType;
+}
+
+function withAuth<P extends object>(
+  WrappedComponent: ComponentType<P>,
+  options: WithAuthOptions = {}
+) {
+  const {
+    redirectTo = '/login',
+    requireEmailVerification = false,
+    allowedRoles = [],
+    LoadingComponent,
+    UnauthorizedComponent
+  } = options;
+
+  const WithAuthComponent = (props: P) => {
+    const router = useRouter();
+    const { user, loading } = useAuth();
+    const [isAuthorized, setIsAuthorized] = useState(false);
+
+    useEffect(() => {
+      const checkAuth = async () => {
+        if (loading) return;
+
+        if (!user) {
+          const currentPath = router.asPath;
+          sessionStorage.setItem('redirectAfterLogin', currentPath);
+          router.replace(redirectTo);
+          return;
+        }
+
+        if (requireEmailVerification && !user.emailVerified) {
+          router.replace('/verify-email');
+          return;
+        }
+
+        if (allowedRoles.length > 0) {
+          try {
+            const idTokenResult = await user.getIdTokenResult();
+            const userRole = idTokenResult.claims.role || 'user';
+
+            if (!allowedRoles.includes(userRole)) {
+              setIsAuthorized(false);
+              return;
+            }
+          } catch (error) {
+            console.error('Error checking user role:', error);
+            setIsAuthorized(false);
+            return;
+          }
+        }
+
+        setIsAuthorized(true);
+      };
+
+      checkAuth();
+    }, [user, loading, router]);
+
+    if (loading) {
+      if (LoadingComponent) {
+        return <LoadingComponent />;
+      }
+      return (
+        <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh' }}>
+          <Spinner animation="border" />
+        </Container>
+      );
+    }
+
+    if (!user) {
+      return null;
+    }
+
+    if (requireEmailVerification && !user.emailVerified) {
+      return (
+        <Container className="py-5">
+          <Alert variant="warning">
+            Please verify your email address to access this page.
+          </Alert>
+        </Container>
+      );
+    }
+
+    if (allowedRoles.length > 0 && !isAuthorized) {
+      if (UnauthorizedComponent) {
+        return <UnauthorizedComponent />;
+      }
+      return (
+        <Container className="py-5">
+          <Alert variant="danger">
+            You don't have permission to access this page.
+          </Alert>
+        </Container>
+      );
+    }
+
+    return <WrappedComponent {...props} />;
+  };
+
+  WithAuthComponent.displayName = `withAuth(${WrappedComponent.displayName || WrappedComponent.name || 'Component'})`;
+
+  return WithAuthComponent;
+}
+
+export default withAuth;
+""",
+        "category": 'react',
+        "subcategory": 'components',
+        "tags": ['async', 'auth', 'bootstrap', 'components', 'firebase', 'hooks', 'react']
     }
 ]

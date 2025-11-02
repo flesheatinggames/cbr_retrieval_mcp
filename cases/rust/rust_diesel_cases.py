@@ -1,12 +1,10 @@
 
 
 RUST_DIESEL_CASES = [
-    
-    # ============================================
-    # DIESEL ORM
-    # ============================================
     {
-        "problem": "A Diesel ORM setup with migrations, complex queries, transactions, and connection pooling.",
+        "problem": """
+A Diesel ORM setup with migrations, complex queries, transactions, and connection pooling.
+""",
         "solution": """
 use diesel::prelude::*;
 use diesel::r2d2::{self, ConnectionManager, Pool};
@@ -429,7 +427,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'diesel',
+        "tags": ['auth', 'database', 'diesel', 'filter', 'form', 'hashing', 'migration']
     }
-
 ]

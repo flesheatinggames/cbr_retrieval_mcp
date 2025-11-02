@@ -1,11 +1,14 @@
+"""
+    },
+    {
+        "problem": "An Axum REST API with CRUD operations, pagination, and input validation using validator crate.",
+        "solution": """
 
 RUST_AXUM_CASES = [
-    
-    # ============================================
-    # AXUM WEB FRAMEWORK
-    # ============================================
     {
-        "problem": "An Axum web server with authentication middleware, error handling, and database connection pooling.",
+        "problem": """
+An Axum web server with authentication middleware, error handling, and database connection pooling.
+""",
         "solution": """
 use axum::{
     async_trait,
@@ -311,10 +314,15 @@ async fn main() -> anyhow::Result<()> {
 
     Ok(())
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'axum',
+        "tags": ['api', 'async', 'auth', 'authentication', 'authorization', 'axum', 'database']
     },
     {
-        "problem": "An Axum REST API with CRUD operations, pagination, and input validation using validator crate.",
+        "problem": """
+An Axum REST API with CRUD operations, pagination, and input validation using validator crate.
+""",
         "solution": """
 use axum::{
     extract::{Path, Query, State},
@@ -600,7 +608,9 @@ pub fn articles_router() -> Router<PgPool> {
         .route("/articles", post(create_article).get(get_articles))
         .route("/articles/:id", get(get_article).put(update_article).delete(delete_article))
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'axum',
+        "tags": ['api', 'async', 'auth', 'axum', 'crud', 'database', 'error-handling']
     }
-
 ]

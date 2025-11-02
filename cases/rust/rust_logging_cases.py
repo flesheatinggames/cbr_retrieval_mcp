@@ -1,11 +1,9 @@
 
 RUST_LOGGING_CASES = [
-    
-    # ============================================
-    # TRACING/LOGGING
-    # ============================================
     {
-        "problem": "A structured logging system using tracing with multiple layers, filtering, and custom formatting.",
+        "problem": """
+A structured logging system using tracing with multiple layers, filtering, and custom formatting.
+""",
         "solution": """
 use tracing::{debug, error, info, instrument, span, trace, warn, Level};
 use tracing_subscriber::{
@@ -235,7 +233,9 @@ async fn main() -> anyhow::Result<()> {
 
     Ok(())
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'logging',
+        "tags": ['api', 'async', 'auth', 'authentication', 'database', 'event', 'filter']
     }
-
 ]

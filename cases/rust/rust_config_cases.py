@@ -1,11 +1,9 @@
 
 RUST_CONFIG_CASES = [
-    
-    # ============================================
-    # CONFIG FILE HANDLING
-    # ============================================
     {
-        "problem": "Configuration management with multiple formats (TOML, YAML, JSON) and environment variable overrides.",
+        "problem": """
+Configuration management with multiple formats (TOML, YAML, JSON) and environment variable overrides.
+""",
         "solution": """
 use config::{Config, ConfigError, Environment, File, FileFormat};
 use serde::{Deserialize, Serialize};
@@ -276,7 +274,9 @@ fn main() -> anyhow::Result<()> {
 
     Ok(())
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'config',
+        "tags": ['auth', 'authentication', 'caching', 'config', 'database', 'event', 'form']
     }
-
 ]

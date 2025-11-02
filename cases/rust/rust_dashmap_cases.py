@@ -1,11 +1,9 @@
 
 RUST_DASHMAP_CASES = [
-    
-    # ============================================
-    # DASHMAP CONCURRENT HASHMAP
-    # ============================================
     {
-        "problem": "High-performance concurrent HashMap using DashMap for lock-free operations.",
+        "problem": """
+High-performance concurrent HashMap using DashMap for lock-free operations.
+""",
         "solution": """
 use dashmap::{DashMap, DashSet};
 use std::sync::Arc;
@@ -311,7 +309,9 @@ fn main() {
     
     println!("Unique visitors: {}", visitors.count());
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'dashmap',
+        "tags": ['dashmap', 'form', 'json', 'orm', 'performance', 'request', 'rust']
     }
-
 ]

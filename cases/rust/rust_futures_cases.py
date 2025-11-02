@@ -1,11 +1,9 @@
 
 RUST_FUTURES_CASES = [
-    
-    # ============================================
-    # FUTURES AND ASYNC STREAMS
-    # ============================================
     {
-        "problem": "Advanced async programming with futures, streams, and combinators.",
+        "problem": """
+Advanced async programming with futures, streams, and combinators.
+""",
         "solution": """
 use futures::{
     future::{BoxFuture, FutureExt, join_all, try_join_all, select, Either},
@@ -329,7 +327,9 @@ async fn main() {
         Err(e) => println!("Workflow error: {}", e),
     }
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'futures',
+        "tags": ['async', 'form', 'futures', 'orm', 'rust', 'tokio']
     }
-
 ]

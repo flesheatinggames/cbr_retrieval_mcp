@@ -1,11 +1,9 @@
 
 RUST_PARKINGLOT_CASES = [
-    
-    # ============================================
-    # PARKING_LOT HIGH-PERFORMANCE LOCKS
-    # ============================================
     {
-        "problem": "High-performance synchronization primitives using parking_lot for better performance than std::sync.",
+        "problem": """
+High-performance synchronization primitives using parking_lot for better performance than std::sync.
+""",
         "solution": """
 use parking_lot::{Mutex, RwLock, Condvar, Once, OnceState};
 use std::sync::Arc;
@@ -336,12 +334,14 @@ fn main() {
     log.log("Processing data");
     log.log("Operation completed");
     
-    println!("\\nRecent events:");
+    println!("\nRecent events:");
     for (timestamp, message) in log.get_recent(3) {
         println!("  [{}] {}", timestamp.format("%H:%M:%S"), message);
     }
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'parkinglot',
+        "tags": ['event', 'form', 'orm', 'parkinglot', 'performance', 'rust', 'ui']
     }
-
 ]

@@ -8,7 +8,9 @@ authentication state handling.
 
 FIREBASE_AUTH_CASES = [
     {
-        "problem": "A React component for user sign-up with Firebase Authentication.",
+        "problem": """
+A React component for user sign-up with Firebase Authentication.
+""",
         "solution": """
 import React, { useState } from 'react';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
@@ -194,12 +196,14 @@ const SignUpForm: React.FC = () => {
 
 export default SignUpForm;
 """,
-        "category": "firebase",
-        "subcategory": "auth",
-        "tags": ["authentication", "firebase", "react", "signup", "user", "form-validation", "email-validation", "password-reset"]
+        "category": 'firebase',
+        "subcategory": 'auth',
+        "tags": ['firebase', 'authentication', 'react', 'signup', 'user', 'form-validation', 'email-validation']
     },
     {
-        "problem": "A React hook to get the current Firebase authentication user state in real-time.",
+        "problem": """
+A React hook to get the current Firebase authentication user state in real-time.
+""",
         "solution": """
 import { useState, useEffect } from 'react';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
@@ -230,12 +234,14 @@ export const useAuth = () => {
   return { user, loading, error };
 };
 """,
-        "category": "firebase",
-        "subcategory": "auth",
-        "tags": ["authentication", "firebase", "react", "hook", "auth-state", "session", "user", "realtime"]
+        "category": 'firebase',
+        "subcategory": 'auth',
+        "tags": ['firebase', 'authentication', 'react', 'hook', 'auth-state', 'session', 'user']
     },
     {
-        "problem": "A function to sign in a user with Google using Firebase Authentication popup.",
+        "problem": """
+A function to sign in a user with Google using Firebase Authentication popup.
+""",
         "solution": """
 import { getAuth, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
@@ -272,12 +278,14 @@ const signInWithGoogle = async () => {
 
 export default signInWithGoogle;
 """,
-        "category": "firebase",
-        "subcategory": "auth",
-        "tags": ["authentication", "firebase", "google", "signin", "oauth", "popup", "user", "token"]
+        "category": 'firebase',
+        "subcategory": 'auth',
+        "tags": ['firebase', 'authentication', 'google', 'signin', 'oauth', 'popup', 'user']
     },
     {
-        "problem": "A function to sign out the current user from Firebase.",
+        "problem": """
+A function to sign out the current user from Firebase.
+""",
         "solution": """
 import { getAuth, signOut } from 'firebase/auth';
 
@@ -300,12 +308,14 @@ const handleSignOut = async () => {
 
 export default handleSignOut;
 """,
-        "category": "firebase",
-        "subcategory": "auth",
-        "tags": ["authentication", "firebase", "signout", "session", "user"]
+        "category": 'firebase',
+        "subcategory": 'auth',
+        "tags": ['authentication', 'firebase', 'signout', 'session', 'user']
     },
     {
-        "problem": "Implement secure session management with JWT tokens and refresh token rotation for Firebase Auth.",
+        "problem": """
+Implement secure session management with JWT tokens and refresh token rotation for Firebase Auth.
+""",
         "solution": """
 // lib/secure-session.ts
 import { SignJWT, jwtVerify, JWTPayload } from 'jose';
@@ -654,8 +664,8 @@ export class SecureSessionManager {
 
 export const sessionManager = new SecureSessionManager();
 """,
-        "category": "firebase",
-        "subcategory": "auth",
-        "tags": ["authentication", "firebase", "security", "session", "jwt", "token", "refresh-token", "auth-state", "mfa"]
+        "category": 'firebase',
+        "subcategory": 'auth',
+        "tags": ['firebase', 'authentication', 'security', 'session', 'jwt', 'token', 'refresh-token']
     }
 ]

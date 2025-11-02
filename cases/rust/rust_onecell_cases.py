@@ -1,11 +1,9 @@
 
 RUST_ONECELL_CASES = [
-    
-    # ============================================
-    # ONCE_CELL LAZY INITIALIZATION
-    # ============================================
     {
-        "problem": "Lazy static initialization and one-time initialization using once_cell.",
+        "problem": """
+Lazy static initialization and one-time initialization using once_cell.
+""",
         "solution": """
 use once_cell::sync::{Lazy, OnceCell};
 use std::sync::Mutex;
@@ -113,7 +111,8 @@ impl Logger {
     }
 
     fn flush(&self) -> std::io::Result<()> {
-        std::fs::write(&self.file_path, self.entries.join("\n"))
+        std::fs::write(&self.file_path, self.entries.join("
+"))
     }
 }
 
@@ -195,7 +194,9 @@ fn main() {
     let urls = extract_urls("Visit https://example.com and https://rust-lang.org");
     println!("Found URLs: {:?}", urls);
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'onecell',
+        "tags": ['api', 'database', 'form', 'http', 'onecell', 'orm', 'request']
     }
-
 ]

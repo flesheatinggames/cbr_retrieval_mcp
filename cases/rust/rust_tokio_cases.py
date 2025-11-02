@@ -1,11 +1,18 @@
+"""
+    },
 
-RUST_TOKIO_CASES = [
-    
     # ============================================
-    # TOKIO ASYNC RUNTIME
+    # TOKIO SELECT AND JOIN
     # ============================================
     {
-        "problem": "A tokio-based concurrent task processor with rate limiting, retries, and graceful shutdown.",
+        "problem": "Advanced tokio concurrency patterns using select!, join!, and timeout with cancellation support.",
+        "solution": """
+
+RUST_TOKIO_CASES = [
+    {
+        "problem": """
+A tokio-based concurrent task processor with rate limiting, retries, and graceful shutdown.
+""",
         "solution": """
 use tokio::{
     sync::{mpsc, Semaphore},
@@ -314,14 +321,15 @@ pub async fn run_task_processing_system() -> anyhow::Result<()> {
     info!("System shutdown complete");
     Ok(())
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'tokio',
+        "tags": ['async', 'concurrency', 'form', 'orm', 'rust', 'sse', 'token']
     },
-
-    # ============================================
-    # TOKIO SELECT AND JOIN
-    # ============================================
     {
-        "problem": "Advanced tokio concurrency patterns using select!, join!, and timeout with cancellation support.",
+        "problem": """
+Advanced tokio concurrency patterns using select!, join!, and timeout with cancellation support.
+""",
         "solution": """
 use tokio::{select, time::{sleep, Duration, timeout, interval}, sync::{mpsc, oneshot}};
 use tokio::task::JoinHandle;
@@ -690,7 +698,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'tokio',
+        "tags": ['async', 'concurrency', 'error-handling', 'event', 'form', 'handler', 'orm']
     }
-
 ]

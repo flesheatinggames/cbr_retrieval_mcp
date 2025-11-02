@@ -1,11 +1,9 @@
 
 RUST_SERDE_CASES = [
-    
-    # ============================================
-    # SERDE SERIALIZATION
-    # ============================================
     {
-        "problem": "Custom serde serialization and deserialization with complex nested structures and validation.",
+        "problem": """
+Custom serde serialization and deserialization with complex nested structures and validation.
+""",
         "solution": """
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
 use std::collections::HashMap;
@@ -271,7 +269,8 @@ mod tests {
         };
 
         let json = serde_json::to_string_pretty(&user).unwrap();
-        println!("Serialized user:\n{}", json);
+        println!("Serialized user:
+{}", json);
 
         let deserialized: User = serde_json::from_str(&json).unwrap();
         assert_eq!(user.id, deserialized.id);
@@ -295,7 +294,8 @@ mod tests {
         };
 
         let json = serde_json::to_string_pretty(&transaction).unwrap();
-        println!("Serialized transaction:\n{}", json);
+        println!("Serialized transaction:
+{}", json);
 
         let deserialized: Transaction = serde_json::from_str(&json).unwrap();
         assert_eq!(transaction.id, deserialized.id);
@@ -306,14 +306,18 @@ mod tests {
     fn test_api_response() {
         let response = ApiResponse::success(vec!["item1", "item2"]);
         let json = serde_json::to_string_pretty(&response).unwrap();
-        println!("Success response:\n{}", json);
+        println!("Success response:
+{}", json);
 
         let error_response: ApiResponse<()> = ApiResponse::error("NOT_FOUND", "Resource not found");
         let error_json = serde_json::to_string_pretty(&error_response).unwrap();
-        println!("Error response:\n{}", error_json);
+        println!("Error response:
+{}", error_json);
     }
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'serde',
+        "tags": ['api', 'deserialization', 'form', 'json', 'orm', 'response', 'routing']
     }
-
 ]

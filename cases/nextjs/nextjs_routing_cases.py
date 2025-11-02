@@ -7,7 +7,9 @@ and middleware implementation.
 
 NEXTJS_ROUTING_CASES = [
     {
-        "problem": "A responsive navigation bar in Next.js using react-bootstrap with Next.js Link routing and authentication-aware navigation.",
+        "problem": """
+A responsive navigation bar in Next.js using react-bootstrap with Next.js Link routing and authentication-aware navigation.
+""",
         "solution": """
 import { Navbar, Nav, Container, NavDropdown, Button } from 'react-bootstrap';
 import Link from 'next/link';
@@ -107,12 +109,14 @@ const AppNavbar = () => {
 
 export default AppNavbar;
 """,
-        "category": "nextjs",
-        "subcategory": "routing",
-        "tags": ["nextjs", "routing", "navigation", "link", "app-router"],
+        "category": 'nextjs',
+        "subcategory": 'routing',
+        "tags": ['nextjs', 'routing', 'navigation', 'link', 'app-router']
     },
     {
-        "problem": "A Next.js page with dynamic route [id] parameter that is server-side rendered (SSR) and fetches data from Firebase Admin SDK.",
+        "problem": """
+A Next.js page with dynamic route [id] parameter that is server-side rendered (SSR) and fetches data from Firebase Admin SDK.
+""",
         "solution": """
 import React, { useEffect } from 'react';
 import { GetServerSideProps } from 'next';
@@ -276,12 +280,14 @@ const PostPage: React.FC<PostPageProps> = ({ post, error }) => {
 
 export default PostPage;
 """,
-        "category": "nextjs",
-        "subcategory": "routing",
-        "tags": ["nextjs", "routing", "dynamic-routes", "params", "slug"],
+        "category": 'nextjs',
+        "subcategory": 'routing',
+        "tags": ['nextjs', 'routing', 'dynamic-routes', 'params', 'slug']
     },
     {
-        "problem": "Implement Content Security Policy (CSP) headers and security middleware in Next.js to prevent XSS attacks.",
+        "problem": """
+Implement Content Security Policy (CSP) headers and security middleware in Next.js to prevent XSS attacks.
+""",
         "solution": """
 // middleware.ts
 import { NextResponse } from 'next/server';
@@ -305,7 +311,7 @@ export function middleware(request: NextRequest) {
     block-all-mixed-content;
     upgrade-insecure-requests;
     connect-src 'self' https://identitytoolkit.googleapis.com https://firestore.googleapis.com https://firebase.googleapis.com wss://*.firebaseio.com;
-  `.replace(/\\s{2,}/g, ' ').trim();
+  `.replace(/\s{2,}/g, ' ').trim();
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set('x-nonce', nonce);
@@ -365,7 +371,7 @@ export default function Document() {
 export const sanitizeInput = (input: string): string => {
   // Remove any HTML tags and script injections
   return input
-    .replace(/<script\\b[^<]*(?:(?!<\\/script>)<[^<]*)*<\\/script>/gi, '')
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
     .replace(/<[^>]+>/g, '')
     .trim();
 };
@@ -375,8 +381,92 @@ export const validateOrigin = (origin: string | null): boolean => {
   return origin ? allowedOrigins.includes(origin) : false;
 };
 """,
-        "category": "nextjs",
-        "subcategory": "routing",
-        "tags": ["nextjs", "routing", "middleware", "edge", "request"],
+        "category": 'nextjs',
+        "subcategory": 'routing',
+        "tags": ['nextjs', 'routing', 'middleware', 'edge', 'request']
     },
+    {
+        "problem": """
+A Next.js page component that fetches data at build time using getStaticProps.
+""",
+        "solution": """
+import { GetStaticProps } from 'next';
+import { Container, Row, Col, Card } from 'react-bootstrap';
+
+interface Post {
+  id: string;
+  title: string;
+  excerpt: string;
+  publishedAt: string;
+}
+
+interface BlogProps {
+  posts: Post[];
+}
+
+export const getStaticProps: GetStaticProps<BlogProps> = async () => {
+  try {
+    const res = await fetch('https://api.example.com/posts');
+
+    if (!res.ok) {
+      throw new Error('Failed to fetch posts');
+    }
+
+    const posts = await res.json();
+
+    return {
+      props: {
+        posts,
+      },
+      // Re-generate page every 60 seconds
+      revalidate: 60,
+    };
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    return {
+      props: {
+        posts: [],
+      },
+      revalidate: 60,
+    };
+  }
+};
+
+function Blog({ posts }: BlogProps) {
+  if (posts.length === 0) {
+    return (
+      <Container className="py-5">
+        <p>No posts available at the moment.</p>
+      </Container>
+    );
+  }
+
+  return (
+    <Container className="py-5">
+      <h1 className="mb-4">Blog Posts</h1>
+      <Row>
+        {posts.map((post) => (
+          <Col key={post.id} md={6} lg={4} className="mb-4">
+            <Card h-100>
+              <Card.Body>
+                <Card.Title>{post.title}</Card.Title>
+                <Card.Text>{post.excerpt}</Card.Text>
+                <small className="text-muted">
+                  {new Date(post.publishedAt).toLocaleDateString()}
+                </small>
+              </Card.Body>
+            </Card>
+          </Col>
+        ))}
+      </Row>
+    </Container>
+  );
+}
+
+export default Blog;
+""",
+        "category": 'nextjs',
+        "subcategory": 'routing',
+        "tags": ['nextjs', 'routing', 'async', 'bootstrap', 'http', 'json', 'api']
+    }
 ]

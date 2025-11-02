@@ -5,7 +5,9 @@ Examples: Handling failed verification, remediation workflow after karen feedbac
 
 ORCHESTRATION_REMEDIATION_CASES = [
     {
-        "problem": "The ui-developer completed the GoogleSignInButton component, but karen's verification returned 'INCOMPLETE: The button lacks a proper loading state.' How do I handle this failed verification and implement the remediation workflow?",
+        "problem": """
+The ui-developer completed the GoogleSignInButton component, but karen's verification returned 'INCOMPLETE: The button lacks a proper loading state.' How do I handle this failed verification and implement the remediation workflow?
+""",
         "solution": """
 <thinking>
 `karen` has returned "INCOMPLETE". I MUST now execute the Remediation Protocol.
@@ -85,31 +87,14 @@ After Remediation Protocol:
 
 The Plan of Record is preserved, and remedial tasks are inserted to address the issue before continuing with the original workflow.
 """,
-        "category": "orchestration",
-        "subcategory": "remediation",
-        "tags": [
-            "remediation",
-            "verification",
-            "failure",
-            "recovery",
-            "karen",
-            "incomplete",
-            "workflow",
-            "agents",
-            "orchestration",
-            "blocking-authority",
-            "delegation",
-            "plan-of-record",
-            "protocol",
-            "ui-developer",
-            "verification-failure",
-            "fix-and-reverify",
-            "append-tasks",
-            "execution-ritual"
-        ]
+        "category": 'orchestration',
+        "subcategory": 'remediation',
+        "tags": ['orchestration', 'remediation', 'verification', 'failure', 'recovery', 'karen', 'incomplete']
     },
     {
-        "problem": "The security audit found we need to add HTTP Security Headers like CSP and HSTS.",
+        "problem": """
+The security audit found we need to add HTTP Security Headers like CSP and HSTS.
+""",
         "solution": """
 <sequential-thinking>
 This is a security hardening task that involves middleware changes.
@@ -149,6 +134,9 @@ This is a 3-step plan.
 3.  **Security Audit:** Delegate to **security-auditor** for a final verification of the security posture.
 
 Do you approve this plan?
-"""
+""",
+        "category": 'orchestration',
+        "subcategory": 'remediation',
+        "tags": ['auth', 'form', 'http', 'middleware', 'orchestration', 'orm', 'remediation']
     }
 ]

@@ -1,11 +1,9 @@
 
 RUST_DATETIME_CASES = [
-    
-    # ============================================
-    # CHRONO DATE/TIME
-    # ============================================
     {
-        "problem": "Comprehensive date and time handling using chrono with timezones, formatting, and parsing.",
+        "problem": """
+Comprehensive date and time handling using chrono with timezones, formatting, and parsing.
+""",
         "solution": """
 use chrono::{DateTime, Utc, Local, NaiveDate, NaiveTime, NaiveDateTime, Duration};
 use chrono::{Datelike, Timelike, Weekday};
@@ -272,7 +270,9 @@ fn main() {
         println!("Next available time: {}", next.format("%Y-%m-%d %H:%M"));
     }
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'datetime',
+        "tags": ['datetime', 'event', 'form', 'orm', 'rust', 'serde']
     }
-
 ]

@@ -6,7 +6,9 @@ Contains cases for Next.js API routes, server actions, and edge functions.
 
 NEXTJS_API_CASES = [
     {
-        "problem": "A Next.js API route that handles a POST request.",
+        "problem": """
+A Next.js API route that handles a POST request.
+""",
         "solution": """
 // pages/api/contact.js (Pages Router)
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -76,12 +78,14 @@ export default async function handler(
   }
 }
 """,
-        "category": "nextjs",
-        "subcategory": "api",
-        "tags": ["nextjs", "api", "api-routes", "post", "request", "response"],
+        "category": 'nextjs',
+        "subcategory": 'api',
+        "tags": ['nextjs', 'api', 'api-routes', 'post', 'request', 'response']
     },
     {
-        "problem": "A Next.js API route to add a document to Firestore using the Firebase Admin SDK.",
+        "problem": """
+A Next.js API route to add a document to Firestore using the Firebase Admin SDK.
+""",
         "solution": """
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { adminDb } from '../../../lib/firebase-admin';
@@ -153,12 +157,14 @@ export default async function handler(
   }
 }
 """,
-        "category": "nextjs",
-        "subcategory": "api",
-        "tags": ["nextjs", "api", "firestore", "firebase", "admin-sdk"],
+        "category": 'nextjs',
+        "subcategory": 'api',
+        "tags": ['nextjs', 'api', 'firestore', 'firebase', 'admin-sdk']
     },
     {
-        "problem": "Implement rate limiting and DDoS protection for Next.js API routes with Redis.",
+        "problem": """
+Implement rate limiting and DDoS protection for Next.js API routes with Redis.
+""",
         "solution": """
 // lib/rate-limiter.ts
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -364,7 +370,7 @@ export class DDoSProtection {
       /union.*select/i, // SQL injection
       /eval\(/i, // Code injection
       /base64_decode/i, // Encoded payload
-      /\0/, // Null byte injection
+      //, // Null byte injection
       /%00/, // Null byte (URL encoded)
       /\.env/, // Environment file access
       /\/etc\/passwd/, // System file access
@@ -422,8 +428,215 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   res.status(200).json({ message: 'Success' });
 }
 """,
-        "category": "nextjs",
-        "subcategory": "api",
-        "tags": ["nextjs", "api", "rate-limiting", "security", "redis", "ddos"],
+        "category": 'nextjs',
+        "subcategory": 'api',
+        "tags": ['nextjs', 'api', 'rate-limiting', 'security', 'redis', 'ddos']
     },
+    {
+        "problem": """
+A custom _app.js file in Next.js with a global layout component.
+""",
+        "solution": """
+// pages/_app.tsx (Pages Router)
+import type { AppProps } from 'next/app';
+import Layout from '../components/Layout';
+import { AuthProvider } from '../contexts/AuthContext';
+import { ThemeProvider } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import '../styles/globals.css';
+
+function MyApp({ Component, pageProps }: AppProps) {
+  return (
+    <ThemeProvider
+      breakpoints={['xxxl', 'xxl', 'xl', 'lg', 'md', 'sm', 'xs', 'xxs']}
+      minBreakpoint="xxs"
+    >
+      <AuthProvider>
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      </AuthProvider>
+    </ThemeProvider>
+  );
+}
+
+export default MyApp;
+
+// components/Layout.tsx
+import React from 'react';
+import Head from 'next/head';
+import Navigation from './Navigation';
+import Footer from './Footer';
+import { Container } from 'react-bootstrap';
+
+interface LayoutProps {
+  children: React.ReactNode;
+  title?: string;
+  description?: string;
+}
+
+const Layout: React.FC<LayoutProps> = ({
+  children,
+  title = 'My App',
+  description = 'A Next.js application'
+}) => {
+  return (
+    <>
+      <Head>
+        <title>{title}</title>
+        <meta name="description" content={description} />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      <div className="d-flex flex-column min-vh-100">
+        <Navigation />
+        <main className="flex-grow-1">
+          {children}
+        </main>
+        <Footer />
+      </div>
+    </>
+  );
+};
+
+export default Layout;
+""",
+        "category": 'nextjs',
+        "subcategory": 'api',
+        "tags": ['api', 'auth', 'bootstrap', 'components', 'css', 'next.js', 'nextjs']
+    },
+    {
+        "problem": """
+A Next.js page that is server-side rendered (SSR) and fetches data from Firebase Admin SDK.
+""",
+        "solution": """
+import { GetServerSideProps } from 'next';
+import { adminDb } from '../lib/firebase-admin';
+import { Container, Card, Badge } from 'react-bootstrap';
+import Head from 'next/head';
+
+interface Post {
+  id: string;
+  title: string;
+  content: string;
+  authorName: string;
+  createdAt: string;
+  tags: string[];
+  views: number;
+}
+
+interface PostPageProps {
+  post: Post | null;
+  error?: string;
+}
+
+export const getServerSideProps: GetServerSideProps<PostPageProps> = async (context) => {
+  const { id } = context.params as { id: string };
+
+  try {
+    const docRef = adminDb.collection('posts').doc(id);
+    const docSnap = await docRef.get();
+
+    if (!docSnap.exists) {
+      return {
+        notFound: true
+      };
+    }
+
+    const postData = docSnap.data();
+
+    // Increment view counter
+    await docRef.update({
+      views: adminDb.FieldValue.increment(1)
+    });
+
+    // Serialize Firestore timestamps for client
+    const post: Post = {
+      id: docSnap.id,
+      title: postData?.title || '',
+      content: postData?.content || '',
+      authorName: postData?.authorName || 'Anonymous',
+      tags: postData?.tags || [],
+      views: postData?.views || 0,
+      createdAt: postData?.createdAt?.toDate().toISOString() || new Date().toISOString(),
+    };
+
+    return {
+      props: {
+        post
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching post:', error);
+    return {
+      props: {
+        post: null,
+        error: 'Failed to load post'
+      }
+    };
+  }
+};
+
+function PostPage({ post, error }: PostPageProps) {
+  if (error) {
+    return (
+      <Container className="py-5">
+        <div className="alert alert-danger">{error}</div>
+      </Container>
+    );
+  }
+
+  if (!post) {
+    return (
+      <Container className="py-5">
+        <div>Post not found</div>
+      </Container>
+    );
+  }
+
+  return (
+    <>
+      <Head>
+        <title>{post.title} | My Blog</title>
+        <meta name="description" content={post.content.substring(0, 160)} />
+      </Head>
+
+      <Container className="py-5">
+        <Card>
+          <Card.Body>
+            <h1>{post.title}</h1>
+
+            <div className="mb-3">
+              {post.tags.map((tag) => (
+                <Badge key={tag} bg="secondary" className="me-2">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+
+            <div className="text-muted mb-4">
+              <small>
+                By {post.authorName} •
+                {new Date(post.createdAt).toLocaleDateString()} •
+                {post.views} views
+              </small>
+            </div>
+
+            <div className="post-content">
+              {post.content}
+            </div>
+          </Card.Body>
+        </Card>
+      </Container>
+    </>
+  );
+}
+
+export default PostPage;
+""",
+        "category": 'nextjs',
+        "subcategory": 'api',
+        "tags": ['nextjs', 'api', 'async', 'auth', 'bootstrap', 'firebase', 'firestore']
+    }
 ]

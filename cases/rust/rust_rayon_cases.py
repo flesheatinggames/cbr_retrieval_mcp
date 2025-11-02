@@ -1,12 +1,10 @@
 
 
 RUST_RAYON_CASES = [
-    
-    # ============================================
-    # RAYON PARALLEL PROCESSING
-    # ============================================
     {
-        "problem": "Parallel data processing using Rayon with custom iterators, error handling, and progress tracking.",
+        "problem": """
+Parallel data processing using Rayon with custom iterators, error handling, and progress tracking.
+""",
         "solution": """
 use rayon::prelude::*;
 use std::sync::{Arc, Mutex};
@@ -71,7 +69,7 @@ impl ProcessingStats {
         let successful = self.successful.load(Ordering::Relaxed);
         let failed = self.failed.load(Ordering::Relaxed);
         
-        println!("\\n=== Processing Summary ===");
+        println!("\n=== Processing Summary ===");
         println!("Total items: {}", self.total_items);
         println!("Successful: {} ({:.2}%)", successful, 
             (successful as f64 / self.total_items as f64) * 100.0);
@@ -290,13 +288,13 @@ fn main() {
         })
         .collect();
     
-    println!("Processing {} items in parallel...\\n", items.len());
+    println!("Processing {} items in parallel...\n", items.len());
     
     // Parallel batch processing
     let (successes, errors) = process_batch_parallel(items.clone());
     
     if !errors.is_empty() {
-        println!("\\nErrors encountered:");
+        println!("\nErrors encountered:");
         for (id, error) in errors.iter().take(5) {
             println!("  {}: {}", id, error);
         }
@@ -306,7 +304,7 @@ fn main() {
     }
     
     // Compute statistics
-    println!("\\nComputing statistics...");
+    println!("\nComputing statistics...");
     let stats = parallel_statistics(&items);
     println!("Statistics:");
     println!("  Count: {}", stats.count);
@@ -316,13 +314,15 @@ fn main() {
     println!("  Max: {:.2}", stats.max);
     
     // Group by range
-    println!("\\nGrouping by ranges...");
+    println!("\nGrouping by ranges...");
     let groups = parallel_group_by_range(items.clone());
     for (label, group) in groups {
         println!("  {}: {} items", label, group.len());
     }
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'rayon',
+        "tags": ['error-handling', 'filter', 'form', 'orm', 'rayon', 'rust', 'sse']
     }
-
 ]

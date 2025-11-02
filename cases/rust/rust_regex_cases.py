@@ -1,11 +1,9 @@
 
 RUST_REGEX_CASES = [
-    
-    # ============================================
-    # REGEX PATTERN MATCHING
-    # ============================================
     {
-        "problem": "Advanced regex pattern matching with validation, extraction, and text processing.",
+        "problem": """
+Advanced regex pattern matching with validation, extraction, and text processing.
+""",
         "solution": """
 use regex::{Regex, RegexBuilder, Captures};
 use lazy_static::lazy_static;
@@ -22,7 +20,7 @@ lazy_static! {
     ).unwrap();
     
     static ref URL_REGEX: Regex = Regex::new(
-        r"https?://(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&/=]*)"
+        r"https?://(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}(?:[-a-zA-Z0-9()@:%_\+.~#?&/=]*)"
     ).unwrap();
     
     static ref IPV4_REGEX: Regex = Regex::new(
@@ -78,7 +76,7 @@ impl Validator {
             errors.push("Password must contain at least one digit".to_string());
         }
 
-        if !Regex::new(r"[!@#$%^&*(),.?\":{}|<>]").unwrap().is_match(password) {
+        if !Regex::new(r"[!@#$%^&*(),.?":{}|<>]").unwrap().is_match(password) {
             errors.push("Password must contain at least one special character".to_string());
         }
 
@@ -192,15 +190,15 @@ impl TextSanitizer {
         let mut result = text.to_string();
 
         // Mask credit card numbers
-        let cc_regex = Regex::new(r"\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b").unwrap();
+        let cc_regex = Regex::new(r"\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}").unwrap();
         result = cc_regex.replace_all(&result, "****-****-****-****").to_string();
 
         // Mask SSN
-        let ssn_regex = Regex::new(r"\b\d{3}-\d{2}-\d{4}\b").unwrap();
+        let ssn_regex = Regex::new(r"\d{3}-\d{2}-\d{4}").unwrap();
         result = ssn_regex.replace_all(&result, "***-**-****").to_string();
 
         // Mask email addresses
-        let email_regex = Regex::new(r"\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b").unwrap();
+        let email_regex = Regex::new(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}").unwrap();
         result = email_regex.replace_all(&result, |caps: &Captures| {
             let email = caps.get(0).unwrap().as_str();
             let at_pos = email.find('@').unwrap();
@@ -283,7 +281,7 @@ fn main() {
                 Call us at (555) 123-4567 or +1-555-987-6543.
                 Follow us on #rust and #programming. Mention @rustlang!";
 
-    println!("\\nExtracted emails: {:?}", TextExtractor::extract_emails(text));
+    println!("\nExtracted emails: {:?}", TextExtractor::extract_emails(text));
     println!("Extracted URLs: {:?}", TextExtractor::extract_urls(text));
     println!("Extracted phones: {:?}", TextExtractor::extract_phone_numbers(text));
     println!("Extracted hashtags: {:?}", TextExtractor::extract_hashtags(text));
@@ -294,12 +292,12 @@ fn main() {
     engine.set_variable("name", "John");
     engine.set_variable("age", "30");
     let template = "Hello {{name}}, you are {{age}} years old!";
-    println!("\\nRendered template: {}", engine.render(template));
+    println!("\nRendered template: {}", engine.render(template));
 
     // Sanitization
     let sensitive = "My credit card is 4532-1234-5678-9010 and SSN is 123-45-6789. 
                      Email: john.doe@example.com";
-    println!("\\nMasked data: {}", TextSanitizer::mask_sensitive_data(sensitive));
+    println!("\nMasked data: {}", TextSanitizer::mask_sensitive_data(sensitive));
 
     // Phone normalization
     if let Some(normalized) = TextSanitizer::normalize_phone_number("555-123-4567") {
@@ -308,9 +306,11 @@ fn main() {
 
     // Highlighting
     let text_to_search = "The quick brown fox jumps over the lazy dog. The FOX is quick!";
-    println!("\\nHighlighted: {}", highlight_matches(text_to_search, "fox"));
+    println!("\nHighlighted: {}", highlight_matches(text_to_search, "fox"));
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'regex',
+        "tags": ['form', 'html', 'http', 'orm', 'parser', 'regex', 'rust']
     }
-
 ]

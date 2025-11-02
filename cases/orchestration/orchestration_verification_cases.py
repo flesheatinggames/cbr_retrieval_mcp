@@ -6,7 +6,9 @@ Examples: Using karen for verification, quality checking, validation workflows
 
 ORCHESTRATION_VERIFICATION_CASES = [
     {
-        "problem": "Add server-side validation to the user registration endpoint for password strength.",
+        "problem": """
+Add server-side validation to the user registration endpoint for password strength.
+""",
         "solution": """
 <sequential-thinking>
 This is a classic TDD case for modifying an existing endpoint.
@@ -62,18 +64,8 @@ This results in 5 delegation steps.
 
 Do you approve this plan?
 """,
-        "category": "orchestration",
-        "subcategory": "verification",
-        "tags": [
-            "verification",
-            "karen",
-            "testing",
-            "validation",
-            "quality-checking",
-            "tdd",
-            "test-verification",
-            "implementation-verification",
-            "orchestration"
-        ]
+        "category": 'orchestration',
+        "subcategory": 'verification',
+        "tags": ['orchestration', 'verification', 'karen', 'testing', 'validation', 'quality-checking', 'tdd']
     }
 ]

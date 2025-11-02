@@ -1,0 +1,554 @@
+{
+  "summary": {
+    "total_original_cases": 76,
+    "case_base_cases": 48,
+    "orchestration_examples": 20,
+    "security_cases": 8,
+    "total_modular_cases": 103,
+    "matched_cases": 76,
+    "missing_cases": 0,
+    "migration_complete": true,
+    "metadata_complete": false
+  },
+  "matched_cases": [
+    {
+      "source": "CASE_BASE",
+      "source_index": 0,
+      "modular_index": 38,
+      "problem": "A React component for user sign-up with Firebase Authentication.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 1,
+      "modular_index": 39,
+      "problem": "A React hook to get the current Firebase authentication user state in real-time.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 2,
+      "modular_index": 40,
+      "problem": "A function to sign in a user with Google using Firebase Authentication popup.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 3,
+      "modular_index": 41,
+      "problem": "A function to sign out the current user from Firebase.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 4,
+      "modular_index": 43,
+      "problem": "A function to add a new document to a 'users' collection in Firestore.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 5,
+      "modular_index": 44,
+      "problem": "A React hook to fetch a single document from Firestore by its ID.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 6,
+      "modular_index": 45,
+      "problem": "A React hook to listen for real-time updates on a Firestore collection.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 7,
+      "modular_index": 46,
+      "problem": "A function to update an existing document in Firestore.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 8,
+      "modular_index": 75,
+      "problem": "A Next.js page component that fetches data at build time using getStaticProps.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 9,
+      "modular_index": 76,
+      "problem": "A Next.js API route that handles a POST request.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 10,
+      "modular_index": 79,
+      "problem": "A custom _app.js file in Next.js with a global layout component.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 11,
+      "modular_index": 0,
+      "problem": "A responsive navigation bar in a React component using react-bootstrap.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 12,
+      "modular_index": 1,
+      "problem": "A React component that displays a Bootstrap modal dialog.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 13,
+      "modular_index": 2,
+      "problem": "A Bootstrap-styled form with validation feedback in React.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 14,
+      "modular_index": 3,
+      "problem": "A React component that displays data in a responsive Bootstrap grid.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 15,
+      "modular_index": 80,
+      "problem": "A Next.js page that is server-side rendered (SSR) and fetches data from Firebase Admin SDK.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 16,
+      "modular_index": 102,
+      "problem": "A higher-order component (HOC) in React to protect routes based on Firebase auth state.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 17,
+      "modular_index": 100,
+      "problem": "A React component that fetches a list of items from Firestore and displays them as Bootstrap Cards.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 18,
+      "modular_index": 77,
+      "problem": "A Next.js API route to add a document to Firestore using the Firebase Admin SDK.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 19,
+      "modular_index": 101,
+      "problem": "A React component with a button that triggers a Firebase Cloud Function when clicked.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 20,
+      "modular_index": 74,
+      "problem": "Implement Content Security Policy (CSP) headers and security middleware in Next.js to prevent XSS attacks.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 21,
+      "modular_index": 47,
+      "problem": "Secure Firebase Storage uploads with file validation, size limits, and malware scanning simulation.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 22,
+      "modular_index": 78,
+      "problem": "Implement rate limiting and DDoS protection for Next.js API routes with Redis.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 23,
+      "modular_index": 6,
+      "problem": "Implement secure session management with JWT tokens and refresh token rotation for Firebase Auth.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 24,
+      "modular_index": 4,
+      "problem": "Implement input sanitization and SQL/NoSQL injection prevention for Firestore queries.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 25,
+      "modular_index": 5,
+      "problem": "Implement secure API key management and environment variable validation for production deployments.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 26,
+      "modular_index": 85,
+      "problem": "Implement secure error handling and logging that doesn't expose sensitive information in production.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 27,
+      "modular_index": 7,
+      "problem": "Implement secure authentication middleware with CSRF protection for Next.js forms.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 28,
+      "modular_index": 48,
+      "problem": "Refactor the PaymentProcessor service to use the new StripeClient instead of the legacy BraintreeClient.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 29,
+      "modular_index": 49,
+      "problem": "Add a last_login_ip field to the User model in the database.",
+      "has_metadata": true
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 30,
+      "modular_index": 50,
+      "problem": "Integrate with the WeatherAPI to fetch the current weather for a user's location.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 31,
+      "modular_index": 51,
+      "problem": "The /api/v1/analytics/report endpoint is too slow. Find the bottleneck and optimize it.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 32,
+      "modular_index": 52,
+      "problem": "Add internationalization support for French to the <UserProfile> component.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 33,
+      "modular_index": 53,
+      "problem": "Implement a feature flag for the new 'AI Summary' feature.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 34,
+      "modular_index": 54,
+      "problem": "Scaffold a new microservice for handling user notifications.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 35,
+      "modular_index": 55,
+      "problem": "Update the Dockerfile and CI/CD pipeline to use the new base image rust:1.79-slim.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 36,
+      "modular_index": 56,
+      "problem": "Remove the deprecated LegacyReporting module and all its usages.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 37,
+      "modular_index": 57,
+      "problem": "Fix the accessibility issues on the login form. It is missing labels and has poor color contrast.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 38,
+      "modular_index": 58,
+      "problem": "Add structured logging to the authentication service.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 39,
+      "modular_index": 59,
+      "problem": "Create a nightly cron job that cleans up expired user sessions from the database.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 40,
+      "modular_index": 60,
+      "problem": "Add server-side validation to the user registration endpoint for password strength.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 41,
+      "modular_index": 61,
+      "problem": "Implement a Redis caching layer for the get_product_list function.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 42,
+      "modular_index": 70,
+      "problem": "The security audit found we need to add HTTP Security Headers like CSP and HSTS.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 43,
+      "modular_index": 62,
+      "problem": "Create a new GET endpoint /api/v1/health that returns a 200 OK.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 44,
+      "modular_index": 63,
+      "problem": "Migrate the state management in the Dashboard page from local state to a global Zustand store.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 45,
+      "modular_index": 64,
+      "problem": "Create a reusable React component for a data table with sorting and pagination.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 46,
+      "modular_index": 65,
+      "problem": "Add a dark mode toggle to the UI that persists the user's preference.",
+      "has_metadata": false
+    },
+    {
+      "source": "CASE_BASE",
+      "source_index": 47,
+      "modular_index": 66,
+      "problem": "Analyze the project's requirements from the PRD and create a task breakdown in Task Master.",
+      "has_metadata": false
+    },
+    {
+      "source": "ORCHESTRATION_EXAMPLES",
+      "source_index": 0,
+      "modular_index": null,
+      "problem": "Refactor the PaymentProcessor service to use the new StripeClient instead of the legacy BraintreeClient.",
+      "has_metadata": true
+    },
+    {
+      "source": "ORCHESTRATION_EXAMPLES",
+      "source_index": 1,
+      "modular_index": null,
+      "problem": "Add a last_login_ip field to the User model in the database.",
+      "has_metadata": true
+    },
+    {
+      "source": "ORCHESTRATION_EXAMPLES",
+      "source_index": 2,
+      "modular_index": null,
+      "problem": "Integrate with the WeatherAPI to fetch the current weather for a user's location.",
+      "has_metadata": false
+    },
+    {
+      "source": "ORCHESTRATION_EXAMPLES",
+      "source_index": 3,
+      "modular_index": null,
+      "problem": "The /api/v1/analytics/report endpoint is too slow. Find the bottleneck and optimize it.",
+      "has_metadata": false
+    },
+    {
+      "source": "ORCHESTRATION_EXAMPLES",
+      "source_index": 4,
+      "modular_index": null,
+      "problem": "Add internationalization support for French to the <UserProfile> component.",
+      "has_metadata": false
+    },
+    {
+      "source": "ORCHESTRATION_EXAMPLES",
+      "source_index": 5,
+      "modular_index": null,
+      "problem": "Implement a feature flag for the new 'AI Summary' feature.",
+      "has_metadata": false
+    },
+    {
+      "source": "ORCHESTRATION_EXAMPLES",
+      "source_index": 6,
+      "modular_index": null,
+      "problem": "Scaffold a new microservice for handling user notifications.",
+      "has_metadata": false
+    },
+    {
+      "source": "ORCHESTRATION_EXAMPLES",
+      "source_index": 7,
+      "modular_index": null,
+      "problem": "Update the Dockerfile and CI/CD pipeline to use the new base image rust:1.79-slim.",
+      "has_metadata": false
+    },
+    {
+      "source": "ORCHESTRATION_EXAMPLES",
+      "source_index": 8,
+      "modular_index": null,
+      "problem": "Remove the deprecated LegacyReporting module and all its usages.",
+      "has_metadata": false
+    },
+    {
+      "source": "ORCHESTRATION_EXAMPLES",
+      "source_index": 9,
+      "modular_index": null,
+      "problem": "Fix the accessibility issues on the login form. It is missing labels and has poor color contrast.",
+      "has_metadata": false
+    },
+    {
+      "source": "ORCHESTRATION_EXAMPLES",
+      "source_index": 10,
+      "modular_index": null,
+      "problem": "Add structured logging to the authentication service.",
+      "has_metadata": false
+    },
+    {
+      "source": "ORCHESTRATION_EXAMPLES",
+      "source_index": 11,
+      "modular_index": null,
+      "problem": "Create a nightly cron job that cleans up expired user sessions from the database.",
+      "has_metadata": false
+    },
+    {
+      "source": "ORCHESTRATION_EXAMPLES",
+      "source_index": 12,
+      "modular_index": null,
+      "problem": "Add server-side validation to the user registration endpoint for password strength.",
+      "has_metadata": false
+    },
+    {
+      "source": "ORCHESTRATION_EXAMPLES",
+      "source_index": 13,
+      "modular_index": null,
+      "problem": "Implement a Redis caching layer for the get_product_list function.",
+      "has_metadata": false
+    },
+    {
+      "source": "ORCHESTRATION_EXAMPLES",
+      "source_index": 14,
+      "modular_index": null,
+      "problem": "The security audit found we need to add HTTP Security Headers like CSP and HSTS.",
+      "has_metadata": false
+    },
+    {
+      "source": "ORCHESTRATION_EXAMPLES",
+      "source_index": 15,
+      "modular_index": null,
+      "problem": "Create a new GET endpoint /api/v1/health that returns a 200 OK.",
+      "has_metadata": false
+    },
+    {
+      "source": "ORCHESTRATION_EXAMPLES",
+      "source_index": 16,
+      "modular_index": null,
+      "problem": "Migrate the state management in the Dashboard page from local state to a global Zustand store.",
+      "has_metadata": false
+    },
+    {
+      "source": "ORCHESTRATION_EXAMPLES",
+      "source_index": 17,
+      "modular_index": null,
+      "problem": "Create a reusable React component for a data table with sorting and pagination.",
+      "has_metadata": false
+    },
+    {
+      "source": "ORCHESTRATION_EXAMPLES",
+      "source_index": 18,
+      "modular_index": null,
+      "problem": "Add a dark mode toggle to the UI that persists the user's preference.",
+      "has_metadata": false
+    },
+    {
+      "source": "ORCHESTRATION_EXAMPLES",
+      "source_index": 19,
+      "modular_index": null,
+      "problem": "Analyze the project's requirements from the PRD and create a task breakdown in Task Master.",
+      "has_metadata": false
+    },
+    {
+      "source": "SECURITY_CASES",
+      "source_index": 0,
+      "modular_index": null,
+      "problem": "Implement Content Security Policy (CSP) headers and security middleware in Next.js to prevent XSS attacks.",
+      "has_metadata": true
+    },
+    {
+      "source": "SECURITY_CASES",
+      "source_index": 1,
+      "modular_index": null,
+      "problem": "Secure Firebase Storage uploads with file validation, size limits, and malware scanning simulation.",
+      "has_metadata": false
+    },
+    {
+      "source": "SECURITY_CASES",
+      "source_index": 2,
+      "modular_index": null,
+      "problem": "Implement rate limiting and DDoS protection for Next.js API routes with Redis.",
+      "has_metadata": true
+    },
+    {
+      "source": "SECURITY_CASES",
+      "source_index": 3,
+      "modular_index": null,
+      "problem": "Implement secure session management with JWT tokens and refresh token rotation for Firebase Auth.",
+      "has_metadata": true
+    },
+    {
+      "source": "SECURITY_CASES",
+      "source_index": 4,
+      "modular_index": null,
+      "problem": "Implement input sanitization and SQL/NoSQL injection prevention for Firestore queries.",
+      "has_metadata": true
+    },
+    {
+      "source": "SECURITY_CASES",
+      "source_index": 5,
+      "modular_index": null,
+      "problem": "Implement secure API key management and environment variable validation for production deployments.",
+      "has_metadata": true
+    },
+    {
+      "source": "SECURITY_CASES",
+      "source_index": 6,
+      "modular_index": null,
+      "problem": "Implement secure error handling and logging that doesn't expose sensitive information in production.",
+      "has_metadata": true
+    },
+    {
+      "source": "SECURITY_CASES",
+      "source_index": 7,
+      "modular_index": null,
+      "problem": "Implement secure authentication middleware with CSRF protection for Next.js forms.",
+      "has_metadata": true
+    }
+  ],
+  "missing_cases": [],
+  "statistics": {
+    "match_rate_percentage": 100.0,
+    "cases_with_metadata": 34,
+    "metadata_rate_percentage": 44.74,
+    "extra_modular_cases": 27
+  }
+}

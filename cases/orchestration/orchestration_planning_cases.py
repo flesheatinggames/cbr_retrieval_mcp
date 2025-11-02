@@ -5,7 +5,9 @@ Examples: TDD workflow planning, multi-agent task breakdown
 
 ORCHESTRATION_PLANNING_CASES = [
     {
-        "problem": "Refactor the PaymentProcessor service to use the new StripeClient instead of the legacy BraintreeClient.",
+        "problem": """
+Refactor the PaymentProcessor service to use the new StripeClient instead of the legacy BraintreeClient.
+""",
         "solution": """
 <sequential-thinking>
 The user wants to refactor a service. This involves changing implementation details while ensuring behavior remains the same. A Test-Driven Development (TDD) approach is safest.
@@ -61,12 +63,14 @@ This translates to 5 delegation steps.
 
 Do you approve this plan?
 """,
-        "category": "orchestration",
-        "subcategory": "planning",
-        "tags": ["tdd", "test-driven", "workflow", "planning", "agents", "refactoring", "orchestration", "delegation", "testing", "rust", "stripe", "payment-processing"]
+        "category": 'orchestration',
+        "subcategory": 'planning',
+        "tags": ['orchestration', 'planning', 'tdd', 'test-driven', 'workflow', 'agents', 'refactoring']
     },
     {
-        "problem": "Add a last_login_ip field to the User model in the database.",
+        "problem": """
+Add a last_login_ip field to the User model in the database.
+""",
         "solution": """
 <sequential-thinking>
 This is a database migration and a code change. It requires updating the database schema, the data access layer, and the application code that uses it.
@@ -137,12 +141,14 @@ This results in 7 delegation steps.
 
 Do you approve this plan?
 """,
-        "category": "orchestration",
-        "subcategory": "planning",
-        "tags": ["orchestration", "planning", "agents", "tasks", "tdd", "workflow", "database", "migration", "multi-agent", "coordination", "delegation", "rust", "surrealdb"]
+        "category": 'orchestration',
+        "subcategory": 'planning',
+        "tags": ['orchestration', 'planning', 'agents', 'tasks', 'tdd', 'workflow', 'database']
     },
     {
-        "problem": "Integrate with the WeatherAPI to fetch the current weather for a user's location.",
+        "problem": """
+Integrate with the WeatherAPI to fetch the current weather for a user's location.
+""",
         "solution": """
 <sequential-thinking>
 This involves creating a new client to communicate with an external API.
@@ -197,10 +203,15 @@ This is a 5-step delegation process.
 5.  **Final Code Review:** Delegate to **code-reviewer** for a final review.
 
 Do you approve this plan?
-"""
+""",
+        "category": 'orchestration',
+        "subcategory": 'planning',
+        "tags": ['api', 'api-integration', 'form', 'orchestration', 'orm', 'planning', 'rust']
     },
     {
-        "problem": "The /api/v1/analytics/report endpoint is too slow. Find the bottleneck and optimize it.",
+        "problem": """
+The /api/v1/analytics/report endpoint is too slow. Find the bottleneck and optimize it.
+""",
         "solution": """
 <sequential-thinking>
 The user is reporting a performance issue with an unknown cause. The first step is investigation.
@@ -227,10 +238,15 @@ The fix will require a new plan after the investigation is complete.
 Once the analysis is complete, I will formulate a new plan to implement the fix.
 
 Do you approve this investigation plan?
-"""
+""",
+        "category": 'orchestration',
+        "subcategory": 'planning',
+        "tags": ['api', 'form', 'orchestration', 'orm', 'performance', 'planning', 'query']
     },
     {
-        "problem": "Add internationalization support for French to the <UserProfile> component.",
+        "problem": """
+Add internationalization support for French to the <UserProfile> component.
+""",
         "solution": """
 <sequential-thinking>
 This is an internationalization (i18n) task, which requires a specialist.
@@ -285,10 +301,15 @@ This is a 5-step delegation process.
 5.  **Final Code Review:** Delegate to **code-reviewer** for a final review.
 
 Do you approve this plan?
-"""
+""",
+        "category": 'orchestration',
+        "subcategory": 'planning',
+        "tags": ['form', 'orchestration', 'orm', 'planning', 'ui']
     },
     {
-        "problem": "Implement a feature flag for the new 'AI Summary' feature.",
+        "problem": """
+Implement a feature flag for the new 'AI Summary' feature.
+""",
         "solution": """
 <sequential-thinking>
 This involves both backend logic to check the flag and potentially frontend work to show/hide the feature. I'll focus on the backend implementation first.
@@ -343,10 +364,15 @@ This breaks down into 5 steps.
 5.  **Final Code Review:** Delegate to **code-reviewer** for a final review.
 
 Do you approve this plan?
-"""
+""",
+        "category": 'orchestration',
+        "subcategory": 'planning',
+        "tags": ['form', 'orchestration', 'orm', 'planning', 'rust', 'sse']
     },
     {
-        "problem": "Scaffold a new microservice for handling user notifications.",
+        "problem": """
+Scaffold a new microservice for handling user notifications.
+""",
         "solution": """
 <sequential-thinking>
 Scaffolding a new service from a template is a DevOps task.
@@ -378,10 +404,15 @@ This is a 2-step process.
 2.  **Verify:** Delegate to **karen** to ensure the newly created service is valid and buildable.
 
 Do you approve this plan?
-"""
+""",
+        "category": 'orchestration',
+        "subcategory": 'planning',
+        "tags": ['aws', 'form', 'orchestration', 'orm', 'planning', 'sse', 'ui']
     },
     {
-        "problem": "Update the Dockerfile and CI/CD pipeline to use the new base image rust:1.79-slim.",
+        "problem": """
+Update the Dockerfile and CI/CD pipeline to use the new base image rust:1.79-slim.
+""",
         "solution": """
 <sequential-thinking>
 This is a pure DevOps and infrastructure change.
@@ -413,10 +444,15 @@ This is a simple 2-step delegation.
 2.  **Verify Changes:** Delegate to **karen** to trigger and verify the CI pipeline to confirm the change is working.
 
 Do you approve this plan?
-"""
+""",
+        "category": 'orchestration',
+        "subcategory": 'planning',
+        "tags": ['aws', 'docker', 'form', 'orchestration', 'orm', 'planning', 'rust']
     },
     {
-        "problem": "Remove the deprecated LegacyReporting module and all its usages.",
+        "problem": """
+Remove the deprecated LegacyReporting module and all its usages.
+""",
         "solution": """
 <sequential-thinking>
 Removing code requires careful testing to ensure no regressions are introduced.
@@ -471,10 +507,15 @@ This breaks down into 5 steps.
 5.  **Final Code Review:** Delegate to **code-reviewer** for a final review.
 
 Do you approve this plan?
-"""
+""",
+        "category": 'orchestration',
+        "subcategory": 'planning',
+        "tags": ['event', 'form', 'orchestration', 'orm', 'planning', 'rust', 'testing']
     },
     {
-        "problem": "Fix the accessibility issues on the login form. It is missing labels and has poor color contrast.",
+        "problem": """
+Fix the accessibility issues on the login form. It is missing labels and has poor color contrast.
+""",
         "solution": """
 <sequential-thinking>
 This is a UI and accessibility (a11y) task.
@@ -514,10 +555,15 @@ This is a 3-step plan.
 3.  **Code Review:** Delegate to **code-reviewer** for a final review.
 
 Do you approve this plan?
-"""
+""",
+        "category": 'orchestration',
+        "subcategory": 'planning',
+        "tags": ['css', 'form', 'orchestration', 'orm', 'planning', 'ui']
     },
     {
-        "problem": "Add structured logging to the authentication service.",
+        "problem": """
+Add structured logging to the authentication service.
+""",
         "solution": """
 <sequential-thinking>
 This involves adding logging statements at key points in the authentication flow.
@@ -572,10 +618,15 @@ This is a 5-step plan.
 5.  **Final Code Review:** Delegate to **code-reviewer** for a final review.
 
 Do you approve this plan?
-"""
+""",
+        "category": 'orchestration',
+        "subcategory": 'planning',
+        "tags": ['auth', 'authentication', 'form', 'logging', 'orchestration', 'orm', 'planning']
     },
     {
-        "problem": "Create a nightly cron job that cleans up expired user sessions from the database.",
+        "problem": """
+Create a nightly cron job that cleans up expired user sessions from the database.
+""",
         "solution": """
 <sequential-thinking>
 This requires two distinct parts: the cleanup logic and the scheduling mechanism.
@@ -645,10 +696,15 @@ Total of 7 steps.
 7.  **Code Review:** Delegate to **code-reviewer**.
 
 Do you approve this plan?
-"""
+""",
+        "category": 'orchestration',
+        "subcategory": 'planning',
+        "tags": ['aws', 'database', 'event', 'form', 'kubernetes', 'orchestration', 'orm']
     },
     {
-        "problem": "Add server-side validation to the user registration endpoint for password strength.",
+        "problem": """
+Add server-side validation to the user registration endpoint for password strength.
+""",
         "solution": """
 <sequential-thinking>
 This is a classic TDD case for modifying an existing endpoint.
@@ -703,10 +759,15 @@ This results in 5 delegation steps.
 5.  **Security Audit:** Delegate to **security-auditor** for a final security review.
 
 Do you approve this plan?
-"""
+""",
+        "category": 'orchestration',
+        "subcategory": 'planning',
+        "tags": ['auth', 'authentication', 'form', 'handler', 'orchestration', 'orm', 'planning']
     },
     {
-        "problem": "Implement a Redis caching layer for the get_product_list function.",
+        "problem": """
+Implement a Redis caching layer for the get_product_list function.
+""",
         "solution": """
 <sequential-thinking>
 This involves modifying an existing function to add caching logic.
@@ -761,10 +822,15 @@ This is a 5-step process.
 5.  **Final Code Review:** Delegate to **code-reviewer** for a final review.
 
 Do you approve this plan?
-"""
+""",
+        "category": 'orchestration',
+        "subcategory": 'planning',
+        "tags": ['caching', 'database', 'form', 'orchestration', 'orm', 'planning', 'redis']
     },
     {
-        "problem": "Create a new GET endpoint /api/v1/health that returns a 200 OK.",
+        "problem": """
+Create a new GET endpoint /api/v1/health that returns a 200 OK.
+""",
         "solution": """
 <sequential-thinking>
 This is a very simple, standard backend task. The full TDD workflow should still be followed for consistency.
@@ -819,10 +885,15 @@ A 5-step delegation.
 5.  **Code Review:** Delegate to **code-reviewer**.
 
 Do you approve this plan?
-"""
+""",
+        "category": 'orchestration',
+        "subcategory": 'planning',
+        "tags": ['api', 'form', 'handler', 'json', 'orchestration', 'orm', 'planning']
     },
     {
-        "problem": "Migrate the state management in the Dashboard page from local state to a global Zustand store.",
+        "problem": """
+Migrate the state management in the Dashboard page from local state to a global Zustand store.
+""",
         "solution": """
 <sequential-thinking>
 This is a frontend refactoring task. It should be broken into creating the store and then using the store.
@@ -907,10 +978,15 @@ This is a 9-step plan.
 9.  **Code Review:** Delegate to **code-reviewer**.
 
 Do you approve this plan?
-"""
+""",
+        "category": 'orchestration',
+        "subcategory": 'planning',
+        "tags": ['form', 'migration', 'orchestration', 'orm', 'planning', 'sse', 'state-management']
     },
     {
-        "problem": "Create a reusable React component for a data table with sorting and pagination.",
+        "problem": """
+Create a reusable React component for a data table with sorting and pagination.
+""",
         "solution": """
 <sequential-thinking>
 This is a complex UI feature that should be broken down into smaller pieces. Let's start with the core table functionality.
@@ -1030,10 +1106,15 @@ This plan has 15 steps.
 5.  **Code Review:** Final review of all new code.
 
 Do you approve this plan?
-"""
+""",
+        "category": 'orchestration',
+        "subcategory": 'planning',
+        "tags": ['form', 'orchestration', 'orm', 'pagination', 'planning', 'react', 'sort']
     },
     {
-        "problem": "Add a dark mode toggle to the UI that persists the user's preference.",
+        "problem": """
+Add a dark mode toggle to the UI that persists the user's preference.
+""",
         "solution": """
 <sequential-thinking>
 This is a full-stack feature involving UI, state management, and a backend endpoint.
@@ -1087,10 +1168,15 @@ This is a comprehensive 13-step plan.
 4.  **Code Review:** Perform a final review of all frontend and backend code.
 
 Do you approve this plan?
-"""
+""",
+        "category": 'orchestration',
+        "subcategory": 'planning',
+        "tags": ['api', 'database', 'form', 'orchestration', 'orm', 'planning', 'rust']
     },
     {
-        "problem": "Analyze the project's requirements from the PRD and create a task breakdown in Task Master.",
+        "problem": """
+Analyze the project's requirements from the PRD and create a task breakdown in Task Master.
+""",
         "solution": """
 <sequential-thinking>
 The user is asking for a planning operation using Task Master based on a Product Requirements Document (PRD). According to the `Task Master Delegation Protocol`, this complex planning work must be delegated to the `product-strategist`.
@@ -1122,6 +1208,9 @@ This is a 2-step delegation. I will not use the `taskmaster` tool directly for t
 2.  **Verify Plan:** Afterwards, I will ask **karen** to verify the completeness and accuracy of the generated plan.
 
 Do you approve this plan?
-"""
+""",
+        "category": 'orchestration',
+        "subcategory": 'planning',
+        "tags": ['form', 'orchestration', 'orm', 'planning', 'ui']
     }
 ]

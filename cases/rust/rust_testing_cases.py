@@ -1,11 +1,9 @@
 
 RUST_TESTING_CASES = [
-    
-    # ============================================
-    # TESTING PATTERNS AND MOCKING
-    # ============================================
     {
-        "problem": "Comprehensive testing patterns including unit tests, integration tests, mocking, and property-based testing.",
+        "problem": """
+Comprehensive testing patterns including unit tests, integration tests, mocking, and property-based testing.
+""",
         "solution": """
 #[cfg(test)]
 mod tests {
@@ -289,8 +287,8 @@ mod tests {
         // In real snapshot testing, you'd use insta crate:
         // insta::assert_snapshot!(json);
         
-        assert!(json.contains("\"id\": 1"));
-        assert!(json.contains("\"name\": \"John Doe\""));
+        assert!(json.contains(""id": 1"));
+        assert!(json.contains(""name": "John Doe""));
     }
 
     // ============================================
@@ -348,7 +346,9 @@ mod unit_tests {
 mod integration_tests {
     // Integration tests here
 }
-"""
+""",
+        "category": 'rust',
+        "subcategory": 'testing',
+        "tags": ['async', 'database', 'form', 'json', 'migration', 'orm', 'query']
     }
-
 ]
