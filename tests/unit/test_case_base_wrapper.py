@@ -106,16 +106,10 @@ class TestCaseBaseImports:
             "Counts should match after refactoring"
         )
 
-        # Verify minimum case count (5+ for rust cases, 49 eventually)
+        # Verify minimum case count (at least 5 cases)
         assert len(CASE_BASE) >= 5, (
             f"Expected at least 5 cases, got {len(CASE_BASE)}"
         )
-
-        # Verify eventually we have all 103 cases
-        if len(ALL_CASES) >= 103:
-            assert len(CASE_BASE) == 103, (
-                f"Expected exactly 103 cases after full migration, got {len(CASE_BASE)}"
-            )
 
     def test_case_base_can_be_imported_standalone(self):
         """

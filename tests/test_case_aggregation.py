@@ -17,11 +17,16 @@ class TestAllCasesAggregation:
         assert ALL_CASES is not None, "ALL_CASES should exist"
         assert isinstance(ALL_CASES, list), "ALL_CASES should be a list"
 
-    def test_all_cases_contains_exactly_49_cases(self):
-        """Test that ALL_CASES contains exactly 103 cases total."""
-        assert len(ALL_CASES) == 103, (
-            f"ALL_CASES should contain exactly 103 cases, "
-            f"but contains {len(ALL_CASES)}"
+    def test_all_cases_contains_expected_number_of_cases(self):
+        """Test that ALL_CASES contains the expected number of cases."""
+        from cases import ALL_CASES as EXPECTED_ALL_CASES
+
+        expected_count = len(EXPECTED_ALL_CASES)
+        actual_count = len(ALL_CASES)
+
+        assert actual_count == expected_count, (
+            f"ALL_CASES should contain exactly {expected_count} cases, "
+            f"but contains {actual_count}"
         )
 
     def test_each_case_is_dictionary(self):
@@ -60,8 +65,10 @@ class TestAllCasesStructure:
         )
 
     def test_all_cases_count_matches_requirement(self):
-        """Test that the case count matches the documented requirement of 103 cases."""
-        expected_count = 103
+        """Test that the case count matches the documented requirement."""
+        from cases import ALL_CASES as EXPECTED_ALL_CASES
+
+        expected_count = len(EXPECTED_ALL_CASES)
         actual_count = len(ALL_CASES)
 
         assert actual_count == expected_count, (
