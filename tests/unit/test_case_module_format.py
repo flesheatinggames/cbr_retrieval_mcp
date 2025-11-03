@@ -386,12 +386,12 @@ FIREBASE_AUTH_CASES = [
         # Cleanup
         del sys.modules['complete_test']
 
-    def test_existing_case_files_need_migration(self):
+    def test_existing_case_files_have_required_metadata(self):
         """
-        Test that demonstrates current case files are missing required fields.
+        Test that validates migrated case files have all required metadata fields.
 
-        This test validates that existing case files (which only have problem/solution)
-        will fail validation until they are migrated to include all required fields.
+        This test confirms that case files have been successfully migrated to include
+        category, subcategory, and tags fields in addition to problem and solution.
         """
         # Add project root to path for imports
         import sys
@@ -411,16 +411,15 @@ FIREBASE_AUTH_CASES = [
         assert isinstance(cases, list)
         assert all(isinstance(case, dict) for case in cases)
 
-        # This should FAIL - existing cases don't have all required fields
+        # All cases should now have the required fields after migration
         for case in cases:
             missing_fields = self.REQUIRED_CASE_FIELDS - set(case.keys())
-            assert len(missing_fields) > 0, (
-                f"Expected case to be missing required fields, but found all fields. "
-                f"Case has: {case.keys()}"
+            assert len(missing_fields) == 0, (
+                f"Case should have all required fields after migration. "
+                f"Missing: {missing_fields}, Has: {case.keys()}"
             )
 
-            # Specifically, they should be missing category, subcategory, tags
-            expected_missing = {'category', 'subcategory', 'tags'}
-            assert missing_fields == expected_missing, (
-                f"Expected to be missing {expected_missing}, but missing {missing_fields}"
+            # Verify all required fields are present
+            assert self.REQUIRED_CASE_FIELDS.issubset(case.keys()), (
+                f"Case missing required fields: {missing_fields}"
             )

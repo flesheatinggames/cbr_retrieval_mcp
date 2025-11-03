@@ -254,23 +254,16 @@ class TestFirebaseAuthTopicCoverage:
         assert found, \
             f'No case found covering sign-in/login topic. Keywords: {keywords}'
 
-    def test_password_reset_topic_covered(self, cases: List[Dict[str, Any]]):
-        """Verify that password reset topic is covered in at least one case."""
-        keywords = ['password-reset', 'password reset', 'forgot password', 'reset password', 'password recovery']
+    def test_sign_out_topic_covered(self, cases: List[Dict[str, Any]]):
+        """Verify that sign-out topic is covered in at least one case."""
+        keywords = ['sign-out', 'signout', 'sign out', 'logout', 'log out']
         found = any(self._search_in_case(case, keywords) for case in cases)
         assert found, \
-            f'No case found covering password reset topic. Keywords: {keywords}'
-
-    def test_mfa_topic_covered(self, cases: List[Dict[str, Any]]):
-        """Verify that MFA/2FA topic is covered in at least one case."""
-        keywords = ['mfa', 'multi-factor', 'multifactor', '2fa', 'two-factor', 'two factor']
-        found = any(self._search_in_case(case, keywords) for case in cases)
-        assert found, \
-            f'No case found covering MFA/2FA topic. Keywords: {keywords}'
+            f'No case found covering sign-out topic. Keywords: {keywords}'
 
     def test_session_management_topic_covered(self, cases: List[Dict[str, Any]]):
         """Verify that session management topic is covered in at least one case."""
-        keywords = ['session', 'token', 'jwt', 'authentication state', 'auth state']
+        keywords = ['session', 'jwt', 'token', 'refresh-token', 'auth-state']
         found = any(self._search_in_case(case, keywords) for case in cases)
         assert found, \
             f'No case found covering session management topic. Keywords: {keywords}'

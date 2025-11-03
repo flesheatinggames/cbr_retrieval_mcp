@@ -29,12 +29,12 @@ class TestModuleStructure:
         ), "Module must define NEXTJS_API_CASES list"
 
     def test_cases_list_length(self):
-        """Test that NEXTJS_API_CASES contains exactly 3 cases."""
+        """Test that NEXTJS_API_CASES contains exactly 5 cases."""
         from cases.nextjs.nextjs_api_cases import NEXTJS_API_CASES
 
         assert (
-            len(NEXTJS_API_CASES) == 3
-        ), f"Expected 3 cases, found {len(NEXTJS_API_CASES)}"
+            len(NEXTJS_API_CASES) == 5
+        ), f"Expected 5 cases, found {len(NEXTJS_API_CASES)}"
 
     def test_all_cases_are_dicts(self):
         """Test that each case in the list is a dictionary."""

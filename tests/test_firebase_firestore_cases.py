@@ -65,10 +65,10 @@ class TestCaseCount:
     """Test suite for validating the number of Firebase Firestore cases."""
 
     def test_firebase_firestore_cases_count(self):
-        """Verify that FIREBASE_FIRESTORE_CASES contains exactly 4 cases."""
+        """Verify that FIREBASE_FIRESTORE_CASES contains exactly 5 cases."""
         from cases.firebase.firebase_firestore_cases import FIREBASE_FIRESTORE_CASES
-        assert len(FIREBASE_FIRESTORE_CASES) == 4, \
-            f'Expected exactly 4 cases, got {len(FIREBASE_FIRESTORE_CASES)}'
+        assert len(FIREBASE_FIRESTORE_CASES) == 5, \
+            f'Expected exactly 5 cases, got {len(FIREBASE_FIRESTORE_CASES)}'
 
 
 # Test Group 4: Required Fields Presence

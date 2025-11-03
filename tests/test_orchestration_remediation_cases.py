@@ -53,13 +53,13 @@ class TestOrchestrationRemediationCaseCount:
     """Test suite for validating the number of cases in the module."""
 
     def test_case_count_is_exactly_one(self):
-        """Verify there is exactly 1 orchestration remediation case."""
+        """Verify there are exactly 2 orchestration remediation cases."""
         from cases.orchestration.orchestration_remediation_cases import ORCHESTRATION_REMEDIATION_CASES
 
-        assert len(ORCHESTRATION_REMEDIATION_CASES) == 1, (
-            f"Expected exactly 1 orchestration remediation case, "
+        assert len(ORCHESTRATION_REMEDIATION_CASES) == 2, (
+            f"Expected exactly 2 orchestration remediation cases, "
             f"found {len(ORCHESTRATION_REMEDIATION_CASES)}. "
-            f"The module should contain 1 case about handling failed verification."
+            f"The module should contain cases about handling failed verification and security remediation."
         )
 
 

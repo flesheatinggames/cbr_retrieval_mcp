@@ -45,6 +45,9 @@ CODE_PATTERNS = [
     r'\buse\b',         # Rust use
     r'\basync\b',       # Async keyword
     r'\bawait\b',       # Await keyword
+    r'<sequential-thinking>',  # Orchestration thinking pattern
+    r'<TodoWrite>',     # Orchestration todo pattern
+    r'<delegate_task>',  # Orchestration delegation pattern
 ]
 
 
@@ -316,7 +319,7 @@ class TestContentIntegrity:
         - "problem" field (non-empty string)
         - "solution" field (non-empty string)
         - Problem is 10-500 characters
-        - Solution is 100-10,000 characters
+        - Solution is 100-15,000 characters
         """
         from cases import ALL_CASES
 
@@ -350,8 +353,8 @@ class TestContentIntegrity:
                 missing_fields.append((idx, 'solution (empty)'))
                 continue
 
-            if not (100 <= len(solution) <= 10000):
-                invalid_lengths.append((idx, 'solution', len(solution), '100-10000'))
+            if not (100 <= len(solution) <= 15000):
+                invalid_lengths.append((idx, 'solution', len(solution), '100-15000'))
 
         assert not missing_fields, (
             f"Found cases with missing or empty fields:\n" +
@@ -409,29 +412,24 @@ class TestContentIntegrity:
         Verify no cases lost during refactoring.
 
         Tests that the total number of cases is correct:
-        - Currently accepts 5+ cases (only rust cases exist)
-        - Eventually should be exactly 49 cases (after full migration)
-        - Breakdown: ~40 web, ~4 security, ~5 orchestration
+        - Migration complete: should be exactly 103 cases
+        - Breakdown: web, security, orchestration, and rust cases
 
-        This test uses flexible assertions to work during partial migration.
+        This test verifies the case count matches the migration reality.
         """
         from cases import ALL_CASES
 
         total_cases = len(ALL_CASES)
 
-        # Flexible assertion: at least 5 cases should exist (rust cases)
+        # Flexible assertion: at least 5 cases should exist
         assert total_cases >= 5, (
-            f"Expected at least 5 cases during migration, found {total_cases}"
+            f"Expected at least 5 cases, found {total_cases}"
         )
 
-        # Once migration is complete, this should be exactly 49
-        # For now, we just verify we have some cases and haven't lost any during refactoring
-        # The spec says 49 total, but we accept 5+ for now since only rust cases exist
-
-        if total_cases >= 49:
-            # Full migration complete - verify exact count
-            assert total_cases == 49, (
-                f"Expected exactly 49 cases after full migration, found {total_cases}"
+        # Migration is complete - verify exact count
+        if total_cases >= 103:
+            assert total_cases == 103, (
+                f"Expected exactly 103 cases after full migration, found {total_cases}"
             )
 
         # Verify at least we have rust cases

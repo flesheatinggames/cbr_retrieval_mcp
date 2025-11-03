@@ -63,10 +63,10 @@ class TestCaseCount:
     """Test suite for validating the number of Orchestration Planning cases."""
 
     def test_orchestration_planning_cases_count(self):
-        """Verify that ORCHESTRATION_PLANNING_CASES contains exactly 2 cases."""
+        """Verify that ORCHESTRATION_PLANNING_CASES contains exactly 19 cases."""
         from cases.orchestration.orchestration_planning_cases import ORCHESTRATION_PLANNING_CASES
-        assert len(ORCHESTRATION_PLANNING_CASES) == 2, \
-            f'Expected exactly 2 cases, got {len(ORCHESTRATION_PLANNING_CASES)}'
+        assert len(ORCHESTRATION_PLANNING_CASES) == 19, \
+            f'Expected exactly 19 cases, got {len(ORCHESTRATION_PLANNING_CASES)}'
 
 
 # Test Group 4: Required Fields Presence

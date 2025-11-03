@@ -58,10 +58,10 @@ class TestCaseCount:
     """Test suite for validating the number of React Components cases."""
 
     def test_react_components_cases_count(self):
-        """Verify that REACT_COMPONENTS_CASES contains exactly 6 cases."""
+        """Verify that REACT_COMPONENTS_CASES contains exactly 7 cases."""
         from cases.react.react_components_cases import REACT_COMPONENTS_CASES
-        assert len(REACT_COMPONENTS_CASES) == 6, \
-            f'Expected exactly 6 cases, got {len(REACT_COMPONENTS_CASES)}'
+        assert len(REACT_COMPONENTS_CASES) == 7, \
+            f'Expected exactly 7 cases, got {len(REACT_COMPONENTS_CASES)}'
 
     def test_all_cases_are_dicts(self):
         """Verify that all cases in the list are dictionaries."""

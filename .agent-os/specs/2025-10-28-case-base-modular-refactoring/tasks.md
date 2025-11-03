@@ -95,17 +95,17 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 10.6 Verify all aggregation and metadata tests pass
   - [x] 10.7 Verify rust cases compatibility with dynamic loader (test with and without metadata fields)
 
-- [ ] 11. Implement Backward Compatibility Wrapper (case_base.py)
-  - [ ] 11.1 Write tests for case_base.CASE_BASE import and equality to ALL_CASES
-  - [ ] 11.2 Refactor case_base.py to import ALL_CASES from cases module and assign to CASE_BASE
-  - [ ] 11.3 Write tests for legacy helper functions (save_case_base_to_file, search_cases, validate_case_base, get_case_statistics)
-  - [ ] 11.4.1 Update save_case_base_to_file function
-  - [ ] 11.4.2 Update search_cases function
-  - [ ] 11.4.3 Update validate_case_base function
-  - [ ] 11.4.4 Update get_case_statistics function
-  - [ ] 11.5 Write tests for case_base.py main execution block
-  - [ ] 11.6 Update main execution block to use new structure
-  - [ ] 11.7 Verify all backward compatibility tests pass
+- [x] 11. Implement Backward Compatibility Wrapper (case_base.py)
+  - [x] 11.1 Write tests for case_base.CASE_BASE import and equality to ALL_CASES
+  - [x] 11.2 Refactor case_base.py to import ALL_CASES from cases module and assign to CASE_BASE
+  - [x] 11.3 Write tests for legacy helper functions (save_case_base_to_file, search_cases, validate_case_base, get_case_statistics)
+  - [x] 11.4.1 Update save_case_base_to_file function
+  - [x] 11.4.2 Update search_cases function
+  - [x] 11.4.3 Update validate_case_base function
+  - [x] 11.4.4 Update get_case_statistics function
+  - [x] 11.5 Write tests for case_base.py main execution block
+  - [x] 11.6 Update main execution block to use new structure
+  - [x] 11.7 Verify all backward compatibility tests pass
 
 - [ ] 12. Integration Testing with CBR Components
   - [ ] 12.1 Write integration tests for setup_vectordb.py importing cases from new structure

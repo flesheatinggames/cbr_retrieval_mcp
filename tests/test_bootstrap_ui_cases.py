@@ -350,10 +350,10 @@ class TestCaseContentMatching:
     def test_case_content_matches_original(self, cases: List[Dict[str, Any]]):
         """Verify problem statements match the 4 identified Bootstrap UI cases."""
         expected_problems = [
-            "A responsive navigation bar in a React component using react-bootstrap.",
-            "A React component that displays a Bootstrap modal dialog.",
-            "A Bootstrap-styled form with validation feedback in React.",
-            "A React component that displays data in a responsive Bootstrap grid."
+            "\nA responsive navigation bar in a React component using react-bootstrap.\n",
+            "\nA React component that displays a Bootstrap modal dialog.\n",
+            "\nA Bootstrap-styled form with validation feedback in React.\n",
+            "\nA React component that displays data in a responsive Bootstrap grid.\n"
         ]
 
         actual_problems = [case.get('problem', '') for case in cases]

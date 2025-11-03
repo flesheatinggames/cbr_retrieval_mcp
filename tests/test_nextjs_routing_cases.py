@@ -28,11 +28,11 @@ class TestModuleStructure:
             "Module must define NEXTJS_ROUTING_CASES list"
 
     def test_cases_list_length(self):
-        """Test that NEXTJS_ROUTING_CASES contains exactly 3 cases."""
+        """Test that NEXTJS_ROUTING_CASES contains exactly 4 cases."""
         from cases.nextjs.nextjs_routing_cases import NEXTJS_ROUTING_CASES
 
-        assert len(NEXTJS_ROUTING_CASES) == 3, \
-            f"Expected 3 cases, found {len(NEXTJS_ROUTING_CASES)}"
+        assert len(NEXTJS_ROUTING_CASES) == 4, \
+            f"Expected 4 cases, found {len(NEXTJS_ROUTING_CASES)}"
 
     def test_all_cases_are_dicts(self):
         """Test that each case in the list is a dictionary."""
