@@ -1,0 +1,526 @@
+"""
+Integration tests for category-based search functionality.
+
+This test suite verifies that the cbr_search_category function correctly filters
+cases by category and subcategory using the complete metadata stored in ChromaDB.
+
+These tests are designed to FAIL initially as they test the bug fix implementation
+for the metadata storage bug documented in:
+@.agent-os/specs/2025-11-04-metadata-storage-bug-fix/spec.md
+
+The current database has broken metadata (only stores "problem" field, missing
+category/subcategory/tags), so category-based queries will fail. After the metadata
+bug is fixed in setup_vectordb.py, these tests should pass.
+
+Test Group: Category-Based Search Functionality (from tests.md)
+"""
+
+import os
+import shutil
+import sys
+import tempfile
+from pathlib import Path
+from unittest.mock import Mock, patch
+
+import chromadb
+import pytest
+from sentence_transformers import SentenceTransformer
+
+# Add the src directory to path for importing cbr_mcp_server
+src_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "src")
+sys.path.insert(0, src_path)
+
+# Import by loading the cbr_mcp_server.py file directly (not the package)
+import importlib.util
+cbr_mcp_server_path = os.path.join(src_path, "cbr_mcp_server.py")
+spec = importlib.util.spec_from_file_location("cbr_mcp_server_module", cbr_mcp_server_path)
+cbr_mcp_server_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(cbr_mcp_server_module)
+ProductionCBRRetriever = cbr_mcp_server_module.ProductionCBRRetriever
+CBRServerConfig = cbr_mcp_server_module.CBRServerConfig
+StructuredLogger = cbr_mcp_server_module.StructuredLogger
+
+
+# ============================================================================
+# Fixtures
+# ============================================================================
+
+
+@pytest.fixture
+def temp_db_dir():
+  """
+  Create a temporary directory for ChromaDB testing.
+
+  Yields the path to the temporary directory and cleans it up after the test.
+  This prevents tests from interfering with the actual ./db directory.
+  """
+  temp_dir = tempfile.mkdtemp(prefix="cbr_test_category_search_")
+  yield temp_dir
+  # Cleanup after test
+  if os.path.exists(temp_dir):
+    shutil.rmtree(temp_dir)
+
+
+@pytest.fixture
+def mock_embedding_model():
+  """
+  Mock the SentenceTransformer to avoid downloading models during tests.
+
+  Returns a mock that generates deterministic embeddings for testing.
+  """
+  mock_model = Mock(spec=SentenceTransformer)
+
+  # Generate mock embeddings: simple list of floats for each case
+  # Each case gets a unique but deterministic embedding
+  def mock_encode(texts, normalize_embeddings=True):
+    # Handle both single text and list of texts
+    if isinstance(texts, str):
+      texts = [texts]
+
+    embeddings = []
+    for i, text in enumerate(texts):
+      # Create a simple deterministic embedding based on text hash
+      text_hash = hash(text) % 100
+      embedding = [0.1 + text_hash * 0.001, 0.2 + text_hash * 0.001, 0.3 + text_hash * 0.001]
+      embeddings.append(embedding)
+
+    # Return single list if input was single string, else list of lists
+    return embeddings if len(embeddings) > 1 or not isinstance(texts, list) else embeddings[0]
+
+  mock_model.encode = mock_encode
+  return mock_model
+
+
+@pytest.fixture
+def sample_cases_for_category_search():
+  """
+  Fixture providing a diverse set of cases for category search testing.
+
+  Returns cases spanning multiple categories and subcategories:
+  - orchestration (planning, delegation)
+  - firebase (auth)
+  - rust (database, api)
+  """
+  return [
+    # Orchestration - planning cases
+    {
+      "problem": "How to plan a multi-step agent workflow",
+      "solution": "Use sequential delegation with verification checkpoints",
+      "category": "orchestration",
+      "subcategory": "planning",
+      "tags": ["orchestration", "planning", "delegation"],
+    },
+    {
+      "problem": "How to create a detailed implementation plan",
+      "solution": "Break down features into verifiable units of work",
+      "category": "orchestration",
+      "subcategory": "planning",
+      "tags": ["orchestration", "planning", "decomposition"],
+    },
+    # Orchestration - delegation cases
+    {
+      "problem": "How to delegate tasks to specialist agents",
+      "solution": "Use delegation protocol with clear objectives",
+      "category": "orchestration",
+      "subcategory": "delegation",
+      "tags": ["orchestration", "delegation", "agents"],
+    },
+    # Code - firebase-auth cases (using valid category "code")
+    {
+      "problem": "How to implement Firebase authentication",
+      "solution": "Use firebase.auth().signInWithEmailAndPassword(...)",
+      "category": "code",
+      "subcategory": "firebase-auth",
+      "tags": ["authentication", "firebase", "login"],
+    },
+    {
+      "problem": "How to handle Firebase auth errors",
+      "solution": "Use try-catch with specific error codes",
+      "category": "code",
+      "subcategory": "firebase-auth",
+      "tags": ["firebase", "auth", "error-handling"],
+    },
+    # Code - react-components cases
+    {
+      "problem": "How to create reusable React components",
+      "solution": "Use functional components with props and hooks",
+      "category": "code",
+      "subcategory": "react-components",
+      "tags": ["react", "components", "hooks"],
+    },
+    {
+      "problem": "How to manage component state in React",
+      "solution": "Use useState and useReducer hooks appropriately",
+      "category": "code",
+      "subcategory": "react-components",
+      "tags": ["react", "state", "hooks"],
+    },
+    # Best-practice cases
+    {
+      "problem": "How to ensure proper verification workflows",
+      "solution": "Always verify completed work before marking tasks complete",
+      "category": "best-practice",
+      "subcategory": "verification",
+      "tags": ["verification", "quality", "workflow"],
+    },
+  ]
+
+
+@pytest.fixture
+def populated_db_with_complete_metadata(
+  temp_db_dir, mock_embedding_model, sample_cases_for_category_search
+):
+  """
+  Create and populate a test database with complete metadata.
+
+  This simulates what the database SHOULD look like after the metadata bug is fixed.
+  Returns a client and collection ready for category-based queries.
+  """
+  # Create ChromaDB client and collection
+  client = chromadb.PersistentClient(path=temp_db_dir)
+  collection = client.create_collection(name="code_solutions_case_base")
+
+  # Extract data from cases
+  problems = [case["problem"] for case in sample_cases_for_category_search]
+  solutions = [case["solution"] for case in sample_cases_for_category_search]
+  ids = [f"id{i}" for i in range(len(sample_cases_for_category_search))]
+
+  # Generate embeddings
+  embeddings = mock_embedding_model.encode(problems)
+
+  # Build COMPLETE metadata (this is what the fix should produce)
+  metadatas = [
+    {
+      "problem": case["problem"],
+      "category": case.get("category", "unknown"),
+      "subcategory": case.get("subcategory", "unknown"),
+      "tags": ",".join(case.get("tags", [])),
+    }
+    for case in sample_cases_for_category_search
+  ]
+
+  # Add to collection with complete metadata
+  collection.add(
+    embeddings=embeddings,
+    documents=solutions,
+    metadatas=metadatas,
+    ids=ids,
+  )
+
+  return client, collection
+
+
+@pytest.fixture
+def test_retriever(temp_db_dir, mock_embedding_model):
+  """
+  Create a ProductionCBRRetriever instance for testing.
+
+  Returns a retriever configured with the temporary database and mock embedding model.
+  """
+  # Create config pointing to temporary database
+  config = CBRServerConfig(
+    database_path=temp_db_dir,
+    collection_name="code_solutions_case_base",
+    use_real_db=True,
+  )
+
+  # Create a mock logger
+  mock_logger = Mock(spec=StructuredLogger)
+  mock_logger.info = Mock()
+  mock_logger.debug = Mock()
+  mock_logger.warning = Mock()
+  mock_logger.error = Mock()
+
+  # Create retriever instance
+  retriever = ProductionCBRRetriever(config=config, logger=mock_logger)
+
+  # Override the embedding model with our mock
+  retriever.embedding_model = mock_embedding_model
+
+  return retriever
+
+
+# ============================================================================
+# Test 1: Search by Category - Orchestration
+# ============================================================================
+
+
+@pytest.mark.asyncio
+async def test_search_by_category_orchestration(
+  populated_db_with_complete_metadata, test_retriever
+):
+  """
+  Test that searching by category="orchestration" returns orchestration cases.
+
+  Given: Database with complete metadata including orchestration cases
+  When: Calling search_by_category(category="orchestration")
+  Then:
+    - Query succeeds (no error)
+    - Returns approximately 3 orchestration cases from sample data
+    - All returned cases have category="orchestration" in metadata
+  """
+  # Ensure database is populated before test
+  client, collection = populated_db_with_complete_metadata
+
+  # Execute category search using the test retriever
+  results = await test_retriever.search_by_category(category="orchestration", limit=50)
+
+  # Assertion 1: Query succeeds (no exception raised)
+  assert results is not None, "Query should return results, not None"
+
+  # Assertion 2: Returns approximately 3 orchestration cases from sample data
+  assert len(results) == 3, f"Expected 3 orchestration cases, got {len(results)}"
+
+  # Assertion 3: All returned cases have category="orchestration"
+  for result in results:
+    metadata = result.get("metadata", {})
+    assert (
+      "category" in metadata
+    ), "Result metadata should contain 'category' field"
+    assert (
+      metadata["category"] == "orchestration"
+    ), f"Expected category='orchestration', got '{metadata.get('category')}'"
+
+
+# ============================================================================
+# Test 2: Search by Category - Firebase
+# ============================================================================
+
+
+@pytest.mark.asyncio
+async def test_search_by_category_code(
+  populated_db_with_complete_metadata, test_retriever
+):
+  """
+  Test that searching by category="code" returns only code cases.
+
+  Given: Database with complete metadata including code cases
+  When: Calling search_by_category(category="code")
+  Then:
+    - Query succeeds
+    - Returns code cases (4 in sample data: 2 firebase-auth + 2 react-components)
+    - All returned cases have category="code"
+  """
+  # Ensure database is populated before test
+  client, collection = populated_db_with_complete_metadata
+
+  # Execute category search using the test retriever
+  results = await test_retriever.search_by_category(category="code", limit=50)
+
+  # Assertion 1: Query succeeds
+  assert results is not None, "Query should return results, not None"
+
+  # Assertion 2: Returns code cases (4 code cases in sample data)
+  assert len(results) == 4, f"Expected 4 code cases, got {len(results)}"
+
+  # Assertion 3: All returned cases have category="code"
+  for result in results:
+    metadata = result.get("metadata", {})
+    assert (
+      "category" in metadata
+    ), "Result metadata should contain 'category' field"
+    assert (
+      metadata["category"] == "code"
+    ), f"Expected category='code', got '{metadata.get('category')}'"
+
+
+# ============================================================================
+# Test 3: Search by Category - Rust
+# ============================================================================
+
+
+@pytest.mark.asyncio
+async def test_search_by_category_best_practice(
+  populated_db_with_complete_metadata, test_retriever
+):
+  """
+  Test that searching by category="best-practice" returns only best-practice cases.
+
+  Given: Database with complete metadata including best-practice cases
+  When: Calling search_by_category(category="best-practice")
+  Then:
+    - Query succeeds
+    - Returns best-practice cases (1 in sample data)
+    - All returned cases have category="best-practice"
+  """
+  # Ensure database is populated before test
+  client, collection = populated_db_with_complete_metadata
+
+  # Execute category search using the test retriever
+  results = await test_retriever.search_by_category(category="best-practice", limit=50)
+
+  # Assertion 1: Query succeeds
+  assert results is not None, "Query should return results, not None"
+
+  # Assertion 2: Returns best-practice cases
+  assert len(results) == 1, f"Expected 1 best-practice case, got {len(results)}"
+
+  # Assertion 3: All returned cases have category="best-practice"
+  for result in results:
+    metadata = result.get("metadata", {})
+    assert (
+      "category" in metadata
+    ), "Result metadata should contain 'category' field"
+    assert (
+      metadata["category"] == "best-practice"
+    ), f"Expected category='best-practice', got '{metadata.get('category')}'"
+
+
+# ============================================================================
+# Test 4: Search by Category and Subcategory
+# ============================================================================
+
+
+@pytest.mark.asyncio
+async def test_search_by_category_and_subcategory(
+  populated_db_with_complete_metadata, test_retriever
+):
+  """
+  Test that filtering by both category and subcategory returns only matching cases.
+
+  Given: Database with orchestration cases of different subcategories
+  When: Calling search_by_category(category="orchestration", subcategory="planning")
+  Then:
+    - Query succeeds
+    - Returns only orchestration planning cases (2 in sample)
+    - All returned cases have BOTH category="orchestration" AND subcategory="planning"
+  """
+  # Ensure database is populated before test
+  client, collection = populated_db_with_complete_metadata
+
+  # Execute category + subcategory search using the test retriever
+  results = await test_retriever.search_by_category(
+    category="orchestration", subcategory="planning", limit=50
+  )
+
+  # Assertion 1: Query succeeds
+  assert results is not None, "Query should return results, not None"
+
+  # Assertion 2: Returns only planning cases (2 in sample data)
+  assert (
+    len(results) == 2
+  ), f"Expected 2 orchestration planning cases, got {len(results)}"
+
+  # Assertion 3: All cases have both category="orchestration" AND subcategory="planning"
+  for result in results:
+    metadata = result.get("metadata", {})
+    assert (
+      "category" in metadata
+    ), "Result metadata should contain 'category' field"
+    assert (
+      "subcategory" in metadata
+    ), "Result metadata should contain 'subcategory' field"
+    assert (
+      metadata["category"] == "orchestration"
+    ), f"Expected category='orchestration', got '{metadata.get('category')}'"
+    assert (
+      metadata["subcategory"] == "planning"
+    ), f"Expected subcategory='planning', got '{metadata.get('subcategory')}'"
+
+
+# ============================================================================
+# Test 5: Search by Category with Query Text
+# ============================================================================
+
+
+@pytest.mark.asyncio
+async def test_search_by_category_with_query_text(
+  populated_db_with_complete_metadata, test_retriever
+):
+  """
+  Test that adding a query text filters results by semantic similarity.
+
+  Given: Database with orchestration cases
+  When: Calling search_by_category(category="orchestration", query="delegation pattern")
+  Then:
+    - Query succeeds
+    - Returns orchestration cases
+    - All returned cases have category="orchestration"
+    - Results should be filtered/ranked by similarity (may be fewer than all orchestration cases)
+  """
+  # Ensure database is populated before test
+  client, collection = populated_db_with_complete_metadata
+
+  # Execute category search with query text using the test retriever
+  results = await test_retriever.search_by_category(
+    category="orchestration", query="delegation pattern", limit=50
+  )
+
+  # Assertion 1: Query succeeds
+  assert results is not None, "Query should return results, not None"
+
+  # Assertion 2: Returns orchestration cases (may be filtered by similarity)
+  assert (
+    len(results) > 0
+  ), "Should return at least some orchestration cases matching query"
+  assert (
+    len(results) <= 3
+  ), "Should not return more orchestration cases than exist in sample"
+
+  # Assertion 3: All returned cases have category="orchestration"
+  for result in results:
+    metadata = result.get("metadata", {})
+    assert (
+      "category" in metadata
+    ), "Result metadata should contain 'category' field"
+    assert (
+      metadata["category"] == "orchestration"
+    ), f"Expected category='orchestration', got '{metadata.get('category')}'"
+
+
+# ============================================================================
+# Test 6: Search Nonexistent Category
+# ============================================================================
+
+
+@pytest.mark.asyncio
+async def test_search_nonexistent_category(test_retriever):
+  """
+  Test that searching for an invalid category raises ValueError.
+
+  Given: Database with any metadata
+  When: Calling search_by_category(category="nonexistent")
+  Then: Raises ValueError with message about invalid category
+  """
+  # Assertion: Should raise ValueError for nonexistent category
+  with pytest.raises(ValueError) as exc_info:
+    await test_retriever.search_by_category(category="nonexistent", limit=10)
+
+  # Verify error message mentions invalid category
+  error_message = str(exc_info.value)
+  assert (
+    "Invalid category" in error_message
+  ), f"Error message should mention 'Invalid category', got: {error_message}"
+  assert (
+    "nonexistent" in error_message
+  ), f"Error message should mention the invalid category name, got: {error_message}"
+
+
+# ============================================================================
+# Test 7: Search Invalid Subcategory for Category
+# ============================================================================
+
+
+@pytest.mark.asyncio
+async def test_search_invalid_subcategory_for_category(test_retriever):
+  """
+  Test that searching with an invalid subcategory for a category raises ValueError.
+
+  Given: Database with any metadata
+  When: Calling search_by_category(category="orchestration", subcategory="invalid")
+  Then: Raises ValueError with message about invalid subcategory
+  """
+  # Assertion: Should raise ValueError for invalid subcategory
+  with pytest.raises(ValueError) as exc_info:
+    await test_retriever.search_by_category(
+      category="orchestration", subcategory="invalid", limit=10
+    )
+
+  # Verify error message mentions invalid subcategory
+  error_message = str(exc_info.value)
+  assert (
+    "Invalid subcategory" in error_message or "subcategory" in error_message.lower()
+  ), f"Error message should mention invalid subcategory, got: {error_message}"
+  assert (
+    "invalid" in error_message
+  ), f"Error message should mention the invalid subcategory name, got: {error_message}"

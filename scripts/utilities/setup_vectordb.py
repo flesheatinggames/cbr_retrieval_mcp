@@ -12,6 +12,7 @@ sys.path.insert(0, str(project_root))
 import chromadb
 from sentence_transformers import SentenceTransformer
 from cases import load_all_cases
+from cbr_mcp_server.metadata_extraction import extract_metadata_list
 
 
 def parse_arguments():
@@ -276,12 +277,28 @@ def main():
         print(f"Generating embeddings for {len(problems)} cases...")
         problem_embeddings = embedding_model.encode(problems, normalize_embeddings=True)
 
+        # Prepare metadata
+        metadatas = extract_metadata_list(CASE_BASE)
+
+        # Validate metadata before storage
+        assert len(metadatas) == len(CASE_BASE), f"Metadata count mismatch: {len(metadatas)} != {len(CASE_BASE)}"
+
+        # Print sample metadata for verification
+        print(f"Sample metadata (first case): {metadatas[0]}")
+
+        # Verify all metadata dicts have required fields
+        required_fields = {"problem", "category", "subcategory", "tags"}
+        for i, metadata in enumerate(metadatas):
+            missing_fields = required_fields - set(metadata.keys())
+            if missing_fields:
+                print(f"Warning: Case {i} missing fields: {missing_fields}")
+
         # Add the data to the collection
         print("Adding cases to database...")
         collection.add(
             embeddings=problem_embeddings,
             documents=solutions,  # Store the code solutions as the main document
-            metadatas=[{"problem": p} for p in problems], # Store the problem descriptions in metadata
+            metadatas=metadatas, # Store complete metadata including problem, category, subcategory, tags
             ids=ids # Provide the unique IDs
         )
         print(f"Successfully added {len(ids)} cases to the database.")
@@ -304,12 +321,28 @@ def main():
         print(f"Generating embeddings for {len(problems)} cases...")
         problem_embeddings = embedding_model.encode(problems, normalize_embeddings=True)
 
+        # Prepare metadata
+        metadatas = extract_metadata_list(CASE_BASE)
+
+        # Validate metadata before storage
+        assert len(metadatas) == len(CASE_BASE), f"Metadata count mismatch: {len(metadatas)} != {len(CASE_BASE)}"
+
+        # Print sample metadata for verification
+        print(f"Sample metadata (first case): {metadatas[0]}")
+
+        # Verify all metadata dicts have required fields
+        required_fields = {"problem", "category", "subcategory", "tags"}
+        for i, metadata in enumerate(metadatas):
+            missing_fields = required_fields - set(metadata.keys())
+            if missing_fields:
+                print(f"Warning: Case {i} missing fields: {missing_fields}")
+
         # Add the data to the collection
         print("Adding cases to database...")
         collection.add(
             embeddings=problem_embeddings,
             documents=solutions,
-            metadatas=[{"problem": p} for p in problems],
+            metadatas=metadatas,
             ids=ids
         )
         print(f"Successfully added {len(ids)} cases to the database.")
