@@ -5,9 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "cbr-mcp-server"
 version = "0.1.0"
-description = "Case-Based Reasoning MCP Server for SBCF"
+description = "Case-Based Reasoning MCP Server"
 authors = [
-    {name = "SBCF Team", email = "team@sbcf.com"}
+    {name = "Travis Williams", email = "flesheatinggames@gmail.com"}
 ]
 dependencies = [
     "mcp",
