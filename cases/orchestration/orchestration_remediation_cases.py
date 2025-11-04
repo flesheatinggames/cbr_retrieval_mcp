@@ -77,18 +77,9 @@ I am now waiting for the ui-developer to complete the fix before delegating to k
 2. Karen re-verifies and returns "VERIFIED COMPLETE"
 3. All blocking issues are resolved
 """,
-        "category": "orchestration",
-        "subcategory": "remediation",
-        "tags": [
-            "orchestration",
-            "remediation",
-            "karen",
-            "incomplete",
-            "ui",
-            "verification-failure",
-            "workflow",
-            "agents",
-        ],
+        "category": 'orchestration',
+        "subcategory": 'remediation',
+        "tags": ['orchestration', 'remediation', 'karen', 'incomplete', 'ui', 'verification-failure', 'workflow']
     },
     {
         "problem": """
@@ -179,17 +170,8 @@ The remedial steps have been added to the plan:
 
 I will wait for ui-developer to complete the fixes, then delegate to karen for verification, then back to code-reviewer for re-review.
 """,
-        "category": "orchestration",
-        "subcategory": "remediation",
-        "tags": [
-            "orchestration",
-            "remediation",
-            "code-reviewer",
-            "failed",
-            "blocking-authority",
-            "critical-issues",
-            "workflow",
-            "agents",
-        ],
-    },
+        "category": 'orchestration',
+        "subcategory": 'remediation',
+        "tags": ['orchestration', 'remediation', 'code-reviewer', 'failed', 'blocking-authority', 'critical-issues', 'workflow']
+    }
 ]

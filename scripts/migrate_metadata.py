@@ -11,6 +11,15 @@ Usage:
 
 import logging
 import sys
+from pathlib import Path
+
+# Add project root and scripts/utilities to Python path
+script_dir = Path(__file__).resolve().parent
+project_root = script_dir.parent
+utilities_dir = script_dir / "utilities"
+sys.path.insert(0, str(project_root))
+sys.path.insert(0, str(utilities_dir))
+
 import chromadb
 from metadata_migration import MetadataMigration
 

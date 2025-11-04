@@ -20,6 +20,12 @@ Uses only Python stdlib modules (timeit, tracemalloc, sys) for maximum portabili
 import sys
 import timeit
 import tracemalloc
+from pathlib import Path
+
+# Add project root to Python path for imports
+script_dir = Path(__file__).resolve().parent
+project_root = script_dir.parent.parent  # Go up two levels from scripts/utilities/
+sys.path.insert(0, str(project_root))
 
 
 # Configuration: Number of iterations for averaging (10-20 as per spec)
@@ -42,8 +48,13 @@ def measure_baseline_import_time():
         float: Average import time in milliseconds
     """
     # Setup: Clear module from cache before each iteration (including dependencies)
-    setup_code = """
+    # Note: We need to pass the project_root as a string literal since __file__ isn't available in timeit context
+    setup_code = f"""
 import sys
+# Add project root to path (literal path from outer scope)
+project_root = r'{project_root}'
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 # Clear case_base and all cases submodules to ensure fresh import
 modules_to_clear = [m for m in list(sys.modules.keys()) if m == 'case_base' or m.startswith('cases')]
 for module in modules_to_clear:
@@ -127,8 +138,13 @@ def measure_new_module_import_time():
         float: Average import time in milliseconds
     """
     # Setup: Clear module from cache before each iteration
-    setup_code = """
+    # Note: We need to pass the project_root as a string literal since __file__ isn't available in timeit context
+    setup_code = f"""
 import sys
+# Add project root to path (literal path from outer scope)
+project_root = r'{project_root}'
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
 # Clear all cases submodules
 modules_to_clear = [m for m in sys.modules.keys() if m.startswith('cases')]
 for module in modules_to_clear:
