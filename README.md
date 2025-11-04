@@ -606,130 +606,225 @@ The CBR MCP Server uses a dynamic loader (`cases/__init__.py`) that automaticall
 
 ### Loading Specific Cases into Vector Database
 
-By default, `scripts/utilities/setup_vectordb.py` loads **all** cases from all modules using `load_all_cases()`. To load only specific cases into the vector database, you can filter the case list before embedding.
+> **Important Context:** This section describes the CLI script (`setup_vectordb.py`) used for **initial database population**, not the MCP tool usage described earlier. These CLI options control which cases are loaded into ChromaDB during setup, whereas the MCP tool's subcategory parameter (described in the "Search by Category" section above) filters cases during runtime queries.
 
-#### Option 1: Filter by Category
+The `scripts/utilities/setup_vectordb.py` script now supports command-line parameters for selective case loading, eliminating the need to edit Python code. By default, it loads all cases, but you can filter by category, subcategory, or tags using simple command-line options.
 
-Load only cases from specific categories (e.g., only `rust` and `firebase` cases):
+#### Basic Usage
 
-```python
-# setup_vectordb.py (modified)
-import chromadb
-from sentence_transformers import SentenceTransformer
-from cases import load_all_cases
+```bash
+# Load all cases (default behavior)
+python scripts/utilities/setup_vectordb.py
 
-# 1. Initialize the Embedding Model
-embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
-
-# 2. Initialize ChromaDB Client
-client = chromadb.PersistentClient(path="./db")
-
-# 3. Create or load a collection
-collection = client.get_or_create_collection(name="code_solutions_case_base")
-
-# 4. Load ALL cases and filter by category
-ALL_CASES = load_all_cases()
-ALLOWED_CATEGORIES = ["rust", "firebase"]  # Only load these categories
-CASE_BASE = [case for case in ALL_CASES if case.get("category") in ALLOWED_CATEGORIES]
-
-print(f"Filtered {len(CASE_BASE)} cases from {ALLOWED_CATEGORIES} (out of {len(ALL_CASES)} total)")
-
-# 5. Populate the database with filtered cases
-# ... (rest of the setup code)
+# Get help and see all available options
+python scripts/utilities/setup_vectordb.py --help
 ```
 
-#### Option 2: Filter by Subcategory
+#### Discovery Commands
 
-Load only specific subcategories within categories:
+Before filtering, you can explore what categories and subcategories are available in your case base:
 
-```python
-# Load only Firebase auth and Rust Actix cases
-CASE_BASE = [
-    case for case in ALL_CASES
-    if (case.get("category") == "firebase" and case.get("subcategory") == "auth")
-    or (case.get("category") == "rust" and case.get("subcategory") == "actix")
-]
-print(f"Filtered {len(CASE_BASE)} specific subcategory cases")
+```bash
+# List all available categories with case counts
+python scripts/utilities/setup_vectordb.py --list-categories
+
+# Example output:
+# Available Categories:
+# ==================================================
+#   bootstrap            (4 cases)
+#   firebase             (10 cases)
+#   nextjs               (9 cases)
+#   orchestration        (24 cases)
+#   react                (7 cases)
+#   rust                 (30 cases)
+#   security             (4 cases)
+#   webdev               (15 cases)
+# ==================================================
+# Total: 103 cases across 8 categories
+
+# List subcategories for a specific category
+python scripts/utilities/setup_vectordb.py --list-subcategories orchestration
+
+# Example output:
+# Subcategories for 'orchestration':
+# ==================================================
+#   completion           (1 cases)
+#   delegation           (1 cases)
+#   planning             (19 cases)
+#   remediation          (2 cases)
+#   verification         (1 cases)
+# ==================================================
+# Total: 24 cases across 5 subcategories
 ```
 
-#### Option 3: Filter by Tags
+#### Filtering by Category
 
-Load only cases with specific tags:
+Load only cases from specific top-level categories:
 
-```python
-# Load only cases related to authentication and security
-REQUIRED_TAGS = {"authentication", "security", "jwt", "oauth"}
-CASE_BASE = [
-    case for case in ALL_CASES
-    if any(tag in REQUIRED_TAGS for tag in case.get("tags", []))
-]
-print(f"Filtered {len(CASE_BASE)} cases with security-related tags")
+```bash
+# Load only Firebase cases
+python scripts/utilities/setup_vectordb.py --category firebase
+
+# Load multiple categories
+python scripts/utilities/setup_vectordb.py --category firebase rust nextjs
+
+# Example output:
+# Filtered to 236 cases (out of 450 total)
+#   Categories: firebase, rust, nextjs
 ```
 
-#### Option 4: Load from Specific Modules Only
+#### Filtering by Subcategory
 
-To load cases from specific module files without importing all modules:
+Load only cases from specific subcategories:
 
-```python
-# setup_vectordb.py (manual loading)
-from cases.firebase.firebase_auth_cases import FIREBASE_AUTH_CASES
-from cases.rust.rust_actix_cases import RUST_ACTIX_CASES
+```bash
+# Load only authentication-related cases
+python scripts/utilities/setup_vectordb.py --subcategory auth
 
-# Combine only the modules you want
-CASE_BASE = FIREBASE_AUTH_CASES + RUST_ACTIX_CASES
-print(f"Loaded {len(CASE_BASE)} cases from selected modules")
-
-# Continue with embedding and database population...
+# Load multiple subcategories
+python scripts/utilities/setup_vectordb.py --subcategory auth components routing
 ```
 
-#### Complete Example: Custom Setup Script
+#### Filtering by Tags
 
-Here's a complete example for loading only orchestration and security cases:
+Load only cases that contain specific tags:
 
-```python
-# scripts/utilities/setup_vectordb_custom.py
-import chromadb
-from sentence_transformers import SentenceTransformer
-from cases import load_all_cases
+```bash
+# Load cases tagged with authentication
+python scripts/utilities/setup_vectordb.py --tags authentication
 
-# Initialize embedding model
-embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
+# Load cases with security-related tags
+python scripts/utilities/setup_vectordb.py --tags authentication security jwt oauth
 
-# Initialize ChromaDB
-client = chromadb.PersistentClient(path="./db")
-collection = client.get_or_create_collection(name="orchestration_case_base")
-
-# Load only orchestration and security cases
-ALL_CASES = load_all_cases()
-CASE_BASE = [
-    case for case in ALL_CASES
-    if case.get("category") in ["orchestration", "security"]
-]
-
-print(f"Loading {len(CASE_BASE)} orchestration/security cases (out of {len(ALL_CASES)} total)")
-
-# Populate database with filtered cases
-if collection.count() == 0:
-    problems = [case["problem"] for case in CASE_BASE]
-    solutions = [case["solution"] for case in CASE_BASE]
-    ids = [f"id{i}" for i in range(len(problems))]
-
-    problem_embeddings = embedding_model.encode(problems, normalize_embeddings=True)
-
-    collection.add(
-        embeddings=problem_embeddings,
-        documents=solutions,
-        metadatas=[{"problem": p} for p in problems],  # Default: only store problem in metadata
-        ids=ids
-    )
-    print(f"Successfully added {len(ids)} filtered cases to custom collection.")
-else:
-    print(f"Collection already populated with {collection.count()} cases.")
+# Example output:
+# Filtered to 47 cases (out of 450 total)
+#   Tags: authentication, security, jwt, oauth
 ```
+
+#### Filtering by Module Files (Planned Feature)
+
+The `--modules` option is designed to allow direct loading of specific case files:
+
+```bash
+# Planned usage (not yet implemented)
+python scripts/utilities/setup_vectordb.py --modules cases/firebase/firebase_auth_cases.py
+
+# Current behavior: Displays warning message
+# Warning: --modules filtering not yet implemented (requires case source tracking)
+```
+
+**Implementation Status:** This feature is currently not implemented and will display a warning message if used. The functionality requires tracking which module file each case originated from, which is planned for a future release.
+
+**Workaround:** Use `--category`, `--subcategory`, or `--tags` filters to achieve similar results:
+
+```bash
+# Instead of loading a specific module file, use category + subcategory
+python scripts/utilities/setup_vectordb.py --category firebase --subcategory auth
+```
+
+#### Combining Filters (AND Logic)
+
+You can combine multiple filters to create precise selections. Filters use AND logic:
+
+```bash
+# Firebase cases tagged with authentication
+python scripts/utilities/setup_vectordb.py --category firebase --tags authentication
+
+# Next.js routing cases only
+python scripts/utilities/setup_vectordb.py --category nextjs --subcategory routing
+
+# Complex filtering: Firebase and Next.js auth cases with TypeScript
+python scripts/utilities/setup_vectordb.py \
+    --category firebase nextjs \
+    --subcategory auth \
+    --tags typescript
+
+# Example output:
+# Filtered to 23 cases (out of 450 total)
+#   Categories: firebase, nextjs
+#   Subcategories: auth
+#   Tags: typescript
+```
+
+#### Advanced Options
+
+```bash
+# Force rebuild even if database exists
+python scripts/utilities/setup_vectordb.py --force
+
+# Force rebuild with filtering
+python scripts/utilities/setup_vectordb.py --force --category orchestration
+
+# Load only orchestration cases, forcing a rebuild
+python scripts/utilities/setup_vectordb.py \
+    --category orchestration \
+    --force
+
+# Example output:
+# Force rebuild requested. Clearing existing 450 cases...
+# Filtered to 67 cases (out of 450 total)
+#   Categories: orchestration
+# Populating the vector database...
+# Successfully added 67 cases to the database.
+```
+
+#### Practical Use Cases
+
+**Use Case 1: Development Focus on Specific Technology**
+```bash
+# Working on a React/Next.js project
+python scripts/utilities/setup_vectordb.py --category react nextjs
+```
+
+**Use Case 2: Learning Agent Orchestration Patterns**
+```bash
+# Only load orchestration examples
+python scripts/utilities/setup_vectordb.py --category orchestration
+```
+
+**Use Case 3: Security-Focused Development**
+```bash
+# Load security and authentication cases
+python scripts/utilities/setup_vectordb.py \
+    --category security \
+    --tags authentication encryption jwt
+```
+
+**Use Case 4: Rust Development**
+```bash
+# Load all Rust cases
+python scripts/utilities/setup_vectordb.py --category rust
+
+# Load only Rust web framework cases
+python scripts/utilities/setup_vectordb.py \
+    --category rust \
+    --subcategory actix axum
+```
+
+**Use Case 5: Full Stack Web Development**
+```bash
+# Frontend and backend web cases
+python scripts/utilities/setup_vectordb.py \
+    --category react nextjs webdev \
+    --subcategory components api routing
+```
+
+#### Quick Reference Table
+
+| Option | Description | Example | Status |
+|--------|-------------|---------|--------|
+| `--category` | Filter by one or more categories | `--category firebase rust` | ✓ Available |
+| `--subcategory` | Filter by one or more subcategories | `--subcategory auth components` | ✓ Available |
+| `--tags` | Filter by tags (any tag matches) | `--tags authentication security` | ✓ Available |
+| `--modules` | Load specific module file paths | `--modules cases/firebase/firebase_auth_cases.py` | ⚠️ Not yet implemented |
+| `--list-categories` | Show available categories with counts | `--list-categories` | ✓ Available |
+| `--list-subcategories` | Show subcategories for a category | `--list-subcategories orchestration` | ✓ Available |
+| `--force` | Force rebuild of existing database | `--force` | ✓ Available |
+| `--help` | Show help message with examples | `--help` | ✓ Available |
 
 #### Storing Additional Metadata (Optional)
 
-By default, `setup_vectordb.py` only stores the `problem` field in ChromaDB metadata. However, you can optionally store additional case fields like `category`, `subcategory`, and `tags` in the metadata for enhanced filtering capabilities:
+By default, `setup_vectordb.py` stores only the `problem` field in ChromaDB metadata. To store additional fields like `category`, `subcategory`, and `tags` for enhanced filtering, you can modify the metadata parameter in the script:
 
 ```python
 # Optional: Store additional metadata fields for filtering
@@ -748,7 +843,7 @@ collection.add(
 
 Storing additional metadata enables post-retrieval filtering based on these fields, but is not required for semantic similarity search to work.
 
-**Note**: After filtering cases, remember to update your collection name or clear the existing collection to avoid mixing filtered and unfiltered case bases.
+**Note**: When using filters, the script will automatically rebuild the database if the case count doesn't match. Use `--force` to explicitly rebuild even when counts match.
 
 ## Architecture
 
