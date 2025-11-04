@@ -24,7 +24,7 @@ This comprehensive deployment guide provides production-ready deployment strateg
 - Docker-compatible environments
 
 **Software Dependencies:**
-- Python 3.8+ (3.10+ recommended)
+- Python 3.10+
 - pip package manager
 - Git (for source deployment)
 - systemd (for service management on Linux)

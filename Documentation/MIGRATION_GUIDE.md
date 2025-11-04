@@ -58,7 +58,7 @@ Use this guide when:
 
 **Python Environment:**
 ```bash
-Python >= 3.8
+Python >= 3.10
 chromadb >= 0.4.0
 sentence-transformers (existing dependency)
 ```

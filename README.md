@@ -131,7 +131,7 @@ pip install structlog psutil pyyaml
 
 ### System Requirements
 
-- Python 3.8+
+- Python 3.10+
 - ChromaDB for vector storage
 - At least 2GB RAM recommended for embedding model
 - Write access for database directory (./db by default)
@@ -577,7 +577,7 @@ The CBR MCP Server uses a dynamic loader (`cases/__init__.py`) that automaticall
 **Benefits of Dynamic Loading:**
 - Add new case files without modifying any loader code
 - Organize cases by technology without merge conflicts
-- Selective loading possible via environment configuration (future feature)
+- Selective loading supported via filtering (see "Loading Specific Cases into Vector Database" section below)
 - Graceful handling of module import errors
 
 ### Best Practices for Case Management
@@ -603,6 +603,152 @@ The CBR MCP Server uses a dynamic loader (`cases/__init__.py`) that automaticall
    from cases import ALL_CASES
    print(f"Total cases: {len(ALL_CASES)}")
    ```
+
+### Loading Specific Cases into Vector Database
+
+By default, `scripts/utilities/setup_vectordb.py` loads **all** cases from all modules using `load_all_cases()`. To load only specific cases into the vector database, you can filter the case list before embedding.
+
+#### Option 1: Filter by Category
+
+Load only cases from specific categories (e.g., only `rust` and `firebase` cases):
+
+```python
+# setup_vectordb.py (modified)
+import chromadb
+from sentence_transformers import SentenceTransformer
+from cases import load_all_cases
+
+# 1. Initialize the Embedding Model
+embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
+
+# 2. Initialize ChromaDB Client
+client = chromadb.PersistentClient(path="./db")
+
+# 3. Create or load a collection
+collection = client.get_or_create_collection(name="code_solutions_case_base")
+
+# 4. Load ALL cases and filter by category
+ALL_CASES = load_all_cases()
+ALLOWED_CATEGORIES = ["rust", "firebase"]  # Only load these categories
+CASE_BASE = [case for case in ALL_CASES if case.get("category") in ALLOWED_CATEGORIES]
+
+print(f"Filtered {len(CASE_BASE)} cases from {ALLOWED_CATEGORIES} (out of {len(ALL_CASES)} total)")
+
+# 5. Populate the database with filtered cases
+# ... (rest of the setup code)
+```
+
+#### Option 2: Filter by Subcategory
+
+Load only specific subcategories within categories:
+
+```python
+# Load only Firebase auth and Rust Actix cases
+CASE_BASE = [
+    case for case in ALL_CASES
+    if (case.get("category") == "firebase" and case.get("subcategory") == "auth")
+    or (case.get("category") == "rust" and case.get("subcategory") == "actix")
+]
+print(f"Filtered {len(CASE_BASE)} specific subcategory cases")
+```
+
+#### Option 3: Filter by Tags
+
+Load only cases with specific tags:
+
+```python
+# Load only cases related to authentication and security
+REQUIRED_TAGS = {"authentication", "security", "jwt", "oauth"}
+CASE_BASE = [
+    case for case in ALL_CASES
+    if any(tag in REQUIRED_TAGS for tag in case.get("tags", []))
+]
+print(f"Filtered {len(CASE_BASE)} cases with security-related tags")
+```
+
+#### Option 4: Load from Specific Modules Only
+
+To load cases from specific module files without importing all modules:
+
+```python
+# setup_vectordb.py (manual loading)
+from cases.firebase.firebase_auth_cases import FIREBASE_AUTH_CASES
+from cases.rust.rust_actix_cases import RUST_ACTIX_CASES
+
+# Combine only the modules you want
+CASE_BASE = FIREBASE_AUTH_CASES + RUST_ACTIX_CASES
+print(f"Loaded {len(CASE_BASE)} cases from selected modules")
+
+# Continue with embedding and database population...
+```
+
+#### Complete Example: Custom Setup Script
+
+Here's a complete example for loading only orchestration and security cases:
+
+```python
+# scripts/utilities/setup_vectordb_custom.py
+import chromadb
+from sentence_transformers import SentenceTransformer
+from cases import load_all_cases
+
+# Initialize embedding model
+embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
+
+# Initialize ChromaDB
+client = chromadb.PersistentClient(path="./db")
+collection = client.get_or_create_collection(name="orchestration_case_base")
+
+# Load only orchestration and security cases
+ALL_CASES = load_all_cases()
+CASE_BASE = [
+    case for case in ALL_CASES
+    if case.get("category") in ["orchestration", "security"]
+]
+
+print(f"Loading {len(CASE_BASE)} orchestration/security cases (out of {len(ALL_CASES)} total)")
+
+# Populate database with filtered cases
+if collection.count() == 0:
+    problems = [case["problem"] for case in CASE_BASE]
+    solutions = [case["solution"] for case in CASE_BASE]
+    ids = [f"id{i}" for i in range(len(problems))]
+
+    problem_embeddings = embedding_model.encode(problems, normalize_embeddings=True)
+
+    collection.add(
+        embeddings=problem_embeddings,
+        documents=solutions,
+        metadatas=[{"problem": p} for p in problems],  # Default: only store problem in metadata
+        ids=ids
+    )
+    print(f"Successfully added {len(ids)} filtered cases to custom collection.")
+else:
+    print(f"Collection already populated with {collection.count()} cases.")
+```
+
+#### Storing Additional Metadata (Optional)
+
+By default, `setup_vectordb.py` only stores the `problem` field in ChromaDB metadata. However, you can optionally store additional case fields like `category`, `subcategory`, and `tags` in the metadata for enhanced filtering capabilities:
+
+```python
+# Optional: Store additional metadata fields for filtering
+collection.add(
+    embeddings=problem_embeddings,
+    documents=solutions,
+    metadatas=[{
+        "problem": p,
+        "category": case["category"],
+        "subcategory": case["subcategory"],
+        "tags": ",".join(case["tags"])  # Store as comma-separated string
+    } for p, case in zip(problems, CASE_BASE)],
+    ids=ids
+)
+```
+
+Storing additional metadata enables post-retrieval filtering based on these fields, but is not required for semantic similarity search to work.
+
+**Note**: After filtering cases, remember to update your collection name or clear the existing collection to avoid mixing filtered and unfiltered case bases.
 
 ## Architecture
 

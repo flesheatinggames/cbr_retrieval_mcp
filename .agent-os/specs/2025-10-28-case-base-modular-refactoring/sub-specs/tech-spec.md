@@ -322,9 +322,9 @@ Based on analysis of case_base.py (5,768 lines, 49 cases):
 
 ### Python Compatibility
 
-- **Minimum Version**: Python 3.8+ (matches existing tech stack)
+- **Minimum Version**: Python 3.10+ (matches existing tech stack)
 - **Dependencies**: Only stdlib (importlib, pathlib, logging) - no new dependencies
-- **Type Hints**: Use typing module for Python 3.8 compatibility (List, Dict, Any)
+- **Type Hints**: Use modern Python 3.10+ type syntax (list, dict, any) and PEP 604 union types (X | Y)
 
 ## User Flow Logic
 
@@ -402,6 +402,6 @@ Based on analysis of case_base.py (5,768 lines, 49 cases):
 - `importlib` - Dynamic module loading
 - `pathlib` - Path manipulation
 - `logging` - Error and info logging
-- `typing` - Type hints for Python 3.8+
+- `typing` - Type hints for Python 3.10+ (modern syntax support)
 
 No new pip packages required.

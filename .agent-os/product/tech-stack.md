@@ -7,8 +7,8 @@
 
 ### Application Framework
 - **Framework:** Python
-- **Version:** >=3.8
-- **Language:** Python 3.8+
+- **Version:** >=3.10
+- **Language:** Python 3.10+
 - **Package Management:** pip with pyproject.toml
 
 ### Database
@@ -47,7 +47,7 @@
 - **Formatter:** Black (line-length: 88)
 - **Import Sorting:** isort (black profile)
 - **Type Checking:** mypy with strict typing
-- **Python Version Target:** 3.8+
+- **Python Version Target:** 3.10+
 
 ## Infrastructure
 
