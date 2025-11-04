@@ -6,9 +6,9 @@ implementations, including JWT session management and CSRF protection for Next.j
 """
 
 SECURITY_AUTH_CASES = [
-  {
-    "problem": "Implement secure session management with JWT tokens and refresh token rotation for Firebase Auth.",
-    "solution": """
+    {
+        "problem": "Implement secure session management with JWT tokens and refresh token rotation for Firebase Auth.",
+        "solution": """
 // lib/secure-session.ts
 import { SignJWT, jwtVerify, JWTPayload } from 'jose';
 import { cookies } from 'next/headers';
@@ -356,13 +356,21 @@ export class SecureSessionManager {
 
 export const sessionManager = new SecureSessionManager();
 """,
-    "category": "security",
-    "subcategory": "auth",
-    "tags": ["jwt", "authentication", "tokens", "session-management", "refresh-tokens", "firebase", "security"]
-  },
-  {
-    "problem": "Implement secure authentication middleware with CSRF protection for Next.js forms.",
-    "solution": """
+        "category": "security",
+        "subcategory": "auth",
+        "tags": [
+            "jwt",
+            "authentication",
+            "tokens",
+            "session-management",
+            "refresh-tokens",
+            "firebase",
+            "security",
+        ],
+    },
+    {
+        "problem": "Implement secure authentication middleware with CSRF protection for Next.js forms.",
+        "solution": """
 // lib/csrf-protection.ts
 import csrf from 'csrf';
 import crypto from 'crypto';
@@ -759,8 +767,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   res.status(200).json({ success: true });
 }
 """,
-    "category": "security",
-    "subcategory": "auth",
-    "tags": ["csrf", "authentication", "middleware", "forms", "security", "nextjs", "tokens"]
-  }
+        "category": "security",
+        "subcategory": "auth",
+        "tags": [
+            "csrf",
+            "authentication",
+            "middleware",
+            "forms",
+            "security",
+            "nextjs",
+            "tokens",
+        ],
+    },
 ]

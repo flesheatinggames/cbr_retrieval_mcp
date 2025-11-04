@@ -1,4 +1,3 @@
-
 RUST_DASHMAP_CASES = [
     {
         "problem": """
@@ -310,8 +309,8 @@ fn main() {
     println!("Unique visitors: {}", visitors.count());
 }
 """,
-        "category": 'rust',
-        "subcategory": 'dashmap',
-        "tags": ['dashmap', 'form', 'json', 'orm', 'performance', 'request', 'rust']
+        "category": "rust",
+        "subcategory": "dashmap",
+        "tags": ["dashmap", "form", "json", "orm", "performance", "request", "rust"],
     }
 ]

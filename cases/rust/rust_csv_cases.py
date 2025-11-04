@@ -1,4 +1,3 @@
-
 RUST_CSV_CASES = [
     {
         "problem": """
@@ -273,8 +272,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 """,
-        "category": 'rust',
-        "subcategory": 'csv',
-        "tags": ['csv', 'filter', 'form', 'orm', 'performance', 'rayon', 'rust']
+        "category": "rust",
+        "subcategory": "csv",
+        "tags": ["csv", "filter", "form", "orm", "performance", "rayon", "rust"],
     }
 ]

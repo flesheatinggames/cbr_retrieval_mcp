@@ -1,4 +1,3 @@
-
 RUST_PARKINGLOT_CASES = [
     {
         "problem": """
@@ -340,8 +339,8 @@ fn main() {
     }
 }
 """,
-        "category": 'rust',
-        "subcategory": 'parkinglot',
-        "tags": ['event', 'form', 'orm', 'parkinglot', 'performance', 'rust', 'ui']
+        "category": "rust",
+        "subcategory": "parkinglot",
+        "tags": ["event", "form", "orm", "parkinglot", "performance", "rust", "ui"],
     }
 ]

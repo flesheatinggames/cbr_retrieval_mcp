@@ -1,4 +1,3 @@
-
 RUST_TOWER_CASES = [
     {
         "problem": """
@@ -267,8 +266,8 @@ async fn main() {
     build_service().await;
 }
 """,
-        "category": 'rust',
-        "subcategory": 'tower',
-        "tags": ['api', 'async', 'auth', 'authentication', 'form', 'http', 'logging']
+        "category": "rust",
+        "subcategory": "tower",
+        "tags": ["api", "async", "auth", "authentication", "form", "http", "logging"],
     }
 ]

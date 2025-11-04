@@ -1,5 +1,3 @@
-
-
 RUST_ACTIX_CASES = [
     {
         "problem": """
@@ -362,8 +360,8 @@ async fn main() -> std::io::Result<()> {
     .await
 }
 """,
-        "category": 'rust',
-        "subcategory": 'actix',
-        "tags": ['actix', 'api', 'async', 'database', 'event', 'form', 'handler']
+        "category": "rust",
+        "subcategory": "actix",
+        "tags": ["actix", "api", "async", "database", "event", "form", "handler"],
     }
 ]

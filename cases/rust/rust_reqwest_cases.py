@@ -1,4 +1,3 @@
-
 RUST_REQWEST_CASES = [
     {
         "problem": """
@@ -354,8 +353,16 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 """,
-        "category": 'rust',
-        "subcategory": 'reqwest',
-        "tags": ['api', 'async', 'auth', 'authorization', 'concurrency', 'form', 'http']
+        "category": "rust",
+        "subcategory": "reqwest",
+        "tags": [
+            "api",
+            "async",
+            "auth",
+            "authorization",
+            "concurrency",
+            "form",
+            "http",
+        ],
     }
 ]

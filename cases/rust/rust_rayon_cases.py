@@ -1,5 +1,3 @@
-
-
 RUST_RAYON_CASES = [
     {
         "problem": """
@@ -321,8 +319,8 @@ fn main() {
     }
 }
 """,
-        "category": 'rust',
-        "subcategory": 'rayon',
-        "tags": ['error-handling', 'filter', 'form', 'orm', 'rayon', 'rust', 'sse']
+        "category": "rust",
+        "subcategory": "rayon",
+        "tags": ["error-handling", "filter", "form", "orm", "rayon", "rust", "sse"],
     }
 ]

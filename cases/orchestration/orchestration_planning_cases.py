@@ -61,9 +61,17 @@ I have created a complete plan for my specialist agents. Here it is:
 
 Do you approve this plan?
 """,
-        "category": 'orchestration',
-        "subcategory": 'planning',
-        "tags": ['orchestration', 'planning', 'ritual', 'checkpoint', 'two-phase', 'google-auth', 'firebase']
+        "category": "orchestration",
+        "subcategory": "planning",
+        "tags": [
+            "orchestration",
+            "planning",
+            "ritual",
+            "checkpoint",
+            "two-phase",
+            "google-auth",
+            "firebase",
+        ],
     },
     {
         "problem": """
@@ -126,9 +134,9 @@ All checks passed. I am authorized to proceed.
 
 Do you approve this plan?
 """,
-        "category": 'orchestration',
-        "subcategory": 'planning',
-        "tags": ['orchestration', 'planning', 'database', 'migration', 'tdd', 'rust']
+        "category": "orchestration",
+        "subcategory": "planning",
+        "tags": ["orchestration", "planning", "database", "migration", "tdd", "rust"],
     },
     {
         "problem": """
@@ -172,9 +180,16 @@ Once the analysis is complete, I will formulate a new plan to implement the fix.
 
 Do you approve this investigation plan?
 """,
-        "category": 'orchestration',
-        "subcategory": 'planning',
-        "tags": ['orchestration', 'planning', 'investigation', 'debugging', 'performance', 'two-phase']
+        "category": "orchestration",
+        "subcategory": "planning",
+        "tags": [
+            "orchestration",
+            "planning",
+            "investigation",
+            "debugging",
+            "performance",
+            "two-phase",
+        ],
     },
     {
         "problem": """
@@ -231,9 +246,16 @@ All checks passed. I am authorized to proceed.
 
 Do you approve this plan?
 """,
-        "category": 'orchestration',
-        "subcategory": 'planning',
-        "tags": ['orchestration', 'planning', 'i18n', 'internationalization', 'ui', 'react']
+        "category": "orchestration",
+        "subcategory": "planning",
+        "tags": [
+            "orchestration",
+            "planning",
+            "i18n",
+            "internationalization",
+            "ui",
+            "react",
+        ],
     },
     {
         "problem": """
@@ -314,9 +336,17 @@ All checks passed. I am authorized to proceed.
 
 Do you approve this plan?
 """,
-        "category": 'orchestration',
-        "subcategory": 'planning',
-        "tags": ['orchestration', 'planning', 'full-stack', 'ui', 'backend', 'tdd', 'firebase']
+        "category": "orchestration",
+        "subcategory": "planning",
+        "tags": [
+            "orchestration",
+            "planning",
+            "full-stack",
+            "ui",
+            "backend",
+            "tdd",
+            "firebase",
+        ],
     },
     {
         "problem": """
@@ -359,9 +389,9 @@ All checks passed. I am authorized to proceed.
 
 Do you approve this plan?
 """,
-        "category": 'orchestration',
-        "subcategory": 'planning',
-        "tags": ['orchestration', 'planning', 'delegation', 'product-strategy', 'prd']
+        "category": "orchestration",
+        "subcategory": "planning",
+        "tags": ["orchestration", "planning", "delegation", "product-strategy", "prd"],
     },
     {
         "problem": """
@@ -418,9 +448,9 @@ All checks passed. I am authorized to proceed.
 
 Do you approve this plan?
 """,
-        "category": 'orchestration',
-        "subcategory": 'planning',
-        "tags": ['orchestration', 'planning', 'refactoring', 'tdd', 'rust', 'payment']
+        "category": "orchestration",
+        "subcategory": "planning",
+        "tags": ["orchestration", "planning", "refactoring", "tdd", "rust", "payment"],
     },
     {
         "problem": """
@@ -477,9 +507,16 @@ All checks passed. I am authorized to proceed.
 
 Do you approve this plan?
 """,
-        "category": 'orchestration',
-        "subcategory": 'planning',
-        "tags": ['orchestration', 'planning', 'api-integration', 'tdd', 'rust', 'weather']
+        "category": "orchestration",
+        "subcategory": "planning",
+        "tags": [
+            "orchestration",
+            "planning",
+            "api-integration",
+            "tdd",
+            "rust",
+            "weather",
+        ],
     },
     {
         "problem": """
@@ -536,9 +573,9 @@ All checks passed. I am authorized to proceed.
 
 Do you approve this plan?
 """,
-        "category": 'orchestration',
-        "subcategory": 'planning',
-        "tags": ['orchestration', 'planning', 'feature-flags', 'tdd', 'rust']
+        "category": "orchestration",
+        "subcategory": "planning",
+        "tags": ["orchestration", "planning", "feature-flags", "tdd", "rust"],
     },
     {
         "problem": """
@@ -581,9 +618,9 @@ All checks passed. I am authorized to proceed.
 
 Do you approve this plan?
 """,
-        "category": 'orchestration',
-        "subcategory": 'planning',
-        "tags": ['orchestration', 'planning', 'scaffolding', 'microservices', 'devops']
+        "category": "orchestration",
+        "subcategory": "planning",
+        "tags": ["orchestration", "planning", "scaffolding", "microservices", "devops"],
     },
     {
         "problem": """
@@ -626,9 +663,9 @@ All checks passed. I am authorized to proceed.
 
 Do you approve this plan?
 """,
-        "category": 'orchestration',
-        "subcategory": 'planning',
-        "tags": ['orchestration', 'planning', 'docker', 'cicd', 'devops', 'rust']
+        "category": "orchestration",
+        "subcategory": "planning",
+        "tags": ["orchestration", "planning", "docker", "cicd", "devops", "rust"],
     },
     {
         "problem": """
@@ -685,9 +722,16 @@ All checks passed. I am authorized to proceed.
 
 Do you approve this plan?
 """,
-        "category": 'orchestration',
-        "subcategory": 'planning',
-        "tags": ['orchestration', 'planning', 'deprecation', 'refactoring', 'tdd', 'rust']
+        "category": "orchestration",
+        "subcategory": "planning",
+        "tags": [
+            "orchestration",
+            "planning",
+            "deprecation",
+            "refactoring",
+            "tdd",
+            "rust",
+        ],
     },
     {
         "problem": """
@@ -738,9 +782,9 @@ All checks passed. I am authorized to proceed.
 
 Do you approve this plan?
 """,
-        "category": 'orchestration',
-        "subcategory": 'planning',
-        "tags": ['orchestration', 'planning', 'accessibility', 'ui', 'a11y', 'wcag']
+        "category": "orchestration",
+        "subcategory": "planning",
+        "tags": ["orchestration", "planning", "accessibility", "ui", "a11y", "wcag"],
     },
     {
         "problem": """
@@ -797,9 +841,16 @@ All checks passed. I am authorized to proceed.
 
 Do you approve this plan?
 """,
-        "category": 'orchestration',
-        "subcategory": 'planning',
-        "tags": ['orchestration', 'planning', 'logging', 'authentication', 'tdd', 'rust']
+        "category": "orchestration",
+        "subcategory": "planning",
+        "tags": [
+            "orchestration",
+            "planning",
+            "logging",
+            "authentication",
+            "tdd",
+            "rust",
+        ],
     },
     {
         "problem": """
@@ -862,9 +913,17 @@ All checks passed. I am authorized to proceed.
 
 Do you approve this plan?
 """,
-        "category": 'orchestration',
-        "subcategory": 'planning',
-        "tags": ['orchestration', 'planning', 'cron', 'scheduling', 'database', 'cleanup', 'tdd']
+        "category": "orchestration",
+        "subcategory": "planning",
+        "tags": [
+            "orchestration",
+            "planning",
+            "cron",
+            "scheduling",
+            "database",
+            "cleanup",
+            "tdd",
+        ],
     },
     {
         "problem": """
@@ -921,9 +980,16 @@ All checks passed. I am authorized to proceed.
 
 Do you approve this plan?
 """,
-        "category": 'orchestration',
-        "subcategory": 'planning',
-        "tags": ['orchestration', 'planning', 'validation', 'security', 'authentication', 'tdd']
+        "category": "orchestration",
+        "subcategory": "planning",
+        "tags": [
+            "orchestration",
+            "planning",
+            "validation",
+            "security",
+            "authentication",
+            "tdd",
+        ],
     },
     {
         "problem": """
@@ -980,9 +1046,9 @@ All checks passed. I am authorized to proceed.
 
 Do you approve this plan?
 """,
-        "category": 'orchestration',
-        "subcategory": 'planning',
-        "tags": ['orchestration', 'planning', 'caching', 'redis', 'performance', 'tdd']
+        "category": "orchestration",
+        "subcategory": "planning",
+        "tags": ["orchestration", "planning", "caching", "redis", "performance", "tdd"],
     },
     {
         "problem": """
@@ -1039,9 +1105,9 @@ All checks passed. I am authorized to proceed.
 
 Do you approve this plan?
 """,
-        "category": 'orchestration',
-        "subcategory": 'planning',
-        "tags": ['orchestration', 'planning', 'api', 'health-check', 'tdd', 'rust']
+        "category": "orchestration",
+        "subcategory": "planning",
+        "tags": ["orchestration", "planning", "api", "health-check", "tdd", "rust"],
     },
     {
         "problem": """
@@ -1110,8 +1176,16 @@ All checks passed. I am authorized to proceed.
 
 Do you approve this plan?
 """,
-        "category": 'orchestration',
-        "subcategory": 'planning',
-        "tags": ['orchestration', 'planning', 'state-management', 'zustand', 'react', 'ui', 'tdd']
-    }
+        "category": "orchestration",
+        "subcategory": "planning",
+        "tags": [
+            "orchestration",
+            "planning",
+            "state-management",
+            "zustand",
+            "react",
+            "ui",
+            "tdd",
+        ],
+    },
 ]

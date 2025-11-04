@@ -1,8 +1,8 @@
 """
-    },
-    {
-        "problem": "An Axum REST API with CRUD operations, pagination, and input validation using validator crate.",
-        "solution": """
+},
+{
+    "problem": "An Axum REST API with CRUD operations, pagination, and input validation using validator crate.",
+    "solution":"""
 
 RUST_AXUM_CASES = [
     {
@@ -315,9 +315,17 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 """,
-        "category": 'rust',
-        "subcategory": 'axum',
-        "tags": ['api', 'async', 'auth', 'authentication', 'authorization', 'axum', 'database']
+        "category": "rust",
+        "subcategory": "axum",
+        "tags": [
+            "api",
+            "async",
+            "auth",
+            "authentication",
+            "authorization",
+            "axum",
+            "database",
+        ],
     },
     {
         "problem": """
@@ -609,8 +617,8 @@ pub fn articles_router() -> Router<PgPool> {
         .route("/articles/:id", get(get_article).put(update_article).delete(delete_article))
 }
 """,
-        "category": 'rust',
-        "subcategory": 'axum',
-        "tags": ['api', 'async', 'auth', 'axum', 'crud', 'database', 'error-handling']
-    }
+        "category": "rust",
+        "subcategory": "axum",
+        "tags": ["api", "async", "auth", "axum", "crud", "database", "error-handling"],
+    },
 ]

@@ -1,15 +1,15 @@
 """
-    },
-    {
-        "problem": "A Leptos server function for fetching and caching data with error handling.",
-        "solution": """
+},
+{
+    "problem": "A Leptos server function for fetching and caching data with error handling.",
+    "solution": r"""
 
 RUST_LEPTOS_CASES = [
     {
         "problem": """
 A Leptos component for a user authentication form with reactive state management and validation.
 """,
-        "solution": """
+        "solution": r"""
 use leptos::*;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::JsCast;
@@ -193,15 +193,15 @@ async fn login_user(form_data: LoginForm) -> Result<(), String> {
     }
 }
 """,
-        "category": 'rust',
-        "subcategory": 'leptos',
-        "tags": ['api', 'async', 'auth', 'authentication', 'event', 'form', 'leptos']
+        "category": "rust",
+        "subcategory": "leptos",
+        "tags": ["api", "async", "auth", "authentication", "event", "form", "leptos"],
     },
     {
         "problem": """
 A Leptos server function for fetching and caching data with error handling.
 """,
-        "solution": """
+        "solution": r"""
 use leptos::*;
 use serde::{Deserialize, Serialize};
 
@@ -377,15 +377,23 @@ pub fn UserList() -> impl IntoView {
     }
 }
 """,
-        "category": 'rust',
-        "subcategory": 'leptos',
-        "tags": ['api', 'async', 'caching', 'database', 'error-handling', 'form', 'leptos']
+        "category": "rust",
+        "subcategory": "leptos",
+        "tags": [
+            "api",
+            "async",
+            "caching",
+            "database",
+            "error-handling",
+            "form",
+            "leptos",
+        ],
     },
     {
         "problem": """
 A Leptos component with a custom hook for managing complex form state with nested objects.
 """,
-        "solution": """
+        "solution": r"""
 use leptos::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -621,8 +629,8 @@ pub fn UserProfileForm() -> impl IntoView {
     }
 }
 """,
-        "category": 'rust',
-        "subcategory": 'leptos',
-        "tags": ['api', 'async', 'event', 'filter', 'form', 'leptos', 'orm']
-    }
+        "category": "rust",
+        "subcategory": "leptos",
+        "tags": ["api", "async", "event", "filter", "form", "leptos", "orm"],
+    },
 ]

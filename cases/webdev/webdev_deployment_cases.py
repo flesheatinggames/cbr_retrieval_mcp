@@ -15,7 +15,7 @@ WEBDEV_DEPLOYMENT_CASES = [
         "problem": """
 Configure Vercel deployment with custom build settings, environment variables, and routing rules for a Next.js application.
 """,
-        "solution": """
+        "solution": r"""
 // vercel.json - Vercel deployment configuration
 {
   "version": 2,
@@ -219,15 +219,23 @@ fi
 
 echo "✅ Deployment complete!"
 """,
-        "category": 'webdev',
-        "subcategory": 'deployment',
-        "tags": ['deployment', 'vercel', 'nextjs', 'production', 'config', 'build', 'environment']
+        "category": "webdev",
+        "subcategory": "deployment",
+        "tags": [
+            "deployment",
+            "vercel",
+            "nextjs",
+            "production",
+            "config",
+            "build",
+            "environment",
+        ],
     },
     {
         "problem": """
 Implement secure API key management and environment variable validation for production deployments.
 """,
-        "solution": """
+        "solution": r"""
 // lib/config-validator.ts
 import { z } from 'zod';
 import crypto from 'crypto';
@@ -552,8 +560,16 @@ const apiKey = config.getApiKey('stripe');
 const isProduction = config.isProduction();
 const allowedOrigins = config.get('ALLOWED_ORIGINS');
 """,
-        "category": 'webdev',
-        "subcategory": 'deployment',
-        "tags": ['deployment', 'environment', 'env', 'config', 'validation', 'production', 'api-keys']
-    }
+        "category": "webdev",
+        "subcategory": "deployment",
+        "tags": [
+            "deployment",
+            "environment",
+            "env",
+            "config",
+            "validation",
+            "production",
+            "api-keys",
+        ],
+    },
 ]

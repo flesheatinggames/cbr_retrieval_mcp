@@ -1,4 +1,3 @@
-
 RUST_CONFIG_CASES = [
     {
         "problem": """
@@ -275,8 +274,16 @@ fn main() -> anyhow::Result<()> {
     Ok(())
 }
 """,
-        "category": 'rust',
-        "subcategory": 'config',
-        "tags": ['auth', 'authentication', 'caching', 'config', 'database', 'event', 'form']
+        "category": "rust",
+        "subcategory": "config",
+        "tags": [
+            "auth",
+            "authentication",
+            "caching",
+            "config",
+            "database",
+            "event",
+            "form",
+        ],
     }
 ]

@@ -10,7 +10,7 @@ NEXTJS_ROUTING_CASES = [
         "problem": """
 A responsive navigation bar in Next.js using react-bootstrap with Next.js Link routing and authentication-aware navigation.
 """,
-        "solution": """
+        "solution": r"""
 import { Navbar, Nav, Container, NavDropdown, Button } from 'react-bootstrap';
 import Link from 'next/link';
 import { useAuth } from '../hooks/useAuth';
@@ -109,15 +109,15 @@ const AppNavbar = () => {
 
 export default AppNavbar;
 """,
-        "category": 'nextjs',
-        "subcategory": 'routing',
-        "tags": ['nextjs', 'routing', 'navigation', 'link', 'app-router']
+        "category": "nextjs",
+        "subcategory": "routing",
+        "tags": ["nextjs", "routing", "navigation", "link", "app-router"],
     },
     {
         "problem": """
 A Next.js page with dynamic route [id] parameter that is server-side rendered (SSR) and fetches data from Firebase Admin SDK.
 """,
-        "solution": """
+        "solution": r"""
 import React, { useEffect } from 'react';
 import { GetServerSideProps } from 'next';
 import Head from 'next/head';
@@ -280,15 +280,15 @@ const PostPage: React.FC<PostPageProps> = ({ post, error }) => {
 
 export default PostPage;
 """,
-        "category": 'nextjs',
-        "subcategory": 'routing',
-        "tags": ['nextjs', 'routing', 'dynamic-routes', 'params', 'slug']
+        "category": "nextjs",
+        "subcategory": "routing",
+        "tags": ["nextjs", "routing", "dynamic-routes", "params", "slug"],
     },
     {
         "problem": """
 Implement Content Security Policy (CSP) headers and security middleware in Next.js to prevent XSS attacks.
 """,
-        "solution": """
+        "solution": r"""
 // middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
@@ -381,15 +381,15 @@ export const validateOrigin = (origin: string | null): boolean => {
   return origin ? allowedOrigins.includes(origin) : false;
 };
 """,
-        "category": 'nextjs',
-        "subcategory": 'routing',
-        "tags": ['nextjs', 'routing', 'middleware', 'edge', 'request']
+        "category": "nextjs",
+        "subcategory": "routing",
+        "tags": ["nextjs", "routing", "middleware", "edge", "request"],
     },
     {
         "problem": """
 A Next.js page component that fetches data at build time using getStaticProps.
 """,
-        "solution": """
+        "solution": r"""
 import { GetStaticProps } from 'next';
 import { Container, Row, Col, Card } from 'react-bootstrap';
 
@@ -465,8 +465,8 @@ function Blog({ posts }: BlogProps) {
 
 export default Blog;
 """,
-        "category": 'nextjs',
-        "subcategory": 'routing',
-        "tags": ['nextjs', 'routing', 'async', 'bootstrap', 'http', 'json', 'api']
-    }
+        "category": "nextjs",
+        "subcategory": "routing",
+        "tags": ["nextjs", "routing", "async", "bootstrap", "http", "json", "api"],
+    },
 ]

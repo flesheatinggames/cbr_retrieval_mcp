@@ -124,11 +124,17 @@ class TestSetupVectorDBImportsAllCases:
         from cases import ALL_CASES as ACTUAL_ALL_CASES
         expected_case_count = len(ACTUAL_ALL_CASES)
 
-        # Mock the cases.ALL_CASES import (or case_base.CASE_BASE for current implementation)
-        with patch('case_base.CASE_BASE', all_cases):
+        # Mock the cases.load_all_cases import
+        with patch('cases.load_all_cases', return_value=all_cases):
             # Import setup_vectordb (this will execute the setup)
             import importlib
             import setup_vectordb
+            # Reset mocks after initial import to test only the reload behavior
+            mock_chromadb_client['client'].reset_mock()
+            mock_chromadb_client['instance'].reset_mock()
+            mock_chromadb_client['collection'].reset_mock()
+            mock_embedding_model.return_value.encode.reset_mock()
+
             importlib.reload(setup_vectordb)
 
             # Verify ChromaDB client was initialized
@@ -168,9 +174,15 @@ class TestSetupVectorDBImportsAllCases:
         from cases import ALL_CASES as ACTUAL_ALL_CASES
         expected_case_count = len(ACTUAL_ALL_CASES)
 
-        with patch('case_base.CASE_BASE', all_cases):
+        with patch('cases.load_all_cases', return_value=all_cases):
             import importlib
             import setup_vectordb
+            # Reset mocks after initial import to test only the reload behavior
+            mock_chromadb_client['client'].reset_mock()
+            mock_chromadb_client['instance'].reset_mock()
+            mock_chromadb_client['collection'].reset_mock()
+            mock_embedding_model.return_value.encode.reset_mock()
+
             importlib.reload(setup_vectordb)
 
             call_args = mock_chromadb_client['collection'].add.call_args
@@ -190,9 +202,15 @@ class TestSetupVectorDBImportsAllCases:
         sample_cases
     ):
         """Verify that problems and solutions are correctly extracted."""
-        with patch('case_base.CASE_BASE', sample_cases):
+        with patch('cases.load_all_cases', return_value=sample_cases):
             import importlib
             import setup_vectordb
+            # Reset mocks after initial import to test only the reload behavior
+            mock_chromadb_client['client'].reset_mock()
+            mock_chromadb_client['instance'].reset_mock()
+            mock_chromadb_client['collection'].reset_mock()
+            mock_embedding_model.return_value.encode.reset_mock()
+
             importlib.reload(setup_vectordb)
 
             call_args = mock_chromadb_client['collection'].add.call_args
@@ -219,7 +237,7 @@ class TestSetupVectorDBHandlesMetadataFields:
         sample_cases
     ):
         """Verify setup processes category, subcategory, tags without errors."""
-        with patch('case_base.CASE_BASE', sample_cases):
+        with patch('cases.load_all_cases', return_value=sample_cases):
             import importlib
             import setup_vectordb
 
@@ -243,9 +261,15 @@ class TestSetupVectorDBHandlesMetadataFields:
         sample_cases
     ):
         """Verify metadata is correctly formatted for ChromaDB."""
-        with patch('case_base.CASE_BASE', sample_cases):
+        with patch('cases.load_all_cases', return_value=sample_cases):
             import importlib
             import setup_vectordb
+            # Reset mocks after initial import to test only the reload behavior
+            mock_chromadb_client['client'].reset_mock()
+            mock_chromadb_client['instance'].reset_mock()
+            mock_chromadb_client['collection'].reset_mock()
+            mock_embedding_model.return_value.encode.reset_mock()
+
             importlib.reload(setup_vectordb)
 
             call_args = mock_chromadb_client['collection'].add.call_args
@@ -271,9 +295,15 @@ class TestSetupVectorDBEmbeddingGeneration:
         from cases import ALL_CASES as ACTUAL_ALL_CASES
         expected_case_count = len(ACTUAL_ALL_CASES)
 
-        with patch('case_base.CASE_BASE', all_cases):
+        with patch('cases.load_all_cases', return_value=all_cases):
             import importlib
             import setup_vectordb
+            # Reset mocks after initial import to test only the reload behavior
+            mock_chromadb_client['client'].reset_mock()
+            mock_chromadb_client['instance'].reset_mock()
+            mock_chromadb_client['collection'].reset_mock()
+            mock_embedding_model.return_value.encode.reset_mock()
+
             importlib.reload(setup_vectordb)
 
             # Verify encode was called once with all problems
@@ -296,9 +326,15 @@ class TestSetupVectorDBEmbeddingGeneration:
         sample_cases
     ):
         """Verify correct content is passed to embedding model."""
-        with patch('case_base.CASE_BASE', sample_cases):
+        with patch('cases.load_all_cases', return_value=sample_cases):
             import importlib
             import setup_vectordb
+            # Reset mocks after initial import to test only the reload behavior
+            mock_chromadb_client['client'].reset_mock()
+            mock_chromadb_client['instance'].reset_mock()
+            mock_chromadb_client['collection'].reset_mock()
+            mock_embedding_model.return_value.encode.reset_mock()
+
             importlib.reload(setup_vectordb)
 
             call_args = mock_embedding_model.return_value.encode.call_args
@@ -319,9 +355,15 @@ class TestSetupVectorDBChromaDBIntegration:
         sample_cases
     ):
         """Verify ChromaDB client is initialized with correct parameters."""
-        with patch('case_base.CASE_BASE', sample_cases):
+        with patch('cases.load_all_cases', return_value=sample_cases):
             import importlib
             import setup_vectordb
+            # Reset mocks after initial import to test only the reload behavior
+            mock_chromadb_client['client'].reset_mock()
+            mock_chromadb_client['instance'].reset_mock()
+            mock_chromadb_client['collection'].reset_mock()
+            mock_embedding_model.return_value.encode.reset_mock()
+
             importlib.reload(setup_vectordb)
 
             # Verify PersistentClient was called with correct path
@@ -334,9 +376,15 @@ class TestSetupVectorDBChromaDBIntegration:
         sample_cases
     ):
         """Verify collection is created/retrieved with correct name."""
-        with patch('case_base.CASE_BASE', sample_cases):
+        with patch('cases.load_all_cases', return_value=sample_cases):
             import importlib
             import setup_vectordb
+            # Reset mocks after initial import to test only the reload behavior
+            mock_chromadb_client['client'].reset_mock()
+            mock_chromadb_client['instance'].reset_mock()
+            mock_chromadb_client['collection'].reset_mock()
+            mock_embedding_model.return_value.encode.reset_mock()
+
             importlib.reload(setup_vectordb)
 
             # Verify get_or_create_collection was called
@@ -354,9 +402,15 @@ class TestSetupVectorDBChromaDBIntegration:
         # Configure collection to return count > 0
         mock_chromadb_client['collection'].count.return_value = 10
 
-        with patch('case_base.CASE_BASE', sample_cases):
+        with patch('cases.load_all_cases', return_value=sample_cases):
             import importlib
             import setup_vectordb
+            # Reset mocks after initial import to test only the reload behavior
+            mock_chromadb_client['client'].reset_mock()
+            mock_chromadb_client['instance'].reset_mock()
+            mock_chromadb_client['collection'].reset_mock()
+            mock_embedding_model.return_value.encode.reset_mock()
+
             importlib.reload(setup_vectordb)
 
             # Verify add was NOT called
@@ -374,7 +428,7 @@ class TestSetupVectorDBEdgeCases:
         """Verify graceful handling when case list is empty."""
         empty_cases = []
 
-        with patch('case_base.CASE_BASE', empty_cases):
+        with patch('cases.load_all_cases', return_value=empty_cases):
             import importlib
             import setup_vectordb
 
@@ -409,7 +463,7 @@ class TestSetupVectorDBEdgeCases:
             }
         ]
 
-        with patch('case_base.CASE_BASE', minimal_cases):
+        with patch('cases.load_all_cases', return_value=minimal_cases):
             import importlib
             import setup_vectordb
 
@@ -437,9 +491,15 @@ class TestSetupVectorDBDuplicateHandling:
         all_cases
     ):
         """Verify all generated IDs are unique."""
-        with patch('case_base.CASE_BASE', all_cases):
+        with patch('cases.load_all_cases', return_value=all_cases):
             import importlib
             import setup_vectordb
+            # Reset mocks after initial import to test only the reload behavior
+            mock_chromadb_client['client'].reset_mock()
+            mock_chromadb_client['instance'].reset_mock()
+            mock_chromadb_client['collection'].reset_mock()
+            mock_embedding_model.return_value.encode.reset_mock()
+
             importlib.reload(setup_vectordb)
 
             call_args = mock_chromadb_client['collection'].add.call_args
@@ -455,9 +515,15 @@ class TestSetupVectorDBDuplicateHandling:
         sample_cases
     ):
         """Verify IDs are sequential and predictable."""
-        with patch('case_base.CASE_BASE', sample_cases):
+        with patch('cases.load_all_cases', return_value=sample_cases):
             import importlib
             import setup_vectordb
+            # Reset mocks after initial import to test only the reload behavior
+            mock_chromadb_client['client'].reset_mock()
+            mock_chromadb_client['instance'].reset_mock()
+            mock_chromadb_client['collection'].reset_mock()
+            mock_embedding_model.return_value.encode.reset_mock()
+
             importlib.reload(setup_vectordb)
 
             call_args = mock_chromadb_client['collection'].add.call_args
@@ -483,12 +549,12 @@ class TestSetupVectorDBErrorHandling:
             mock_instance.encode.side_effect = RuntimeError("Embedding generation failed")
             mock_model.return_value = mock_instance
 
-            with patch('case_base.CASE_BASE', sample_cases):
+            with patch('cases.load_all_cases', return_value=sample_cases):
                 import importlib
-                import setup_vectordb
 
-                # Should raise the embedding error
-                with pytest.raises(RuntimeError):
+                # Should raise the embedding error during import
+                with pytest.raises(RuntimeError, match="Embedding generation failed"):
+                    import setup_vectordb
                     importlib.reload(setup_vectordb)
 
     def test_setup_vectordb_handles_chromadb_connection_failure(
@@ -500,12 +566,12 @@ class TestSetupVectorDBErrorHandling:
         with patch('chromadb.PersistentClient') as mock_client:
             mock_client.side_effect = ConnectionError("Cannot connect to ChromaDB")
 
-            with patch('case_base.CASE_BASE', sample_cases):
+            with patch('cases.load_all_cases', return_value=sample_cases):
                 import importlib
-                import setup_vectordb
 
-                # Should raise the connection error
-                with pytest.raises(ConnectionError):
+                # Should raise the connection error during import
+                with pytest.raises(ConnectionError, match="Cannot connect to ChromaDB"):
+                    import setup_vectordb
                     importlib.reload(setup_vectordb)
 
 

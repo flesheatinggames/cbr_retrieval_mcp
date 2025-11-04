@@ -1,4 +1,3 @@
-
 RUST_DATETIME_CASES = [
     {
         "problem": """
@@ -271,8 +270,8 @@ fn main() {
     }
 }
 """,
-        "category": 'rust',
-        "subcategory": 'datetime',
-        "tags": ['datetime', 'event', 'form', 'orm', 'rust', 'serde']
+        "category": "rust",
+        "subcategory": "datetime",
+        "tags": ["datetime", "event", "form", "orm", "rust", "serde"],
     }
 ]

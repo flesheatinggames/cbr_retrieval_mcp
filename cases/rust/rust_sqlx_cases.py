@@ -1,4 +1,3 @@
-
 RUST_SQLX_CASES = [
     {
         "problem": """
@@ -432,8 +431,8 @@ pub async fn create_pool(database_url: &str) -> anyhow::Result<PgPool> {
     Ok(pool)
 }
 """,
-        "category": 'rust',
-        "subcategory": 'sqlx',
-        "tags": ['async', 'database', 'form', 'hashing', 'migration', 'orm', 'query']
+        "category": "rust",
+        "subcategory": "sqlx",
+        "tags": ["async", "database", "form", "hashing", "migration", "orm", "query"],
     }
 ]

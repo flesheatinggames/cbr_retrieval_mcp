@@ -11,7 +11,7 @@ WEBDEV_STATE_MANAGEMENT_CASES = [
         "problem": """
 Migrate the state management in the Dashboard page from local state to a global Zustand store.
 """,
-        "solution": """
+        "solution": r"""
 <sequential-thinking>
 This is a frontend refactoring task. It should be broken into creating the store and then using the store.
 
@@ -96,15 +96,23 @@ This is a 9-step plan.
 
 Do you approve this plan?
 """,
-        "category": 'webdev',
-        "subcategory": 'state-management',
-        "tags": ['state', 'zustand', 'global-state', 'react', 'frontend', 'state-management', 'client-state']
+        "category": "webdev",
+        "subcategory": "state-management",
+        "tags": [
+            "state",
+            "zustand",
+            "global-state",
+            "react",
+            "frontend",
+            "state-management",
+            "client-state",
+        ],
     },
     {
         "problem": """
 A React hook to query and fetch a single document from Firestore by its ID with server state management.
 """,
-        "solution": """
+        "solution": r"""
 import { useState, useEffect } from 'react';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
@@ -168,15 +176,23 @@ return {
 // const { data: user, loading, error, refetch } = useDocument<User>('users', userId);
 // This pattern is similar to React Query's useQuery hook for managing server state
 """,
-        "category": 'webdev',
-        "subcategory": 'state-management',
-        "tags": ['state-management', 'react', 'hooks', 'server-state', 'data-fetching', 'async', 'query']
+        "category": "webdev",
+        "subcategory": "state-management",
+        "tags": [
+            "state-management",
+            "react",
+            "hooks",
+            "server-state",
+            "data-fetching",
+            "async",
+            "query",
+        ],
     },
     {
         "problem": """
 A React component for user sign-up with Firebase Authentication demonstrating complex local state management.
 """,
-        "solution": """
+        "solution": r"""
 import React, { useState } from 'react';
 import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { Form, Button, Alert, Spinner } from 'react-bootstrap';
@@ -361,8 +377,16 @@ return (
 
 export default SignUpForm;
 """,
-        "category": 'webdev',
-        "subcategory": 'state-management',
-        "tags": ['state-management', 'react', 'usestate', 'local-state', 'form-state', 'loading-state', 'error-state']
-    }
+        "category": "webdev",
+        "subcategory": "state-management",
+        "tags": [
+            "state-management",
+            "react",
+            "usestate",
+            "local-state",
+            "form-state",
+            "loading-state",
+            "error-state",
+        ],
+    },
 ]

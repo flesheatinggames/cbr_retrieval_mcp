@@ -1,5 +1,3 @@
-
-
 RUST_ERROR_CASES = [
     {
         "problem": """
@@ -495,8 +493,8 @@ struct CreateUserRequest {
     name: String,
 }
 """,
-        "category": 'rust',
-        "subcategory": 'error',
-        "tags": ['api', 'async', 'auth', 'authentication', 'axum', 'database', 'error']
+        "category": "rust",
+        "subcategory": "error",
+        "tags": ["api", "async", "auth", "authentication", "axum", "database", "error"],
     }
 ]

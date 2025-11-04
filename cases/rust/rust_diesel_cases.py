@@ -1,5 +1,3 @@
-
-
 RUST_DIESEL_CASES = [
     {
         "problem": """
@@ -428,8 +426,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 """,
-        "category": 'rust',
-        "subcategory": 'diesel',
-        "tags": ['auth', 'database', 'diesel', 'filter', 'form', 'hashing', 'migration']
+        "category": "rust",
+        "subcategory": "diesel",
+        "tags": [
+            "auth",
+            "database",
+            "diesel",
+            "filter",
+            "form",
+            "hashing",
+            "migration",
+        ],
     }
 ]

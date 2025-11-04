@@ -1,4 +1,3 @@
-
 RUST_WEBSOCKETS_CASES = [
     {
         "problem": """
@@ -411,8 +410,16 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 """,
-        "category": 'rust',
-        "subcategory": 'websockets',
-        "tags": ['async', 'auth', 'error-handling', 'handler', 'json', 'listener', 'orm']
+        "category": "rust",
+        "subcategory": "websockets",
+        "tags": [
+            "async",
+            "auth",
+            "error-handling",
+            "handler",
+            "json",
+            "listener",
+            "orm",
+        ],
     }
 ]

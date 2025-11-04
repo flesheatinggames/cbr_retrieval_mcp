@@ -1,4 +1,3 @@
-
 RUST_LOGGING_CASES = [
     {
         "problem": """
@@ -234,8 +233,16 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 """,
-        "category": 'rust',
-        "subcategory": 'logging',
-        "tags": ['api', 'async', 'auth', 'authentication', 'database', 'event', 'filter']
+        "category": "rust",
+        "subcategory": "logging",
+        "tags": [
+            "api",
+            "async",
+            "auth",
+            "authentication",
+            "database",
+            "event",
+            "filter",
+        ],
     }
 ]

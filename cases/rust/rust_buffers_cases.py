@@ -1,4 +1,3 @@
-
 RUST_BUFFERS_CASES = [
     {
         "problem": """
@@ -332,8 +331,8 @@ fn main() {
     pool.release(buf2);
 }
 """,
-        "category": 'rust',
-        "subcategory": 'buffers',
-        "tags": ['buffers', 'parser', 'rust', 'serialization', 'sse', 'ui']
+        "category": "rust",
+        "subcategory": "buffers",
+        "tags": ["buffers", "parser", "rust", "serialization", "sse", "ui"],
     }
 ]

@@ -1,10 +1,9 @@
-
 RUST_REGEX_CASES = [
     {
         "problem": """
 Advanced regex pattern matching with validation, extraction, and text processing.
 """,
-        "solution": """
+        "solution": r"""
 use regex::{Regex, RegexBuilder, Captures};
 use lazy_static::lazy_static;
 use std::collections::HashMap;
@@ -309,8 +308,8 @@ fn main() {
     println!("\nHighlighted: {}", highlight_matches(text_to_search, "fox"));
 }
 """,
-        "category": 'rust',
-        "subcategory": 'regex',
-        "tags": ['form', 'html', 'http', 'orm', 'parser', 'regex', 'rust']
+        "category": "rust",
+        "subcategory": "regex",
+        "tags": ["form", "html", "http", "orm", "parser", "regex", "rust"],
     }
 ]

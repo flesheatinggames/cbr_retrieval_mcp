@@ -150,3 +150,15 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# ChromaDB database directory (users build their own from selected cases)
+db/
+
+# Serena MCP cache
+.serena/
+
+# Test output files
+test_results.txt
+benchmark_output.txt
+*_TEST_RESULTS.md
+*_VERIFICATION_REPORT.md

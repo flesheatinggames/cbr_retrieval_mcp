@@ -1,4 +1,3 @@
-
 RUST_UUID_CASES = [
     {
         "problem": """
@@ -251,8 +250,8 @@ fn main() {
     println!("  URN: {}", uuid_utils::to_urn(&uuid));
 }
 """,
-        "category": 'rust',
-        "subcategory": 'uuid',
-        "tags": ['form', 'node', 'orm', 'rust', 'serde', 'ui', 'uuid']
+        "category": "rust",
+        "subcategory": "uuid",
+        "tags": ["form", "node", "orm", "rust", "serde", "ui", "uuid"],
     }
 ]

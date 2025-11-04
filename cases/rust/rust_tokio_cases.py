@@ -1,12 +1,12 @@
 """
-    },
+},
 
-    # ============================================
-    # TOKIO SELECT AND JOIN
-    # ============================================
-    {
-        "problem": "Advanced tokio concurrency patterns using select!, join!, and timeout with cancellation support.",
-        "solution": """
+# ============================================
+# TOKIO SELECT AND JOIN
+# ============================================
+{
+    "problem": "Advanced tokio concurrency patterns using select!, join!, and timeout with cancellation support.",
+    "solution":"""
 
 RUST_TOKIO_CASES = [
     {
@@ -322,9 +322,9 @@ pub async fn run_task_processing_system() -> anyhow::Result<()> {
     Ok(())
 }
 """,
-        "category": 'rust',
-        "subcategory": 'tokio',
-        "tags": ['async', 'concurrency', 'form', 'orm', 'rust', 'sse', 'token']
+        "category": "rust",
+        "subcategory": "tokio",
+        "tags": ["async", "concurrency", "form", "orm", "rust", "sse", "token"],
     },
     {
         "problem": """
@@ -699,8 +699,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 """,
-        "category": 'rust',
-        "subcategory": 'tokio',
-        "tags": ['async', 'concurrency', 'error-handling', 'event', 'form', 'handler', 'orm']
-    }
+        "category": "rust",
+        "subcategory": "tokio",
+        "tags": [
+            "async",
+            "concurrency",
+            "error-handling",
+            "event",
+            "form",
+            "handler",
+            "orm",
+        ],
+    },
 ]

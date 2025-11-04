@@ -1,4 +1,3 @@
-
 RUST_SERDE_CASES = [
     {
         "problem": """
@@ -316,8 +315,16 @@ mod tests {
     }
 }
 """,
-        "category": 'rust',
-        "subcategory": 'serde',
-        "tags": ['api', 'deserialization', 'form', 'json', 'orm', 'response', 'routing']
+        "category": "rust",
+        "subcategory": "serde",
+        "tags": [
+            "api",
+            "deserialization",
+            "form",
+            "json",
+            "orm",
+            "response",
+            "routing",
+        ],
     }
 ]

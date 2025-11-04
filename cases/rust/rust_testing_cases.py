@@ -1,4 +1,3 @@
-
 RUST_TESTING_CASES = [
     {
         "problem": """
@@ -347,8 +346,8 @@ mod integration_tests {
     // Integration tests here
 }
 """,
-        "category": 'rust',
-        "subcategory": 'testing',
-        "tags": ['async', 'database', 'form', 'json', 'migration', 'orm', 'query']
+        "category": "rust",
+        "subcategory": "testing",
+        "tags": ["async", "database", "form", "json", "migration", "orm", "query"],
     }
 ]

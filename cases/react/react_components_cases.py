@@ -110,9 +110,17 @@ const AppNavbar = () => {
 
 export default AppNavbar;
 """,
-        "category": 'react',
-        "subcategory": 'components',
-        "tags": ['react', 'component', 'bootstrap', 'navbar', 'navigation', 'responsive', 'ui']
+        "category": "react",
+        "subcategory": "components",
+        "tags": [
+            "react",
+            "component",
+            "bootstrap",
+            "navbar",
+            "navigation",
+            "responsive",
+            "ui",
+        ],
     },
     {
         "problem": """
@@ -191,9 +199,17 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
 export default ConfirmationModal;
 """,
-        "category": 'react',
-        "subcategory": 'components',
-        "tags": ['react', 'component', 'bootstrap', 'modal', 'dialog', 'ui', 'usestate']
+        "category": "react",
+        "subcategory": "components",
+        "tags": [
+            "react",
+            "component",
+            "bootstrap",
+            "modal",
+            "dialog",
+            "ui",
+            "usestate",
+        ],
     },
     {
         "problem": """
@@ -338,9 +354,17 @@ const ValidatedForm = () => {
 
 export default ValidatedForm;
 """,
-        "category": 'react',
-        "subcategory": 'components',
-        "tags": ['react', 'component', 'bootstrap', 'form', 'validation', 'input', 'feedback']
+        "category": "react",
+        "subcategory": "components",
+        "tags": [
+            "react",
+            "component",
+            "bootstrap",
+            "form",
+            "validation",
+            "input",
+            "feedback",
+        ],
     },
     {
         "problem": """
@@ -443,9 +467,17 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, onAddToCart }) => {
 
 export default ProductGrid;
 """,
-        "category": 'react',
-        "subcategory": 'components',
-        "tags": ['react', 'component', 'bootstrap', 'grid', 'layout', 'card', 'responsive']
+        "category": "react",
+        "subcategory": "components",
+        "tags": [
+            "react",
+            "component",
+            "bootstrap",
+            "grid",
+            "layout",
+            "card",
+            "responsive",
+        ],
     },
     {
         "problem": """
@@ -562,9 +594,17 @@ const ItemList = () => {
 
 export default ItemList;
 """,
-        "category": 'react',
-        "subcategory": 'components',
-        "tags": ['react', 'component', 'bootstrap', 'firestore', 'list', 'display', 'fetch']
+        "category": "react",
+        "subcategory": "components",
+        "tags": [
+            "react",
+            "component",
+            "bootstrap",
+            "firestore",
+            "list",
+            "display",
+            "fetch",
+        ],
     },
     {
         "problem": """
@@ -695,9 +735,17 @@ const CloudFunctionButton = () => {
 
 export default CloudFunctionButton;
 """,
-        "category": 'react',
-        "subcategory": 'components',
-        "tags": ['react', 'component', 'bootstrap', 'button', 'click', 'trigger', 'action']
+        "category": "react",
+        "subcategory": "components",
+        "tags": [
+            "react",
+            "component",
+            "bootstrap",
+            "button",
+            "click",
+            "trigger",
+            "action",
+        ],
     },
     {
         "problem": """
@@ -820,8 +868,16 @@ function withAuth<P extends object>(
 
 export default withAuth;
 """,
-        "category": 'react',
-        "subcategory": 'components',
-        "tags": ['async', 'auth', 'bootstrap', 'components', 'firebase', 'hooks', 'react']
-    }
+        "category": "react",
+        "subcategory": "components",
+        "tags": [
+            "async",
+            "auth",
+            "bootstrap",
+            "components",
+            "firebase",
+            "hooks",
+            "react",
+        ],
+    },
 ]

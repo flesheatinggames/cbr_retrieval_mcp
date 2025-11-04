@@ -14,7 +14,7 @@ WEBDEV_TESTING_CASES = [
         "problem": """
 Write Jest unit tests for a utility function that validates email addresses and handles edge cases.
 """,
-        "solution": """
+        "solution": r"""
 // utils/validation.ts
 export const validateEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -118,15 +118,23 @@ describe('validatePassword', () => {
   });
 });
 """,
-        "category": 'webdev',
-        "subcategory": 'testing',
-        "tags": ['jest', 'unit-tests', 'testing', 'validation', 'mocking', 'assertions', 'typescript']
+        "category": "webdev",
+        "subcategory": "testing",
+        "tags": [
+            "jest",
+            "unit-tests",
+            "testing",
+            "validation",
+            "mocking",
+            "assertions",
+            "typescript",
+        ],
     },
     {
         "problem": """
 Write React Testing Library tests for a login form component with user interactions and async validation.
 """,
-        "solution": """
+        "solution": r"""
 // components/LoginForm.tsx
 import React, { useState } from 'react';
 import { Form, Button, Alert } from 'react-bootstrap';
@@ -325,8 +333,16 @@ describe('LoginForm', () => {
   });
 });
 """,
-        "category": 'webdev',
-        "subcategory": 'testing',
-        "tags": ['testing-library', 'react', 'jest', 'unit-tests', 'component-testing', 'user-interaction', 'async']
-    }
+        "category": "webdev",
+        "subcategory": "testing",
+        "tags": [
+            "testing-library",
+            "react",
+            "jest",
+            "unit-tests",
+            "component-testing",
+            "user-interaction",
+            "async",
+        ],
+    },
 ]

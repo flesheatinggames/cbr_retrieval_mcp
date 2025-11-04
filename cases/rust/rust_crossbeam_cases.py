@@ -1,4 +1,3 @@
-
 RUST_CROSSBEAM_CASES = [
     {
         "problem": """
@@ -245,8 +244,8 @@ fn main() {
     fan_out_fan_in();
 }
 """,
-        "category": 'rust',
-        "subcategory": 'crossbeam',
-        "tags": ['crossbeam', 'rust', 'sse']
+        "category": "rust",
+        "subcategory": "crossbeam",
+        "tags": ["crossbeam", "rust", "sse"],
     }
 ]

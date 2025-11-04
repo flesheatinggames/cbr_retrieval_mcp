@@ -1,4 +1,3 @@
-
 RUST_FUTURES_CASES = [
     {
         "problem": """
@@ -328,8 +327,8 @@ async fn main() {
     }
 }
 """,
-        "category": 'rust',
-        "subcategory": 'futures',
-        "tags": ['async', 'form', 'futures', 'orm', 'rust', 'tokio']
+        "category": "rust",
+        "subcategory": "futures",
+        "tags": ["async", "form", "futures", "orm", "rust", "tokio"],
     }
 ]

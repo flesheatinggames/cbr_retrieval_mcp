@@ -18,7 +18,7 @@ WEBDEV_ERROR_HANDLING_CASES = [
         "problem": """
 Implement secure error handling and logging that doesn't expose sensitive information in production.
 """,
-        "solution": """
+        "solution": r"""
 // lib/secure-logger.ts
 import winston from 'winston';
 import { Sentry } from '@sentry/nextjs';
@@ -522,15 +522,23 @@ export class ErrorBoundary extends React.Component<
   }
 }
 """,
-        "category": 'webdev',
-        "subcategory": 'error-handling',
-        "tags": ['errors', 'logging', 'winston', 'sentry', 'boundaries', 'react', 'security']
+        "category": "webdev",
+        "subcategory": "error-handling",
+        "tags": [
+            "errors",
+            "logging",
+            "winston",
+            "sentry",
+            "boundaries",
+            "react",
+            "security",
+        ],
     },
     {
         "problem": """
 Implement React error boundaries for graceful error handling and recovery in component trees.
 """,
-        "solution": """
+        "solution": r"""
 // components/ErrorBoundary.tsx
 import React from 'react';
 import { Alert, Container, Button } from 'react-bootstrap';
@@ -737,15 +745,23 @@ export const AsyncErrorBoundary: React.FC<{
   );
 };
 """,
-        "category": 'webdev',
-        "subcategory": 'error-handling',
-        "tags": ['react', 'error-boundaries', 'componentdidcatch', 'error-recovery', 'fallback', 'error-ui', 'errors']
+        "category": "webdev",
+        "subcategory": "error-handling",
+        "tags": [
+            "react",
+            "error-boundaries",
+            "componentdidcatch",
+            "error-recovery",
+            "fallback",
+            "error-ui",
+            "errors",
+        ],
     },
     {
         "problem": """
 Implement user-friendly error notifications and recovery UI with toast messages and fallback states.
 """,
-        "solution": """
+        "solution": r"""
 // components/ToastNotification.tsx
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { Toast, ToastContainer } from 'react-bootstrap';
@@ -1022,8 +1038,16 @@ const ExamplePage = () => {
   );
 };
 """,
-        "category": 'webdev',
-        "subcategory": 'error-handling',
-        "tags": ['error-notifications', 'toast', 'recovery', 'user-feedback', 'error-messages', 'ui', 'alerts']
-    }
+        "category": "webdev",
+        "subcategory": "error-handling",
+        "tags": [
+            "error-notifications",
+            "toast",
+            "recovery",
+            "user-feedback",
+            "error-messages",
+            "ui",
+            "alerts",
+        ],
+    },
 ]

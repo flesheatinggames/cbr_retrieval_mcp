@@ -1,4 +1,3 @@
-
 RUST_CLAP_CASES = [
     {
         "problem": """
@@ -516,8 +515,8 @@ async fn main() -> Result<()> {
     app.run().await
 }
 """,
-        "category": 'rust',
-        "subcategory": 'clap',
-        "tags": ['api', 'async', 'auth', 'authentication', 'caching', 'clap', 'csv']
+        "category": "rust",
+        "subcategory": "clap",
+        "tags": ["api", "async", "auth", "authentication", "caching", "clap", "csv"],
     }
 ]

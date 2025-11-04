@@ -1,10 +1,9 @@
-
 RUST_ONECELL_CASES = [
     {
         "problem": """
 Lazy static initialization and one-time initialization using once_cell.
 """,
-        "solution": """
+        "solution": r"""
 use once_cell::sync::{Lazy, OnceCell};
 use std::sync::Mutex;
 use std::collections::HashMap;
@@ -195,8 +194,8 @@ fn main() {
     println!("Found URLs: {:?}", urls);
 }
 """,
-        "category": 'rust',
-        "subcategory": 'onecell',
-        "tags": ['api', 'database', 'form', 'http', 'onecell', 'orm', 'request']
+        "category": "rust",
+        "subcategory": "onecell",
+        "tags": ["api", "database", "form", "http", "onecell", "orm", "request"],
     }
 ]

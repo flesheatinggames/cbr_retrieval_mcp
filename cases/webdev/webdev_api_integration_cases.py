@@ -151,9 +151,9 @@ if (response.error) {
 return response.status === 204;
 }
 """,
-        "category": 'webdev',
-        "subcategory": 'api-integration',
-        "tags": ['api', 'fetch', 'async', 'rest', 'http', 'request', 'response']
+        "category": "webdev",
+        "subcategory": "api-integration",
+        "tags": ["api", "fetch", "async", "rest", "http", "request", "response"],
     },
     {
         "problem": """
@@ -389,8 +389,8 @@ return (
 );
 }
 """,
-        "category": 'webdev',
-        "subcategory": 'api-integration',
-        "tags": ['error-handling', 'api', 'retry', 'async', 'fetch', 'timeout', 'rest']
-    }
+        "category": "webdev",
+        "subcategory": "api-integration",
+        "tags": ["error-handling", "api", "retry", "async", "fetch", "timeout", "rest"],
+    },
 ]

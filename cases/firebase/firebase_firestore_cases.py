@@ -11,7 +11,7 @@ FIREBASE_FIRESTORE_CASES = [
         "problem": """
 A function to add a new document to a 'users' collection in Firestore.
 """,
-        "solution": """
+        "solution": r"""
 import { getFirestore, collection, addDoc, serverTimestamp, doc, setDoc } from 'firebase/firestore';
 
 interface UserData {
@@ -59,15 +59,23 @@ const setUserProfile = async (userId: string, userData: UserData) => {
 
 export { addUserProfile, setUserProfile };
 """,
-        "category": 'firebase',
-        "subcategory": 'firestore',
-        "tags": ['firebase', 'firestore', 'create', 'add', 'document', 'database', 'crud']
+        "category": "firebase",
+        "subcategory": "firestore",
+        "tags": [
+            "firebase",
+            "firestore",
+            "create",
+            "add",
+            "document",
+            "database",
+            "crud",
+        ],
     },
     {
         "problem": """
 A React hook to fetch a single document from Firestore by its ID.
 """,
-        "solution": """
+        "solution": r"""
 import { useState, useEffect } from 'react';
 import { getFirestore, doc, getDoc, onSnapshot } from 'firebase/firestore';
 
@@ -144,15 +152,23 @@ const useFirestoreDocument = <T = any>(
 
 export default useFirestoreDocument;
 """,
-        "category": 'firebase',
-        "subcategory": 'firestore',
-        "tags": ['firebase', 'firestore', 'read', 'fetch', 'document', 'database', 'query']
+        "category": "firebase",
+        "subcategory": "firestore",
+        "tags": [
+            "firebase",
+            "firestore",
+            "read",
+            "fetch",
+            "document",
+            "database",
+            "query",
+        ],
     },
     {
         "problem": """
 A React hook to listen for real-time updates on a Firestore collection.
 """,
-        "solution": """
+        "solution": r"""
 import { useState, useEffect } from 'react';
 import { getFirestore, collection, onSnapshot, query, orderBy, where, limit, QueryConstraint } from 'firebase/firestore';
 
@@ -229,15 +245,23 @@ const useFirestoreCollection = <T = any>(
 
 export default useFirestoreCollection;
 """,
-        "category": 'firebase',
-        "subcategory": 'firestore',
-        "tags": ['firebase', 'firestore', 'read', 'collection', 'query', 'database', 'react']
+        "category": "firebase",
+        "subcategory": "firestore",
+        "tags": [
+            "firebase",
+            "firestore",
+            "read",
+            "collection",
+            "query",
+            "database",
+            "react",
+        ],
     },
     {
         "problem": """
 A function to update an existing document in Firestore.
 """,
-        "solution": """
+        "solution": r"""
 import { getFirestore, doc, updateDoc, serverTimestamp, writeBatch } from 'firebase/firestore';
 
 interface UpdateData {
@@ -291,15 +315,23 @@ const batchUpdateDocuments = async (
 
 export { updateUserProfile, batchUpdateDocuments };
 """,
-        "category": 'firebase',
-        "subcategory": 'firestore',
-        "tags": ['firebase', 'firestore', 'update', 'modify', 'document', 'database', 'crud']
+        "category": "firebase",
+        "subcategory": "firestore",
+        "tags": [
+            "firebase",
+            "firestore",
+            "update",
+            "modify",
+            "document",
+            "database",
+            "crud",
+        ],
     },
     {
         "problem": """
 Secure Firebase Storage uploads with file validation, size limits, and malware scanning simulation.
 """,
-        "solution": """
+        "solution": r"""
 import { getStorage, ref, uploadBytesResumable, deleteObject } from 'firebase/storage';
 import { getAuth } from 'firebase/auth';
 import crypto from 'crypto';
@@ -557,8 +589,16 @@ class SecureStorageService {
 
 export const secureStorage = new SecureStorageService();
 """,
-        "category": 'firebase',
-        "subcategory": 'firestore',
-        "tags": ['api', 'async', 'auth', 'authentication', 'event', 'firebase', 'firestore']
-    }
+        "category": "firebase",
+        "subcategory": "firestore",
+        "tags": [
+            "api",
+            "async",
+            "auth",
+            "authentication",
+            "event",
+            "firebase",
+            "firestore",
+        ],
+    },
 ]

@@ -360,6 +360,250 @@ cbr_search_category(category="best-practice", subcategory="verification")
 cbr_search_category(category="best-practice", subcategory="planning", query="task decomposition checklist")
 ```
 
+## Case Organization & Management
+
+The CBR MCP Server uses a modular case organization structure that makes it easy to maintain and extend the case base. Cases are organized by technology domain in separate files, replacing the previous monolithic case_base.py file.
+
+> **Note:** If you're migrating from the old monolithic structure, see [MIGRATION.md](MIGRATION.md) for detailed migration guidance. For technical implementation details of the dynamic loader, see the inline documentation in [cases/__init__.py](cases/__init__.py).
+
+### Directory Structure
+
+Cases are organized in the `cases/` directory with the following structure:
+
+```
+cases/
+├── __init__.py                                    # Dynamic loader - automatically discovers all cases
+├── firebase/
+│   ├── __init__.py
+│   ├── firebase_auth_cases.py                    # Firebase Authentication cases
+│   └── firebase_firestore_cases.py               # Firebase Firestore cases
+├── nextjs/
+│   ├── __init__.py
+│   ├── nextjs_routing_cases.py                   # Next.js routing patterns
+│   └── nextjs_api_cases.py                       # Next.js API routes
+├── react/
+│   ├── __init__.py
+│   └── react_components_cases.py                 # React component patterns
+├── bootstrap/
+│   ├── __init__.py
+│   └── bootstrap_ui_cases.py                     # Bootstrap UI components
+├── webdev/
+│   ├── __init__.py
+│   ├── webdev_state_management_cases.py          # State management patterns
+│   ├── webdev_forms_validation_cases.py          # Forms and validation
+│   ├── webdev_api_integration_cases.py           # API integration patterns
+│   ├── webdev_error_handling_cases.py            # Error handling patterns
+│   ├── webdev_testing_cases.py                   # Testing strategies
+│   └── webdev_deployment_cases.py                # Deployment configurations
+├── orchestration/
+│   ├── __init__.py
+│   ├── orchestration_planning_cases.py           # Task planning patterns
+│   ├── orchestration_remediation_cases.py        # Remediation workflows
+│   ├── orchestration_delegation_cases.py         # Agent delegation patterns
+│   ├── orchestration_verification_cases.py       # Verification protocols
+│   └── orchestration_completion_cases.py         # Task completion patterns
+├── security/
+│   ├── __init__.py
+│   ├── security_auth_cases.py                    # Authentication patterns
+│   └── security_validation_cases.py              # Input validation patterns
+└── rust/
+    ├── __init__.py
+    └── ... (26 Rust-specific case files)
+```
+
+### Adding New Cases
+
+Adding a new case to the case base is straightforward. Follow these steps:
+
+#### Step 1: Choose the Appropriate Case File
+
+Select the case file based on the technology or domain of your example:
+
+| Category | File Location | Use When |
+|----------|--------------|----------|
+| **Firebase Auth** | `cases/firebase/firebase_auth_cases.py` | Authentication, user management, session handling |
+| **Firebase Firestore** | `cases/firebase/firebase_firestore_cases.py` | Database operations, queries, transactions |
+| **Next.js Routing** | `cases/nextjs/nextjs_routing_cases.py` | App router, dynamic routes, middleware |
+| **Next.js API** | `cases/nextjs/nextjs_api_cases.py` | API routes, server actions, edge functions |
+| **React Components** | `cases/react/react_components_cases.py` | Hooks, context, component patterns |
+| **Bootstrap UI** | `cases/bootstrap/bootstrap_ui_cases.py` | UI components, layouts, responsive design |
+| **Web State Management** | `cases/webdev/webdev_state_management_cases.py` | Zustand, React Query, state patterns |
+| **Web Forms** | `cases/webdev/webdev_forms_validation_cases.py` | Form handling, validation |
+| **Web API Integration** | `cases/webdev/webdev_api_integration_cases.py` | Fetch patterns, error handling |
+| **Web Error Handling** | `cases/webdev/webdev_error_handling_cases.py` | Error boundaries, notifications |
+| **Web Testing** | `cases/webdev/webdev_testing_cases.py` | Unit tests, integration tests |
+| **Web Deployment** | `cases/webdev/webdev_deployment_cases.py` | Deployment config, environment variables |
+| **Orchestration Planning** | `cases/orchestration/orchestration_planning_cases.py` | Task breakdown, TDD workflows |
+| **Orchestration Remediation** | `cases/orchestration/orchestration_remediation_cases.py` | Handling failures, recovery |
+| **Orchestration Delegation** | `cases/orchestration/orchestration_delegation_cases.py` | Multi-agent coordination |
+| **Orchestration Verification** | `cases/orchestration/orchestration_verification_cases.py` | Quality checks, validation |
+| **Orchestration Completion** | `cases/orchestration/orchestration_completion_cases.py` | Task completion protocols |
+| **Security Auth** | `cases/security/security_auth_cases.py` | JWT, role-based access |
+| **Security Validation** | `cases/security/security_validation_cases.py` | Input sanitization, validation |
+| **Rust** | `cases/rust/rust_*_cases.py` | Various Rust frameworks and patterns |
+
+#### Step 2: Add Your Case with Required Metadata
+
+Open the selected file and add your case to the case list. Each case requires the following fields:
+
+```python
+{
+    "problem": """
+    A clear description of the problem or use case this code solves.
+    Include relevant context and requirements.
+    """,
+    "solution": """
+    The complete code solution with proper formatting and comments.
+    This should be production-ready code that demonstrates best practices.
+    """,
+    "category": "firebase",           # Top-level category (firebase, react, nextjs, etc.)
+    "subcategory": "auth",             # Specific subcategory (auth, components, routing, etc.)
+    "tags": ["authentication", "react", "firebase", "hooks"]  # Search keywords
+}
+```
+
+#### Step 3: Required Metadata Fields
+
+All cases must include these metadata fields:
+
+- **`category`** (string, required): Top-level technology or domain category
+  - Must be one of: `firebase`, `react`, `nextjs`, `bootstrap`, `webdev`, `orchestration`, `security`, `rust`
+  - Should match the directory name where the case file is located
+
+- **`subcategory`** (string, required): Specific subdomain or pattern type
+  - Examples: `auth`, `components`, `routing`, `planning`, `validation`
+  - Should match the file name pattern (e.g., "auth" from `firebase_auth_cases.py`)
+
+- **`tags`** (list of strings, required): Keywords for search and discovery
+  - Include technology names, frameworks, concepts, and patterns
+  - Examples: `["authentication", "react", "hooks", "typescript", "async"]`
+  - Minimum 1 tag required, recommend 3-7 tags per case
+
+#### Step 4: Complete Example
+
+Here's a complete example of adding a new Firebase authentication case:
+
+```python
+# File: cases/firebase/firebase_auth_cases.py
+
+FIREBASE_AUTH_CASES = [
+    # ... existing cases ...
+
+    {
+        "problem": """
+A React component for password reset functionality using Firebase Authentication.
+The component should handle email input validation, display appropriate feedback,
+and handle Firebase errors gracefully.
+""",
+        "solution": """
+import React, { useState } from 'react';
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
+import { Form, Button, Alert } from 'react-bootstrap';
+
+const PasswordResetForm: React.FC = () => {
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(false);
+    setIsLoading(true);
+
+    try {
+      const auth = getAuth();
+      await sendPasswordResetEmail(auth, email);
+      setSuccess(true);
+      setEmail('');
+    } catch (err: any) {
+      setError(err.message || 'Failed to send password reset email');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Form onSubmit={handleSubmit}>
+      {error && <Alert variant="danger">{error}</Alert>}
+      {success && (
+        <Alert variant="success">
+          Password reset email sent! Check your inbox.
+        </Alert>
+      )}
+
+      <Form.Group className="mb-3">
+        <Form.Label>Email Address</Form.Label>
+        <Form.Control
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          disabled={isLoading}
+        />
+      </Form.Group>
+
+      <Button type="submit" disabled={isLoading}>
+        {isLoading ? 'Sending...' : 'Reset Password'}
+      </Button>
+    </Form>
+  );
+};
+
+export default PasswordResetForm;
+""",
+        "category": "firebase",
+        "subcategory": "auth",
+        "tags": ["firebase", "authentication", "password-reset", "react", "form", "email"]
+    }
+]
+```
+
+### How the Dynamic Loader Works
+
+The CBR MCP Server uses a dynamic loader (`cases/__init__.py`) that automatically discovers and imports all case files:
+
+1. **Automatic Discovery**: On startup, the loader scans all subdirectories in `cases/` for files matching the pattern `*_cases.py`
+
+2. **Dynamic Import**: Each discovered module is imported dynamically using Python's `importlib`
+
+3. **Case Aggregation**: The loader extracts case lists (variables ending in `_CASES`) from each module and combines them into a single `ALL_CASES` list
+
+4. **Error Handling**: If a module fails to load, the error is logged and the loader continues with other modules
+
+5. **No Manual Registration**: You don't need to manually register new case files - just create a file following the naming pattern and the loader will find it
+
+**Benefits of Dynamic Loading:**
+- Add new case files without modifying any loader code
+- Organize cases by technology without merge conflicts
+- Selective loading possible via environment configuration (future feature)
+- Graceful handling of module import errors
+
+### Best Practices for Case Management
+
+1. **Keep Files Focused**: Each case file should contain cases for a single technology or domain (e.g., all Firebase Auth cases in one file)
+
+2. **Use Descriptive Problem Statements**: The `problem` field should clearly describe the use case and context
+
+3. **Include Complete Solutions**: The `solution` field should contain production-ready code with proper error handling and types
+
+4. **Tag Appropriately**: Add comprehensive tags to improve search and discovery (include technology, framework, concepts, patterns)
+
+5. **Validate Your Cases**: Run the validation function to ensure all required fields are present:
+   ```python
+   from cases import validate_case
+
+   # Validate a single case
+   is_valid = validate_case(your_case_dict)
+   ```
+
+6. **Test After Adding**: After adding new cases, restart the server and verify they're discoverable:
+   ```python
+   from cases import ALL_CASES
+   print(f"Total cases: {len(ALL_CASES)}")
+   ```
+
 ## Architecture
 
 ### CBRMCPServer

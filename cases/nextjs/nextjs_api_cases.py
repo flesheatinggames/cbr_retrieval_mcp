@@ -9,7 +9,7 @@ NEXTJS_API_CASES = [
         "problem": """
 A Next.js API route that handles a POST request.
 """,
-        "solution": """
+        "solution": r"""
 // pages/api/contact.js (Pages Router)
 import type { NextApiRequest, NextApiResponse } from 'next';
 
@@ -78,15 +78,15 @@ export default async function handler(
   }
 }
 """,
-        "category": 'nextjs',
-        "subcategory": 'api',
-        "tags": ['nextjs', 'api', 'api-routes', 'post', 'request', 'response']
+        "category": "nextjs",
+        "subcategory": "api",
+        "tags": ["nextjs", "api", "api-routes", "post", "request", "response"],
     },
     {
         "problem": """
 A Next.js API route to add a document to Firestore using the Firebase Admin SDK.
 """,
-        "solution": """
+        "solution": r"""
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { adminDb } from '../../../lib/firebase-admin';
 import * as yup from 'yup';
@@ -157,15 +157,15 @@ export default async function handler(
   }
 }
 """,
-        "category": 'nextjs',
-        "subcategory": 'api',
-        "tags": ['nextjs', 'api', 'firestore', 'firebase', 'admin-sdk']
+        "category": "nextjs",
+        "subcategory": "api",
+        "tags": ["nextjs", "api", "firestore", "firebase", "admin-sdk"],
     },
     {
         "problem": """
 Implement rate limiting and DDoS protection for Next.js API routes with Redis.
 """,
-        "solution": """
+        "solution": r"""
 // lib/rate-limiter.ts
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Redis } from 'ioredis';
@@ -428,15 +428,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   res.status(200).json({ message: 'Success' });
 }
 """,
-        "category": 'nextjs',
-        "subcategory": 'api',
-        "tags": ['nextjs', 'api', 'rate-limiting', 'security', 'redis', 'ddos']
+        "category": "nextjs",
+        "subcategory": "api",
+        "tags": ["nextjs", "api", "rate-limiting", "security", "redis", "ddos"],
     },
     {
         "problem": """
 A custom _app.js file in Next.js with a global layout component.
 """,
-        "solution": """
+        "solution": r"""
 // pages/_app.tsx (Pages Router)
 import type { AppProps } from 'next/app';
 import Layout from '../components/Layout';
@@ -502,15 +502,15 @@ const Layout: React.FC<LayoutProps> = ({
 
 export default Layout;
 """,
-        "category": 'nextjs',
-        "subcategory": 'api',
-        "tags": ['api', 'auth', 'bootstrap', 'components', 'css', 'next.js', 'nextjs']
+        "category": "nextjs",
+        "subcategory": "api",
+        "tags": ["api", "auth", "bootstrap", "components", "css", "next.js", "nextjs"],
     },
     {
         "problem": """
 A Next.js page that is server-side rendered (SSR) and fetches data from Firebase Admin SDK.
 """,
-        "solution": """
+        "solution": r"""
 import { GetServerSideProps } from 'next';
 import { adminDb } from '../lib/firebase-admin';
 import { Container, Card, Badge } from 'react-bootstrap';
@@ -635,8 +635,16 @@ function PostPage({ post, error }: PostPageProps) {
 
 export default PostPage;
 """,
-        "category": 'nextjs',
-        "subcategory": 'api',
-        "tags": ['nextjs', 'api', 'async', 'auth', 'bootstrap', 'firebase', 'firestore']
-    }
+        "category": "nextjs",
+        "subcategory": "api",
+        "tags": [
+            "nextjs",
+            "api",
+            "async",
+            "auth",
+            "bootstrap",
+            "firebase",
+            "firestore",
+        ],
+    },
 ]

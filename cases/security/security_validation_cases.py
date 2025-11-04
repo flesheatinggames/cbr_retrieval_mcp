@@ -8,9 +8,9 @@ This module contains cases demonstrating secure validation techniques including:
 """
 
 SECURITY_VALIDATION_CASES = [
-  {
-    "problem": "Implement input sanitization and SQL/NoSQL injection prevention for Firestore queries.",
-    "solution": """
+    {
+        "problem": "Implement input sanitization and SQL/NoSQL injection prevention for Firestore queries.",
+        "solution": r"""
 // lib/input-sanitizer.ts
 import DOMPurify from 'isomorphic-dompurify';
 import validator from 'validator';
@@ -443,13 +443,21 @@ export async function handleUserInput(req: any, db: any) {
   return sanitizedData;
 }
 """,
-    "category": "security",
-    "subcategory": "validation",
-    "tags": ["validation", "sanitization", "input", "sql-injection", "xss", "firestore", "security"]
-  },
-  {
-    "problem": "Implement secure API key management and environment variable validation for production deployments.",
-    "solution": """
+        "category": "security",
+        "subcategory": "validation",
+        "tags": [
+            "validation",
+            "sanitization",
+            "input",
+            "sql-injection",
+            "xss",
+            "firestore",
+            "security",
+        ],
+    },
+    {
+        "problem": "Implement secure API key management and environment variable validation for production deployments.",
+        "solution": r"""
 // lib/config-validator.ts
 import { z } from 'zod';
 import crypto from 'crypto';
@@ -774,8 +782,16 @@ const apiKey = config.getApiKey('stripe');
 const isProduction = config.isProduction();
 const allowedOrigins = config.get('ALLOWED_ORIGINS');
 """,
-    "category": "security",
-    "subcategory": "validation",
-    "tags": ["validation", "environment", "api-keys", "configuration", "security", "zod", "encryption"]
-  }
+        "category": "security",
+        "subcategory": "validation",
+        "tags": [
+            "validation",
+            "environment",
+            "api-keys",
+            "configuration",
+            "security",
+            "zod",
+            "encryption",
+        ],
+    },
 ]

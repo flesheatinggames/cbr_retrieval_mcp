@@ -7,9 +7,9 @@ validation, and type-safe schema validation using Zod.
 """
 
 WEBDEV_FORMS_VALIDATION_CASES = [
-{
- "problem": "A Bootstrap-styled form with client-side validation feedback in React.",
- "solution": """
+    {
+        "problem": "A Bootstrap-styled form with client-side validation feedback in React.",
+        "solution": """
 import { useState } from 'react';
 import { Form, Button, Col, Row, Alert } from 'react-bootstrap';
 
@@ -148,13 +148,13 @@ return (
 
 export default ValidatedForm;
 """,
- "category": "webdev",
- "subcategory": "forms-validation",
- "tags": ["forms", "validation", "client-side", "react", "bootstrap", "html5"]
-},
-{
- "problem": "Implement secure API key management and environment variable validation for production deployments.",
- "solution": """
+        "category": "webdev",
+        "subcategory": "forms-validation",
+        "tags": ["forms", "validation", "client-side", "react", "bootstrap", "html5"],
+    },
+    {
+        "problem": "Implement secure API key management and environment variable validation for production deployments.",
+        "solution": """
 // lib/config-validator.ts
 import { z } from 'zod';
 import crypto from 'crypto';
@@ -416,13 +416,21 @@ getValidationErrors(): string[] {
 // Create singleton instance
 export const config = ConfigValidator.getInstance();
 """,
- "category": "webdev",
- "subcategory": "forms-validation",
- "tags": ["validation", "zod", "schemas", "type-safe", "typescript", "environment", "configuration"]
-},
-{
- "problem": "Add server-side validation to the user registration endpoint for password strength.",
- "solution": """
+        "category": "webdev",
+        "subcategory": "forms-validation",
+        "tags": [
+            "validation",
+            "zod",
+            "schemas",
+            "type-safe",
+            "typescript",
+            "environment",
+            "configuration",
+        ],
+    },
+    {
+        "problem": "Add server-side validation to the user registration endpoint for password strength.",
+        "solution": """
 <sequential-thinking>
 This is a classic TDD case for modifying an existing endpoint.
 
@@ -477,8 +485,16 @@ This results in 5 delegation steps.
 
 Do you approve this plan?
 """,
- "category": "webdev",
- "subcategory": "forms-validation",
- "tags": ["validation", "server-side", "backend", "api", "password", "security", "express"]
-}
+        "category": "webdev",
+        "subcategory": "forms-validation",
+        "tags": [
+            "validation",
+            "server-side",
+            "backend",
+            "api",
+            "password",
+            "security",
+            "express",
+        ],
+    },
 ]

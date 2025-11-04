@@ -110,9 +110,17 @@ const AppNavbar = () => {
 
 export default AppNavbar;
 """,
-        "category": 'bootstrap',
-        "subcategory": 'ui',
-        "tags": ['bootstrap', 'react-bootstrap', 'navbar', 'navigation', 'responsive', 'ui', 'component']
+        "category": "bootstrap",
+        "subcategory": "ui",
+        "tags": [
+            "bootstrap",
+            "react-bootstrap",
+            "navbar",
+            "navigation",
+            "responsive",
+            "ui",
+            "component",
+        ],
     },
     {
         "problem": """
@@ -191,9 +199,17 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
 export default ConfirmationModal;
 """,
-        "category": 'bootstrap',
-        "subcategory": 'ui',
-        "tags": ['bootstrap', 'react-bootstrap', 'modal', 'dialog', 'ui', 'component', 'overlay']
+        "category": "bootstrap",
+        "subcategory": "ui",
+        "tags": [
+            "bootstrap",
+            "react-bootstrap",
+            "modal",
+            "dialog",
+            "ui",
+            "component",
+            "overlay",
+        ],
     },
     {
         "problem": """
@@ -338,9 +354,17 @@ const ValidatedForm = () => {
 
 export default ValidatedForm;
 """,
-        "category": 'bootstrap',
-        "subcategory": 'ui',
-        "tags": ['bootstrap', 'react-bootstrap', 'form', 'validation', 'feedback', 'ui', 'component']
+        "category": "bootstrap",
+        "subcategory": "ui",
+        "tags": [
+            "bootstrap",
+            "react-bootstrap",
+            "form",
+            "validation",
+            "feedback",
+            "ui",
+            "component",
+        ],
     },
     {
         "problem": """
@@ -443,8 +467,16 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, onAddToCart }) => {
 
 export default ProductGrid;
 """,
-        "category": 'bootstrap',
-        "subcategory": 'ui',
-        "tags": ['bootstrap', 'ui', 'react-bootstrap', 'grid', 'card', 'layout', 'responsive']
-    }
+        "category": "bootstrap",
+        "subcategory": "ui",
+        "tags": [
+            "bootstrap",
+            "ui",
+            "react-bootstrap",
+            "grid",
+            "card",
+            "layout",
+            "responsive",
+        ],
+    },
 ]

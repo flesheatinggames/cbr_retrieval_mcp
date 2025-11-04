@@ -25,19 +25,25 @@ from cases import ALL_CASES
 # Import the server and retriever
 try:
     from cbr_mcp_server import CBRMCPServer, ProductionCBRRetriever
-    from mcp.server.fastmcp import Context
+    from mcp.server.fastmcp import Context as RealContext
 except ImportError as e:
     # Create minimal mocks for missing dependencies
     class CBRMCPServer:
         pass
     class ProductionCBRRetriever:
         pass
-    class Context:
-        def __init__(self):
-            self.debug = AsyncMock()
-            self.info = AsyncMock()
-            self.warning = AsyncMock()
-            self.error = AsyncMock()
+    class RealContext:
+        pass
+
+
+# Create a mock Context that doesn't require request_context
+class MockContext:
+    """Mock Context for testing that doesn't require MCP request context."""
+    def __init__(self):
+        self.debug = AsyncMock()
+        self.info = AsyncMock()
+        self.warning = AsyncMock()
+        self.error = AsyncMock()
 
 
 @pytest.fixture
@@ -117,6 +123,7 @@ def mock_server_config():
     mock_config.circuit_breaker_timeout = 60
     mock_config.cache_ttl = 300
     mock_config.cache_max_size = 100
+    mock_config.retry_enabled = False  # Disable retry/degraded mode for tests
 
     return mock_config
 
@@ -210,7 +217,7 @@ class TestMCPServerIntegration:
             server = CBRMCPServer(config=mock_server_config, retriever=mock_retriever)
 
             # Mock context
-            mock_ctx = Context()
+            mock_ctx = MockContext()
 
             # Call cbr_retrieve tool
             result = await server.cbr_retrieve(
@@ -264,7 +271,7 @@ class TestMCPServerIntegration:
             server = CBRMCPServer(config=mock_server_config, retriever=mock_retriever)
 
             # Mock context
-            mock_ctx = Context()
+            mock_ctx = MockContext()
 
             # Call cbr_search_category tool
             result = await server.cbr_search_category(
@@ -312,7 +319,7 @@ class TestMCPServerIntegration:
             server = CBRMCPServer(config=mock_server_config, retriever=mock_retriever)
 
             # Mock context
-            mock_ctx = Context()
+            mock_ctx = MockContext()
 
             # Call cbr_find_similar tool
             result = await server.cbr_find_similar(
@@ -401,7 +408,7 @@ class TestMCPServerIntegration:
             server = CBRMCPServer(config=mock_server_config, retriever=mock_retriever)
 
             # Mock context
-            mock_ctx = Context()
+            mock_ctx = MockContext()
 
             # Test cbr_retrieve
             retrieve_result = await server.cbr_retrieve(
@@ -520,7 +527,7 @@ class TestMCPServerIntegration:
             server = CBRMCPServer(config=mock_server_config, retriever=mock_retriever)
 
             # Mock context
-            mock_ctx = Context()
+            mock_ctx = MockContext()
 
             # Call cbr_retrieve - should not crash on empty tags
             result = await server.cbr_retrieve(
@@ -565,7 +572,7 @@ class TestMCPServerIntegration:
             server = CBRMCPServer(config=mock_server_config, retriever=mock_retriever)
 
             # Mock context
-            mock_ctx = Context()
+            mock_ctx = MockContext()
 
             # Call cbr_retrieve - should handle error
             with pytest.raises(Exception) as exc_info:
@@ -604,7 +611,7 @@ class TestMCPServerIntegration:
             server = CBRMCPServer(config=mock_server_config, retriever=mock_retriever)
 
             # Mock context
-            mock_ctx = Context()
+            mock_ctx = MockContext()
 
             # Get case from retrieve
             retrieve_result = await server.cbr_retrieve(
