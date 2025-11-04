@@ -137,6 +137,32 @@ pip install structlog psutil pyyaml
 - Write access for database directory (./db by default)
 - Port 8080 available for health dashboard (configurable)
 
+### Database Setup (Required)
+
+**IMPORTANT**: Before running the CBR MCP Server, you must populate the vector database with cases. The database is NOT included in the repository - each user creates their own based on their needs.
+
+```bash
+# Navigate to the project directory
+cd /path/to/cbr_retrieval_mcp
+
+# Load all cases (recommended for first-time setup)
+python scripts/utilities/setup_vectordb.py
+
+# Or load only specific categories you need
+python scripts/utilities/setup_vectordb.py --category firebase rust
+
+# See all filtering options
+python scripts/utilities/setup_vectordb.py --help
+```
+
+This creates the `./db/` directory with your ChromaDB vector database. The setup process:
+- Downloads the embedding model (nomic-ai/nomic-embed-text-v1.5) on first run
+- Generates embeddings for case problems
+- Populates ChromaDB with cases and embeddings
+- Takes 2-5 minutes depending on case count and system performance
+
+For detailed filtering options and use cases, see the [Loading Specific Cases into Vector Database](#loading-specific-cases-into-vector-database) section below.
+
 ## Dependencies
 
 - **mcp** - Model Context Protocol implementation
