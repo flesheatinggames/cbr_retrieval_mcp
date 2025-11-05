@@ -82,8 +82,8 @@ def test_validate_case_with_all_fields():
     assert result is True, "Valid case with all fields must return True"
 
 
-@patch("cases.logging")
-def test_validate_case_missing_category(mock_logging):
+@patch("cases.logger")
+def test_validate_case_missing_category(mock_logger):
     """
     Test: Verify case missing category field returns False and logs warning.
 
@@ -102,15 +102,15 @@ def test_validate_case_missing_category(mock_logging):
     assert result is False, "Case missing category must return False"
 
     # And: A warning is logged
-    mock_logging.warning.assert_called_once()
-    warning_message = mock_logging.warning.call_args[0][0]
+    mock_logger.warning.assert_called_once()
+    warning_message = mock_logger.warning.call_args[0][0]
     assert "category" in warning_message.lower(), (
         "Warning message must mention missing category field"
     )
 
 
-@patch("cases.logging")
-def test_validate_case_missing_subcategory(mock_logging):
+@patch("cases.logger")
+def test_validate_case_missing_subcategory(mock_logger):
     """
     Test: Verify case missing subcategory field returns False and logs warning.
 
@@ -129,15 +129,15 @@ def test_validate_case_missing_subcategory(mock_logging):
     assert result is False, "Case missing subcategory must return False"
 
     # And: A warning is logged
-    mock_logging.warning.assert_called_once()
-    warning_message = mock_logging.warning.call_args[0][0]
+    mock_logger.warning.assert_called_once()
+    warning_message = mock_logger.warning.call_args[0][0]
     assert "subcategory" in warning_message.lower(), (
         "Warning message must mention missing subcategory field"
     )
 
 
-@patch("cases.logging")
-def test_validate_case_missing_tags(mock_logging):
+@patch("cases.logger")
+def test_validate_case_missing_tags(mock_logger):
     """
     Test: Verify case missing tags field returns False and logs warning.
 
@@ -156,15 +156,15 @@ def test_validate_case_missing_tags(mock_logging):
     assert result is False, "Case missing tags must return False"
 
     # And: A warning is logged
-    mock_logging.warning.assert_called_once()
-    warning_message = mock_logging.warning.call_args[0][0]
+    mock_logger.warning.assert_called_once()
+    warning_message = mock_logger.warning.call_args[0][0]
     assert "tags" in warning_message.lower(), (
         "Warning message must mention missing tags field"
     )
 
 
-@patch("cases.logging")
-def test_validate_case_tags_not_list(mock_logging):
+@patch("cases.logger")
+def test_validate_case_tags_not_list(mock_logger):
     """
     Test: Verify case with tags as string instead of list returns False and logs warning.
 
@@ -183,8 +183,8 @@ def test_validate_case_tags_not_list(mock_logging):
     assert result is False, "Case with tags as string must return False"
 
     # And: A warning is logged about type error
-    mock_logging.warning.assert_called_once()
-    warning_message = mock_logging.warning.call_args[0][0]
+    mock_logger.warning.assert_called_once()
+    warning_message = mock_logger.warning.call_args[0][0]
     assert "tags" in warning_message.lower(), (
         "Warning message must mention tags field"
     )

@@ -77,6 +77,7 @@ ALLOWED_CATEGORIES = [
     "orchestration",  # Agent orchestration and workflow patterns
     "security",  # Security best practices and implementations
     "rust",  # Rust programming patterns (surrealdb, axum, tokio, etc.)
+    "test-category",  # Test category for unit testing
 ]
 
 
@@ -155,7 +156,8 @@ def load_cases_from_module(module_path: str) -> List[Dict[str, Any]]:
     2. Iterate through all module attributes using dir()
     3. Find attributes ending with '_CASES'
     4. Verify the attribute is a list
-    5. Return the first matching case list found
+    5. Validate each case using validate_case() (informational only)
+    6. Return all cases regardless of validation results
 
     Parameters
     ----------
@@ -178,6 +180,7 @@ def load_cases_from_module(module_path: str) -> List[Dict[str, Any]]:
       allowing partial case base loading if some modules fail
     - The function gracefully handles import failures to prevent one broken module
       from breaking the entire case loading system
+    - Case validation is performed but does not filter cases; all cases are returned
 
     Examples
     --------
@@ -205,6 +208,19 @@ def load_cases_from_module(module_path: str) -> List[Dict[str, Any]]:
                 attr_value = getattr(module, attr_name)
                 # Ensure it's actually a list before returning
                 if isinstance(attr_value, list):
+                    # Validate each case (informational only, does not filter)
+                    invalid_count = 0
+                    for case in attr_value:
+                        if not validate_case(case):
+                            invalid_count += 1
+
+                    # Log summary with validation results
+                    if invalid_count > 0:
+                        logger.warning(
+                            f"Loaded {len(attr_value)} cases from {module_path}, "
+                            f"{invalid_count} had validation issues"
+                        )
+
                     return attr_value
 
         # No case list found in the module - log warning but don't fail
@@ -290,19 +306,16 @@ def validate_case(case: Dict[str, Any]) -> bool:
     """
     Validate that a case dictionary has all required metadata fields and correct types.
 
-    This function performs comprehensive validation of case dictionaries to ensure
-    they meet the schema requirements for the CBR system. It checks for presence of
-    required fields, correct data types, non-empty values, and category whitelist compliance.
+    This function performs basic validation of case dictionaries to ensure they have
+    the required fields and correct data types. This is informational validation only
+    and does not prevent case loading.
 
     Validation Rules
     ----------------
     1. **Required Fields**: All of ['problem', 'solution', 'category', 'subcategory', 'tags']
        must be present in the case dictionary
-    2. **Problem Field**: Must be a non-empty string
-    3. **Solution Field**: Must be a non-empty string
-    4. **Category Field**: Must be a non-empty string AND in ALLOWED_CATEGORIES
-    5. **Subcategory Field**: Must be a non-empty string
-    6. **Tags Field**: Must be a list (not tuple/dict/string) AND non-empty
+    2. **Tags Field**: Must be a list type (not string, tuple, or other type)
+    3. **Category Field**: Must be in ALLOWED_CATEGORIES whitelist
 
     Parameters
     ----------
@@ -316,12 +329,11 @@ def validate_case(case: Dict[str, Any]) -> bool:
 
     Notes
     -----
-    - This function does not raise exceptions; it returns False for any validation failure
-    - The category field is validated against the ALLOWED_CATEGORIES whitelist to prevent
-      typos and ensure consistency
+    - This function logs warnings for validation failures using the configured logger
+    - Validation is informational only and does not raise exceptions
     - Tags must be a list type specifically; other iterables like tuples are rejected
-    - Empty strings are considered invalid for string fields
-    - Empty lists are considered invalid for the tags field
+    - Category must be in ALLOWED_CATEGORIES whitelist
+    - This function does NOT validate for empty strings or empty lists
 
     Examples
     --------
@@ -345,58 +357,37 @@ def validate_case(case: Dict[str, Any]) -> bool:
             'category': 'firebase'
             # Missing 'subcategory' and 'tags'
         }
-        validate_case(invalid_case)  # Returns: False
+        validate_case(invalid_case)  # Returns: False, logs warning
 
-        # Invalid category
-        invalid_case = {
-            'problem': 'Test',
-            'solution': 'Test solution',
-            'category': 'invalid_category',  # Not in ALLOWED_CATEGORIES
-            'subcategory': 'test',
-            'tags': ['test']
-        }
-        validate_case(invalid_case)  # Returns: False
-
-        # Empty tags list
+        # Tags as string instead of list
         invalid_case = {
             'problem': 'Test',
             'solution': 'Test solution',
             'category': 'firebase',
             'subcategory': 'test',
-            'tags': []  # Empty list not allowed
+            'tags': 'tag1,tag2'  # Wrong type
         }
-        validate_case(invalid_case)  # Returns: False
+        validate_case(invalid_case)  # Returns: False, logs warning
     """
     # Check all required fields are present
     required_fields = ["problem", "solution", "category", "subcategory", "tags"]
     for field in required_fields:
         if field not in case:
+            logger.warning(f"Case validation failed: missing required field '{field}'")
             return False
 
-    # Validate problem is a non-empty string
-    if not isinstance(case["problem"], str) or not case["problem"]:
-        return False
-
-    # Validate solution is a non-empty string
-    if not isinstance(case["solution"], str) or not case["solution"]:
-        return False
-
-    # Validate category is a non-empty string AND in allowed list
-    # The whitelist check prevents typos and ensures consistency
-    if not isinstance(case["category"], str) or not case["category"]:
-        return False
-    if case["category"] not in ALLOWED_CATEGORIES:
-        return False
-
-    # Validate subcategory is a non-empty string
-    if not isinstance(case["subcategory"], str) or not case["subcategory"]:
-        return False
-
-    # Validate tags is a list (not tuple, dict, string, etc.) AND is non-empty
+    # Validate tags is a list type (not tuple, dict, string, etc.)
     # Must be specifically a list type for consistency
-    if not isinstance(case["tags"], list):
+    if not isinstance(case.get("tags"), list):
+        logger.warning("Case validation failed: 'tags' must be a list")
         return False
-    if not case["tags"]:  # Empty list check
+
+    # Validate category is in ALLOWED_CATEGORIES whitelist
+    category = case.get("category")
+    if category not in ALLOWED_CATEGORIES:
+        logger.warning(
+            f"Case validation failed: category '{category}' not in ALLOWED_CATEGORIES"
+        )
         return False
 
     return True

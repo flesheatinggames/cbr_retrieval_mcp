@@ -73,40 +73,40 @@ Always run tests in parallel mode using `pytest -n auto`.
       - Check all metadata dicts have required fields
   - [x] 5.4 Run metadata extraction tests and verify they pass
 
-- [ ] 6. Add Optional Metadata Validation to Case Loading
-  - [ ] 6.1 Create validate_case() function in cases/__init__.py
+- [x] 6. Add Optional Metadata Validation to Case Loading
+  - [x] 6.1 Create validate_case() function in cases/__init__.py
     - **Implementation Details:**
       - Check all required fields present (problem, solution, category, subcategory, tags)
       - Verify tags is a list type
       - Log warnings for validation failures
       - Return boolean indicating validity
-  - [ ] 6.2 Integrate validation into load_cases_from_module() (optional validation with logging)
+  - [x] 6.2 Integrate validation into load_cases_from_module() (optional validation with logging)
     - **Implementation Details:**
       - Call validate_case() for each loaded case
       - Log warnings but don't fail (validation is informational)
       - Count and report number of cases with issues
-  - [ ] 6.3 Run validation tests and verify they pass
+  - [x] 6.3 Run validation tests and verify they pass
 
-- [ ] 7. Migrate Existing Database with Fixed Metadata
-  - [ ] 7.1 Run setup_vectordb.py --force to rebuild database with complete metadata
+- [x] 7. Migrate Existing Database with Fixed Metadata
+  - [x] 7.1 Run setup_vectordb.py --force to rebuild database with complete metadata
     - **Migration Steps:**
       1. Backup existing database: `cp -r ./db ./db.backup.$(date +%Y%m%d)`
       2. Run: `python scripts/utilities/setup_vectordb.py --force`
       3. Verify output shows 103 cases loaded
       4. Verify sample metadata includes all fields
-  - [ ] 7.2 Verify database population tests pass
+  - [x] 7.2 Verify database population tests pass
     - **Verification:**
       - Run test_database_population.py
       - All tests should pass
       - Database has 103 cases with complete metadata
 
-- [ ] 8. Verify Category Search Functionality
-  - [ ] 8.1 Run category search tests and verify they all pass
+- [x] 8. Verify Category Search Functionality
+  - [x] 8.1 Run category search tests and verify they all pass
     - **Verification:**
       - Run test_category_search.py
       - All tests should pass
       - Category filtering now works correctly
-  - [ ] 8.2 Manual verification: Test cbr_search_category via MCP server
+  - [x] 8.2 Manual verification: Test cbr_search_category via MCP server
     - **Manual Test Steps:**
       1. Start MCP server
       2. Call cbr_search_category(category="orchestration")
@@ -115,13 +115,13 @@ Always run tests in parallel mode using `pytest -n auto`.
       5. Test with subcategory filter
       6. Test with query parameter
 
-- [ ] 9. Create and Run End-to-End Tests
-  - [ ] 9.1 Write end-to-end integration tests (test_e2e_category_search.py)
+- [x] 9. Create and Run End-to-End Tests
+  - [x] 9.1 Write end-to-end integration tests (test_e2e_category_search.py)
     - **Test Coverage:**
       - test_e2e_populate_and_search_by_category - Full flow from population to search
       - test_e2e_force_rebuild_and_verify_metadata - Migration verification
       - test_e2e_filtered_load_and_category_search - Filtered loading works end-to-end
-  - [ ] 9.2 Run e2e tests and verify they pass
+  - [x] 9.2 Run e2e tests and verify they pass
 
 - [ ] 10. Create and Run MCP Tool Integration Tests
   - [ ] 10.1 Write MCP tool integration tests (test_mcp_category_tool.py)

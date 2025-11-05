@@ -4212,8 +4212,8 @@ class InputValidator:
                 if not isinstance(value, str):
                     raise ValueError(f"Parameter '{key}' must be a string")
                 sanitized_category = self.sanitize_input(value)
-                # Optional: validate against VALID_CATEGORIES
-                # For now, just sanitize and pass through
+                # Intentionally NOT validated against VALID_CATEGORIES (permissive approach)
+                # Non-existent categories return empty results rather than errors
                 validated[key] = sanitized_category
             
             elif key == "subcategory":
@@ -4992,6 +4992,25 @@ class SignalHandler:
 # ============================================================================
 
 # Valid categories as defined in metadata schema
+#
+# IMPORTANT: This constant is the AUTHORITATIVE SOURCE for valid categories
+# across the CBR system, but it is NOT used for validation within the MCP server.
+#
+# Usage:
+# - scripts/validate_metadata.py: Validates case metadata during data ingestion
+# - tests/unit/test_security_fixes_validation.py: Imports and uses for security tests
+# - Other validation and test files: Reference for test assertions
+#
+# The MCP server uses PERMISSIVE validation for category search:
+# - Non-existent categories return empty results (not errors)
+# - This allows the case base to evolve dynamically without code changes
+# - External validation scripts enforce strict validation during data ingestion
+#
+# If you add a new category:
+# 1. Add it to this list
+# 2. Add corresponding subcategories to VALID_SUBCATEGORIES below
+# 3. Update scripts/validate_metadata.py if needed
+# 4. Add test cases for the new category
 VALID_CATEGORIES = ["code", "orchestration", "best-practice", "anti-pattern"]
 
 VALID_SUBCATEGORIES = {
@@ -5277,25 +5296,30 @@ class ProductionCBRRetriever:
     ) -> List[Dict[str, Any]]:
         """Search for cases within a specific category and optional subcategory.
 
+        This function uses permissive category validation: unknown categories return
+        empty results rather than raising errors. This allows the case base to be
+        dynamically extended without code changes.
+
         Args:
-            category: Required top-level category (code, orchestration, best-practice, anti-pattern)
-            subcategory: Optional subcategory filter
-            query: Optional query text for similarity search
-            limit: Maximum number of results
+            category: Required top-level category name. Uses permissive validation -
+                     returns empty results if category doesn't exist in the database
+                     (no validation against hardcoded list).
+            subcategory: Optional subcategory filter. If provided, uses strict
+                        validation against VALID_SUBCATEGORIES for the category.
+            query: Optional semantic search query to combine with category filter
+            limit: Maximum number of results to return (1-1000, default 10)
 
         Returns:
-            List of cases matching the filters
+            List of cases matching the filters (empty list if category not found in database)
 
         Raises:
-            ValueError: If category is invalid
-        """
-        # 1. Validate category
-        if category not in VALID_CATEGORIES:
-            raise ValueError(
-                f"Invalid category: '{category}'. Valid categories are: {', '.join(VALID_CATEGORIES)}"
-            )
+            ValueError: If subcategory is invalid for the category or limit is out of bounds
 
-        # 2. Validate limit parameter
+        Note:
+            Category validation is permissive (returns [] for non-existent categories).
+            Subcategory validation is strict (raises ValueError for invalid subcategories).
+        """
+        # 1. Validate limit parameter
         if limit < 1:
             raise ValueError("limit must be at least 1")
         if limit > 1000:

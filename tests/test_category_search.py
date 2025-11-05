@@ -125,43 +125,43 @@ def sample_cases_for_category_search():
       "subcategory": "delegation",
       "tags": ["orchestration", "delegation", "agents"],
     },
-    # Code - firebase-auth cases (using valid category "code")
+    # Firebase - auth cases
     {
       "problem": "How to implement Firebase authentication",
       "solution": "Use firebase.auth().signInWithEmailAndPassword(...)",
-      "category": "code",
-      "subcategory": "firebase-auth",
+      "category": "firebase",
+      "subcategory": "auth",
       "tags": ["authentication", "firebase", "login"],
     },
     {
       "problem": "How to handle Firebase auth errors",
       "solution": "Use try-catch with specific error codes",
-      "category": "code",
-      "subcategory": "firebase-auth",
+      "category": "firebase",
+      "subcategory": "auth",
       "tags": ["firebase", "auth", "error-handling"],
     },
-    # Code - react-components cases
+    # Firebase - database cases
     {
-      "problem": "How to create reusable React components",
-      "solution": "Use functional components with props and hooks",
-      "category": "code",
-      "subcategory": "react-components",
-      "tags": ["react", "components", "hooks"],
+      "problem": "How to query Firestore collections",
+      "solution": "Use collection.where() with query constraints",
+      "category": "firebase",
+      "subcategory": "database",
+      "tags": ["firebase", "firestore", "query"],
+    },
+    # Rust - database cases
+    {
+      "problem": "How to implement async database operations in Rust",
+      "solution": "Use tokio with async database drivers",
+      "category": "rust",
+      "subcategory": "database",
+      "tags": ["rust", "async", "database"],
     },
     {
-      "problem": "How to manage component state in React",
-      "solution": "Use useState and useReducer hooks appropriately",
-      "category": "code",
-      "subcategory": "react-components",
-      "tags": ["react", "state", "hooks"],
-    },
-    # Best-practice cases
-    {
-      "problem": "How to ensure proper verification workflows",
-      "solution": "Always verify completed work before marking tasks complete",
-      "category": "best-practice",
-      "subcategory": "verification",
-      "tags": ["verification", "quality", "workflow"],
+      "problem": "How to handle database errors in Rust",
+      "solution": "Use Result types with custom error enums",
+      "category": "rust",
+      "subcategory": "database",
+      "tags": ["rust", "error-handling", "database"],
     },
   ]
 
@@ -288,40 +288,40 @@ async def test_search_by_category_orchestration(
 
 
 @pytest.mark.asyncio
-async def test_search_by_category_code(
+async def test_search_by_category_firebase(
   populated_db_with_complete_metadata, test_retriever
 ):
   """
-  Test that searching by category="code" returns only code cases.
+  Test that searching by category="firebase" returns only firebase cases.
 
-  Given: Database with complete metadata including code cases
-  When: Calling search_by_category(category="code")
+  Given: Database with complete metadata including firebase cases
+  When: Calling search_by_category(category="firebase")
   Then:
     - Query succeeds
-    - Returns code cases (4 in sample data: 2 firebase-auth + 2 react-components)
-    - All returned cases have category="code"
+    - Returns firebase cases (3 in sample data: 2 auth + 1 database)
+    - All returned cases have category="firebase"
   """
   # Ensure database is populated before test
   client, collection = populated_db_with_complete_metadata
 
   # Execute category search using the test retriever
-  results = await test_retriever.search_by_category(category="code", limit=50)
+  results = await test_retriever.search_by_category(category="firebase", limit=50)
 
   # Assertion 1: Query succeeds
   assert results is not None, "Query should return results, not None"
 
-  # Assertion 2: Returns code cases (4 code cases in sample data)
-  assert len(results) == 4, f"Expected 4 code cases, got {len(results)}"
+  # Assertion 2: Returns firebase cases (3 firebase cases in sample data)
+  assert len(results) == 3, f"Expected 3 firebase cases, got {len(results)}"
 
-  # Assertion 3: All returned cases have category="code"
+  # Assertion 3: All returned cases have category="firebase"
   for result in results:
     metadata = result.get("metadata", {})
     assert (
       "category" in metadata
     ), "Result metadata should contain 'category' field"
     assert (
-      metadata["category"] == "code"
-    ), f"Expected category='code', got '{metadata.get('category')}'"
+      metadata["category"] == "firebase"
+    ), f"Expected category='firebase', got '{metadata.get('category')}'"
 
 
 # ============================================================================
@@ -330,40 +330,40 @@ async def test_search_by_category_code(
 
 
 @pytest.mark.asyncio
-async def test_search_by_category_best_practice(
+async def test_search_by_category_rust(
   populated_db_with_complete_metadata, test_retriever
 ):
   """
-  Test that searching by category="best-practice" returns only best-practice cases.
+  Test that searching by category="rust" returns only rust cases.
 
-  Given: Database with complete metadata including best-practice cases
-  When: Calling search_by_category(category="best-practice")
+  Given: Database with complete metadata including rust cases
+  When: Calling search_by_category(category="rust")
   Then:
     - Query succeeds
-    - Returns best-practice cases (1 in sample data)
-    - All returned cases have category="best-practice"
+    - Returns rust cases (2 in sample data)
+    - All returned cases have category="rust"
   """
   # Ensure database is populated before test
   client, collection = populated_db_with_complete_metadata
 
   # Execute category search using the test retriever
-  results = await test_retriever.search_by_category(category="best-practice", limit=50)
+  results = await test_retriever.search_by_category(category="rust", limit=50)
 
   # Assertion 1: Query succeeds
   assert results is not None, "Query should return results, not None"
 
-  # Assertion 2: Returns best-practice cases
-  assert len(results) == 1, f"Expected 1 best-practice case, got {len(results)}"
+  # Assertion 2: Returns rust cases (2 rust cases in sample data)
+  assert len(results) == 2, f"Expected 2 rust cases, got {len(results)}"
 
-  # Assertion 3: All returned cases have category="best-practice"
+  # Assertion 3: All returned cases have category="rust"
   for result in results:
     metadata = result.get("metadata", {})
     assert (
       "category" in metadata
     ), "Result metadata should contain 'category' field"
     assert (
-      metadata["category"] == "best-practice"
-    ), f"Expected category='best-practice', got '{metadata.get('category')}'"
+      metadata["category"] == "rust"
+    ), f"Expected category='rust', got '{metadata.get('category')}'"
 
 
 # ============================================================================
@@ -476,24 +476,18 @@ async def test_search_by_category_with_query_text(
 @pytest.mark.asyncio
 async def test_search_nonexistent_category(test_retriever):
   """
-  Test that searching for an invalid category raises ValueError.
+  Test that searching for a non-existent category returns empty results.
 
   Given: Database with any metadata
   When: Calling search_by_category(category="nonexistent")
-  Then: Raises ValueError with message about invalid category
+  Then: Returns empty list (no error raised)
   """
-  # Assertion: Should raise ValueError for nonexistent category
-  with pytest.raises(ValueError) as exc_info:
-    await test_retriever.search_by_category(category="nonexistent", limit=10)
+  # Assertion: Should return empty results for non-existent category
+  results = await test_retriever.search_by_category(category="nonexistent", limit=10)
 
-  # Verify error message mentions invalid category
-  error_message = str(exc_info.value)
-  assert (
-    "Invalid category" in error_message
-  ), f"Error message should mention 'Invalid category', got: {error_message}"
-  assert (
-    "nonexistent" in error_message
-  ), f"Error message should mention the invalid category name, got: {error_message}"
+  # Verify empty results (category doesn't exist in database)
+  assert isinstance(results, list), "Should return a list"
+  assert len(results) == 0, f"Should return empty results for non-existent category, got {len(results)} results"
 
 
 # ============================================================================
