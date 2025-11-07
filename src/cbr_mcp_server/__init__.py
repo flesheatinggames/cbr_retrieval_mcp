@@ -9,16 +9,12 @@ __version__ = "1.0.0"
 
 import logging
 
+# Try to import FastMCP (may not always be available)
+# Use a temporary variable to avoid type assignment conflict
+from typing import Any
+
 # Import the module itself for test patching
 from . import server as server_module
-
-# Validation functions
-# Validation constants
-# Production infrastructure
-# Monitoring and performance
-# Logging infrastructure
-# External dependencies
-# Core server classes
 from .server import (
     VALID_CATEGORIES,
     VALID_SUBCATEGORIES,
@@ -37,14 +33,18 @@ from .server import (
     SystemMetrics,
     WebSocketManager,
     chromadb,
+    main,
     startup_configuration_validator,
 )
 
-# Try to import FastMCP (may not always be available)
+FastMCP: Any = None
 try:
-    from .server import FastMCP
+    from .server import FastMCP as _FastMCP_temp
+
+    FastMCP = _FastMCP_temp
+
 except (ImportError, AttributeError):
-    FastMCP = None
+    pass
 
 # Re-export for public API
 __all__ = [
@@ -74,6 +74,8 @@ __all__ = [
     "VALID_SUBCATEGORIES",
     # Validation functions
     "startup_configuration_validator",
+    # Main entry point
+    "main",
     # Optional imports
     "FastMCP",
     # Version

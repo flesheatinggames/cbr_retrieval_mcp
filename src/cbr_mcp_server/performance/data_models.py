@@ -7,11 +7,15 @@ This module contains Pydantic models for:
 - Memory allocation breakdown (MemoryAllocation)
 - Cache configuration (CachePolicy)
 - Query optimization configuration (QueryOptimizationConfig)
+- Lazy loading configuration (LazyLoadingConfig)
 """
 
+import logging
 from typing import Literal, Optional
 
 from pydantic import BaseModel, Field, field_validator
+
+logger = logging.getLogger(__name__)
 
 
 class MemoryConfig(BaseModel):
@@ -237,4 +241,126 @@ class QueryOptimizationConfig(BaseModel):
         """Validate cache_ttl_seconds is non-negative."""
         if v < 0:
             raise ValueError("cache_ttl_seconds must be non-negative")
+        return v
+
+
+class LazyLoadingConfig(BaseModel):
+    """
+    Configuration for lazy loading system with predictive preloading.
+
+    This configuration controls the behavior of the lazy loading system,
+    which loads case embeddings and data on-demand rather than at startup.
+    It includes support for predictive preloading based on access patterns
+    to maintain performance while minimizing memory usage.
+
+    Attributes:
+        lazy_load_enabled: Enable/disable lazy loading system (default: True)
+        preload_hot_cases: Enable predictive preloading of frequently accessed cases (default: True)
+        hot_case_count: Number of hot cases to pre-load based on access frequency (default: 50)
+        background_loading_enabled: Enable background loading tasks for non-critical cases (default: True)
+        access_window_hours: Time window in hours for tracking access patterns (default: 24)
+        min_access_frequency: Minimum access frequency (accesses per hour) for preload candidates (default: 0.5)
+        preload_batch_size: Maximum number of cases to preload in a single batch operation (default: 20)
+        max_concurrent_loads: Maximum number of concurrent loading tasks to prevent resource exhaustion (default: 5)
+    """
+
+    lazy_load_enabled: bool = Field(
+        default=True,
+        description="Enable/disable lazy loading",
+    )
+
+    preload_hot_cases: bool = Field(
+        default=True,
+        description="Enable predictive preloading of hot cases",
+    )
+
+    hot_case_count: int = Field(
+        default=50,
+        description="Number of hot cases to pre-load",
+    )
+
+    background_loading_enabled: bool = Field(
+        default=True,
+        description="Enable background loading",
+    )
+
+    access_window_hours: int = Field(
+        default=24,
+        description="Hours for access pattern tracking window",
+    )
+
+    min_access_frequency: float = Field(
+        default=0.5,
+        description="Minimum frequency for preload candidates",
+    )
+
+    preload_batch_size: int = Field(
+        default=20,
+        description="Maximum cases to preload in one batch",
+    )
+
+    max_concurrent_loads: int = Field(
+        default=5,
+        description="Maximum concurrent loading tasks",
+    )
+
+    max_cache_size: int = Field(
+        default=200,
+        description="Maximum number of cases to keep in memory cache (LRU eviction)",
+        gt=0,
+    )
+
+    @field_validator("hot_case_count")
+    @classmethod
+    def validate_hot_case_count(cls, v: int) -> int:
+        """Validate hot_case_count is positive."""
+        if v < 1:
+            raise ValueError("hot_case_count must be at least 1")
+        return v
+
+    @field_validator("access_window_hours")
+    @classmethod
+    def validate_access_window_hours(cls, v: int) -> int:
+        """Validate access_window_hours is positive."""
+        if v < 1:
+            raise ValueError("access_window_hours must be at least 1")
+        return v
+
+    @field_validator("min_access_frequency")
+    @classmethod
+    def validate_min_access_frequency(cls, v: float) -> float:
+        """Validate min_access_frequency is between 0 and 1."""
+        if v < 0.0 or v > 1.0:
+            raise ValueError("min_access_frequency must be between 0.0 and 1.0")
+
+        # Warn about extreme values
+        if v == 0.0:
+            logger.warning("min_access_frequency=0.0 will preload all cases")
+        if v >= 1.0:
+            logger.warning("min_access_frequency>=1.0 may prevent most preloading")
+
+        return v
+
+    @field_validator("preload_batch_size")
+    @classmethod
+    def validate_preload_batch_size(cls, v: int) -> int:
+        """Validate preload_batch_size is positive."""
+        if v < 1:
+            raise ValueError("preload_batch_size must be at least 1")
+        return v
+
+    @field_validator("max_concurrent_loads")
+    @classmethod
+    def validate_max_concurrent_loads(cls, v: int) -> int:
+        """Validate max_concurrent_loads is positive."""
+        if v < 1:
+            raise ValueError("max_concurrent_loads must be at least 1")
+        return v
+
+    @field_validator("max_cache_size")
+    @classmethod
+    def validate_max_cache_size(cls, v: int) -> int:
+        """Validate max_cache_size is positive."""
+        if v < 1:
+            raise ValueError("max_cache_size must be at least 1")
         return v

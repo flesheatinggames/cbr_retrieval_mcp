@@ -181,6 +181,7 @@ name = "cbr-mcp-server"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "cachetools" },
     { name = "chromadb" },
     { name = "einops" },
     { name = "mcp" },
@@ -203,6 +204,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "black", marker = "extra == 'dev'" },
+    { name = "cachetools", specifier = ">=5.3.0" },
     { name = "chromadb" },
     { name = "einops" },
     { name = "isort", marker = "extra == 'dev'" },
