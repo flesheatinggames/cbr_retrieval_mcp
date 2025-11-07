@@ -1,0 +1,211 @@
+# Spec Tasks
+
+These are the tasks to be completed for the spec detailed in @.agent-os/specs/2025-11-05-local-performance-optimization/spec.md
+
+> Created: 2025-11-05
+> Status: Ready for Implementation
+
+## Tasks
+
+- [x] 1. **Establish Performance Baselines and Testing Infrastructure**
+  - [x] 1.1 Write baseline measurement tests to capture current performance metrics (latency, memory, startup time)
+  - [x] 1.2 Create performance test fixtures and helpers (assert helpers, mock ChromaDB, sample workloads)
+  - [x] 1.3 Implement profiling test infrastructure (cProfile integration, memory_profiler integration)
+  - [x] 1.4 Create benchmarking framework for continuous performance tracking
+  - [x] 1.5 Run baseline measurements and document current performance
+  - [x] 1.6 Verify all baseline tests pass and metrics are captured
+
+- [x] 2. **Implement Memory Management System**
+  - [x] 2.1 Write unit tests for MemoryManager component (tests/unit/test_memory_manager.py)
+  - [x] 2.2 Write unit tests for EmbeddingCacheManager component
+  - [x] 2.3 Write unit tests for MemoryPressureDetector component
+  - [x] 2.4 Implement MemoryConfig data model (src/cbr_mcp_server/performance/data_models.py)
+  - [x] 2.5 Implement MemoryManager class (src/cbr_mcp_server/performance/memory_manager.py)
+  - [x] 2.6 Implement EmbeddingCacheManager with LRU eviction
+  - [x] 2.7 Implement MemoryPressureDetector with monitoring
+  - [x] 2.8 Integrate memory tracking with existing ResourceMonitor
+  - [x] 2.9 Write integration tests for memory management (tests/integration/test_memory_integration.py)
+  - [x] 2.10 Verify all memory management tests pass
+
+- [x] 3. **Implement Cache System**
+  - [x] 3.1 Write unit tests for ResultCache component (tests/unit/test_cache_system.py)
+  - [x] 3.2 Write unit tests for CacheEntry and CacheMetrics
+  - [x] 3.3 Write unit tests for CachePolicy component
+  - [x] 3.4 Implement CacheConfig and related data models (src/cbr_mcp_server/performance/data_models.py)
+  - [x] 3.5 Implement ResultCache with LRU eviction (src/cbr_mcp_server/performance/cache_system.py)
+  - [x] 3.6 Implement CacheEntry with TTL support
+  - [x] 3.7 Implement CacheMetrics tracking and reporting
+  - [x] 3.8 Add cachetools dependency to pyproject.toml
+  - [x] 3.9 Write integration tests for cache system (tests/integration/test_cache_integration.py)
+  - [x] 3.10 Verify all cache system tests pass
+
+- [x] 4. **Implement Query Optimizer**
+  - [x] 4.1 Write unit tests for QueryOptimizer component (tests/unit/test_query_optimizer.py)
+  - [x] 4.2 Write unit tests for ConnectionPool component
+  - [x] 4.3 Write unit tests for BatchCoordinator component
+  - [x] 4.4 Implement QueryOptimizationConfig data model (src/cbr_mcp_server/performance/data_models.py)
+  - [x] 4.5 Implement QueryOptimizer class (src/cbr_mcp_server/performance/query_optimizer.py)
+  - [x] 4.6 Implement ConnectionPool for ChromaDB connections
+  - [x] 4.7 Implement BatchCoordinator for query batching
+  - [x] 4.8 Integrate query cache with QueryOptimizer
+  - [x] 4.9 Write integration tests for query optimizer (tests/integration/test_query_optimizer_integration.py)
+  - [x] 4.10 Verify all query optimizer tests pass
+
+- [ ] 5. **Implement Lazy Loading System**
+  - [ ] 5.1 Write unit tests for LazyLoader component (tests/unit/test_lazy_loader.py)
+  - [ ] 5.2 Write unit tests for AccessPatternTracker component
+  - [ ] 5.3 Write unit tests for PreloadStrategy component
+  - [ ] 5.4 Write unit tests for LoadScheduler component
+  - [ ] 5.5 Implement LazyLoadingConfig data model (src/cbr_mcp_server/performance/data_models.py)
+  - [ ] 5.6 Implement LazyLoader class (src/cbr_mcp_server/performance/lazy_loader.py)
+  - [ ] 5.7 Implement AccessPatternTracker for pattern learning
+  - [ ] 5.8 Implement PreloadStrategy for predictive loading
+  - [ ] 5.9 Implement LoadScheduler for background loading
+  - [ ] 5.10 Write integration tests for lazy loading (tests/integration/test_lazy_loading_integration.py)
+  - [ ] 5.11 Verify all lazy loading tests pass
+
+- [ ] 6. **Integrate Performance Components with CBRRetriever**
+  - [ ] 6.1 Write integration tests for ProductionCBRRetriever with performance enhancements
+  - [ ] 6.2 Modify ProductionCBRRetriever to use MemoryManager (src/cbr_mcp_server/server.py)
+  - [ ] 6.3 Integrate ResultCache into query path
+  - [ ] 6.4 Integrate LazyLoader for embedding loading
+  - [ ] 6.5 Add cache warming on startup
+  - [ ] 6.6 Update configuration loading to include performance settings
+  - [ ] 6.7 Write end-to-end integration tests (tests/integration/test_performance_integration.py)
+  - [ ] 6.8 Verify all CBRRetriever integration tests pass
+
+- [ ] 7. **Optimize Server Startup**
+  - [ ] 7.1 Write startup time benchmark tests (tests/benchmarks/test_startup_benchmarks.py)
+  - [ ] 7.2 Implement lazy embedding model loading
+  - [ ] 7.3 Implement incremental database initialization
+  - [ ] 7.4 Add parallel initialization where possible
+  - [ ] 7.5 Implement index warming strategy
+  - [ ] 7.6 Measure and verify startup time under 5 seconds
+  - [ ] 7.7 Write startup regression tests
+  - [ ] 7.8 Verify all startup optimization tests pass
+
+- [ ] 8. **Implement Index Optimization**
+  - [ ] 8.1 Write tests for ChromaDB index configuration
+  - [ ] 8.2 Implement IndexOptimizationConfig data model (src/cbr_mcp_server/performance/data_models.py)
+  - [ ] 8.3 Configure HNSW parameters for local optimization
+  - [ ] 8.4 Implement index warming on startup
+  - [ ] 8.5 Add index performance monitoring
+  - [ ] 8.6 Write integration tests for index optimization
+  - [ ] 8.7 Verify index optimization tests pass
+
+- [ ] 9. **Performance Benchmarking and Validation**
+  - [ ] 9.1 Write comprehensive latency benchmarks (tests/benchmarks/test_latency_benchmarks.py)
+  - [ ] 9.2 Write memory usage benchmarks (tests/benchmarks/test_memory_benchmarks.py)
+  - [ ] 9.3 Write throughput benchmarks (tests/benchmarks/test_throughput_benchmarks.py)
+  - [ ] 9.4 Run all benchmarks and compare against targets
+  - [ ] 9.5 Verify query latency <200ms (p95)
+  - [ ] 9.6 Verify memory usage <500MB peak
+  - [ ] 9.7 Verify cache hit rate >70%
+  - [ ] 9.8 Verify startup time <5 seconds
+  - [ ] 9.9 Document benchmark results
+  - [ ] 9.10 Verify all performance targets met
+
+- [ ] 10. **MCP Protocol Performance Integration**
+  - [ ] 10.1 Write MCP tool performance tests (tests/integration/test_mcp_performance_integration.py)
+  - [ ] 10.2 Test cbr_retrieve tool performance
+  - [ ] 10.3 Test cbr_search_category tool performance
+  - [ ] 10.4 Test cbr_find_similar tool performance
+  - [ ] 10.5 Test concurrent MCP tool calls performance
+  - [ ] 10.6 Verify MCP protocol compliance maintained
+  - [ ] 10.7 Verify all MCP performance tests pass
+
+- [ ] 11. **Regression Testing and Quality Assurance**
+  - [ ] 11.1 Write performance regression tests (tests/regression/test_performance_regression.py)
+  - [ ] 11.2 Run entire existing test suite to verify no breakage
+  - [ ] 11.3 Run functionality regression tests
+  - [ ] 11.4 Verify retrieval accuracy not degraded
+  - [ ] 11.5 Verify MCP protocol compliance preserved
+  - [ ] 11.6 Run code quality checks (Black, isort, mypy)
+  - [ ] 11.7 Review code for performance best practices
+  - [ ] 11.8 Verify all regression tests pass
+
+- [ ] 12. **Load Testing and Stress Testing**
+  - [ ] 12.1 Write sustained load tests (tests/load/test_performance_load.py)
+  - [ ] 12.2 Write stress tests for concurrent queries
+  - [ ] 12.3 Write stress tests for memory pressure
+  - [ ] 12.4 Write stress tests for cache churn
+  - [ ] 12.5 Write spike tests for sudden load
+  - [ ] 12.6 Run all load tests and verify stability
+  - [ ] 12.7 Document load testing results
+  - [ ] 12.8 Verify all load tests pass
+
+- [ ] 13. **Performance Monitoring Integration**
+  - [ ] 13.1 Write tests for performance metrics tracking
+  - [ ] 13.2 Extend PerformanceTracker to capture new metrics (query latency, cache hits, memory)
+  - [ ] 13.3 Add performance metrics to health dashboard
+  - [ ] 13.4 Implement performance metrics export (JSON format)
+  - [ ] 13.5 Add performance alerting for threshold violations
+  - [ ] 13.6 Write integration tests for monitoring
+  - [ ] 13.7 Verify all monitoring integration tests pass
+
+- [ ] 14. **Documentation and Configuration**
+  - [ ] 14.1 Update README with performance optimization features
+  - [ ] 14.2 Document performance configuration options
+  - [ ] 14.3 Create performance tuning guide
+  - [ ] 14.4 Document benchmark results and performance characteristics
+  - [ ] 14.5 Update configuration examples with performance settings
+  - [ ] 14.6 Document environment variable overrides
+  - [ ] 14.7 Create troubleshooting guide for performance issues
+  - [ ] 14.8 Review all documentation for completeness
+
+- [ ] 15. **Final Validation and Release Preparation**
+  - [ ] 15.1 Run complete test suite (unit, integration, benchmarks, regression, load)
+  - [ ] 15.2 Verify all performance targets achieved
+  - [ ] 15.3 Profile production-like workload for final validation
+  - [ ] 15.4 Review code with code-reviewer agent
+  - [ ] 15.5 Create migration guide for existing deployments
+  - [ ] 15.6 Update CHANGELOG with performance improvements
+  - [ ] 15.7 Tag release with performance benchmarks
+  - [ ] 15.8 Verify final release readiness
+
+## Task Dependencies
+
+- Task 1 must complete before all others (establishes baselines)
+- Tasks 2-5 can be developed in parallel (independent components)
+- Task 6 depends on tasks 2-5 (integration of components)
+- Task 7 can proceed in parallel with tasks 2-6
+- Task 8 can proceed in parallel with tasks 2-6
+- Task 9 depends on tasks 2-8 (validation of implementations)
+- Task 10 depends on task 6 (MCP integration validation)
+- Task 11 depends on tasks 2-10 (regression testing)
+- Task 12 depends on tasks 2-10 (load testing)
+- Task 13 depends on tasks 2-8 (monitoring integration)
+- Task 14 can proceed in parallel with tasks 9-13
+- Task 15 depends on all previous tasks (final validation)
+
+## Recommended Sub-Agents
+
+- **tdd-test-engineer:** Tasks 1.1-1.6, 2.1-2.3, 3.1-3.3, 4.1-4.3, 5.1-5.4, 6.1, 6.7-6.8, 7.1, 7.6-7.8, 8.1, 8.6-8.7, 9.1-9.10, 10.1-10.7, 11.1-11.8, 12.1-12.8, 13.1, 13.6-13.7, 15.1-15.3
+- **react-ui-developer:** Not applicable (no UI components)
+- **firebase-backend-architect:** Not applicable (no Firebase components)
+- **unity-developer:** Not applicable (no Unity components)
+- **debug-specialist:** Use if performance issues arise during development
+- **code-reviewer:** Tasks 11.7, 15.4
+- **documentation-specialist:** Tasks 14.1-14.8
+
+## Performance Targets Summary
+
+All implementations must achieve these targets:
+
+- **Query Response Latency:** <200ms (p95)
+- **Memory Usage:** <500MB peak
+- **Cache Hit Rate:** >70%
+- **Startup Time:** <5 seconds
+- **Throughput:** 10+ concurrent queries without degradation
+
+## Success Criteria
+
+The spec is complete when:
+
+1. All 15 tasks are completed and marked done
+2. All performance targets are met and verified
+3. All tests pass (unit, integration, benchmark, regression, load)
+4. Code review is complete and approved
+5. Documentation is complete and reviewed
+6. No regressions in existing functionality
+7. MCP protocol compliance is maintained

@@ -6,8 +6,9 @@ extracted from the legacy case_base.py file. Tests follow TDD approach and will 
 until the nextjs_api_cases.py module is properly implemented.
 """
 
+from typing import Any, Dict, List
+
 import pytest
-from typing import Dict, List, Any
 
 
 class TestModuleStructure:

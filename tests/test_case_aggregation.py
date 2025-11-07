@@ -6,6 +6,7 @@ from all modular case files and contains the expected number of cases.
 """
 
 import pytest
+
 from cases import ALL_CASES
 
 
@@ -77,73 +78,80 @@ class TestAllCasesStructure:
         )
 
 
-
 class TestDirectoryCoverage:
     """Test suite to verify ALL_CASES includes cases from all expected directories."""
 
     def test_firebase_cases_present(self):
         """Test that ALL_CASES contains at least one case from cases/firebase/."""
-        firebase_cases = [case for case in ALL_CASES if case.get("category") == "firebase"]
-        
-        assert len(firebase_cases) > 0, (
-            "ALL_CASES should contain at least one case with category='firebase'"
-        )
+        firebase_cases = [
+            case for case in ALL_CASES if case.get("category") == "firebase"
+        ]
+
+        assert (
+            len(firebase_cases) > 0
+        ), "ALL_CASES should contain at least one case with category='firebase'"
 
     def test_react_cases_present(self):
         """Test that ALL_CASES contains at least one case from cases/react/."""
         react_cases = [case for case in ALL_CASES if case.get("category") == "react"]
-        
-        assert len(react_cases) > 0, (
-            "ALL_CASES should contain at least one case with category='react'"
-        )
+
+        assert (
+            len(react_cases) > 0
+        ), "ALL_CASES should contain at least one case with category='react'"
 
     def test_nextjs_cases_present(self):
         """Test that ALL_CASES contains at least one case from cases/nextjs/."""
         nextjs_cases = [case for case in ALL_CASES if case.get("category") == "nextjs"]
-        
-        assert len(nextjs_cases) > 0, (
-            "ALL_CASES should contain at least one case with category='nextjs'"
-        )
+
+        assert (
+            len(nextjs_cases) > 0
+        ), "ALL_CASES should contain at least one case with category='nextjs'"
 
     def test_bootstrap_cases_present(self):
         """Test that ALL_CASES contains at least one case from cases/bootstrap/."""
-        bootstrap_cases = [case for case in ALL_CASES if case.get("category") == "bootstrap"]
-        
-        assert len(bootstrap_cases) > 0, (
-            "ALL_CASES should contain at least one case with category='bootstrap'"
-        )
+        bootstrap_cases = [
+            case for case in ALL_CASES if case.get("category") == "bootstrap"
+        ]
+
+        assert (
+            len(bootstrap_cases) > 0
+        ), "ALL_CASES should contain at least one case with category='bootstrap'"
 
     def test_webdev_cases_present(self):
         """Test that ALL_CASES contains at least one case from cases/webdev/."""
         webdev_cases = [case for case in ALL_CASES if case.get("category") == "webdev"]
-        
-        assert len(webdev_cases) > 0, (
-            "ALL_CASES should contain at least one case with category='webdev'"
-        )
+
+        assert (
+            len(webdev_cases) > 0
+        ), "ALL_CASES should contain at least one case with category='webdev'"
 
     def test_orchestration_cases_present(self):
         """Test that ALL_CASES contains at least one case from cases/orchestration/."""
-        orchestration_cases = [case for case in ALL_CASES if case.get("category") == "orchestration"]
-        
-        assert len(orchestration_cases) > 0, (
-            "ALL_CASES should contain at least one case with category='orchestration'"
-        )
+        orchestration_cases = [
+            case for case in ALL_CASES if case.get("category") == "orchestration"
+        ]
+
+        assert (
+            len(orchestration_cases) > 0
+        ), "ALL_CASES should contain at least one case with category='orchestration'"
 
     def test_security_cases_present(self):
         """Test that ALL_CASES contains at least one case from cases/security/."""
-        security_cases = [case for case in ALL_CASES if case.get("category") == "security"]
-        
-        assert len(security_cases) > 0, (
-            "ALL_CASES should contain at least one case with category='security'"
-        )
+        security_cases = [
+            case for case in ALL_CASES if case.get("category") == "security"
+        ]
+
+        assert (
+            len(security_cases) > 0
+        ), "ALL_CASES should contain at least one case with category='security'"
 
     def test_rust_cases_present(self):
         """Test that ALL_CASES contains at least one case from cases/rust/."""
         rust_cases = [case for case in ALL_CASES if case.get("category") == "rust"]
-        
-        assert len(rust_cases) > 0, (
-            "ALL_CASES should contain at least one case with category='rust'"
-        )
+
+        assert (
+            len(rust_cases) > 0
+        ), "ALL_CASES should contain at least one case with category='rust'"
 
     def test_all_expected_directories_covered(self):
         """Test that ALL_CASES includes cases from all 8 expected directories."""
@@ -155,11 +163,13 @@ class TestDirectoryCoverage:
             "webdev",
             "orchestration",
             "security",
-            "rust"
+            "rust",
         }
 
         # Get all unique categories present in ALL_CASES
-        present_categories = {case.get("category") for case in ALL_CASES if case.get("category")}
+        present_categories = {
+            case.get("category") for case in ALL_CASES if case.get("category")
+        }
 
         # Find missing categories
         missing_categories = expected_categories - present_categories
@@ -238,11 +248,13 @@ class TestMetadataCompleteness:
             missing_fields = required_fields - set(case.keys())
             if missing_fields:
                 case_desc = case.get("description", "No description")
-                incomplete_cases.append({
-                    "index": idx,
-                    "description": case_desc,
-                    "missing_fields": sorted(missing_fields)
-                })
+                incomplete_cases.append(
+                    {
+                        "index": idx,
+                        "description": case_desc,
+                        "missing_fields": sorted(missing_fields),
+                    }
+                )
 
         assert not incomplete_cases, (
             f"All cases should have complete metadata (category, subcategory, tags). "
@@ -262,7 +274,7 @@ class TestMetadataValidity:
         "webdev",
         "orchestration",
         "security",
-        "rust"
+        "rust",
     ]
 
     def test_all_categories_are_valid(self):
@@ -274,11 +286,13 @@ class TestMetadataValidity:
             category = case.get("category")
             if category not in self.ALLOWED_CATEGORIES:
                 case_desc = case.get("description", "No description")
-                invalid_category_cases.append({
-                    "index": idx,
-                    "description": case_desc,
-                    "invalid_category": category
-                })
+                invalid_category_cases.append(
+                    {
+                        "index": idx,
+                        "description": case_desc,
+                        "invalid_category": category,
+                    }
+                )
 
         assert not invalid_category_cases, (
             f"All cases should have a valid category from {self.ALLOWED_CATEGORIES}. "
@@ -296,19 +310,23 @@ class TestMetadataValidity:
             case_desc = case.get("description", "No description")
 
             if not isinstance(subcategory, str):
-                invalid_subcategory_cases.append({
-                    "index": idx,
-                    "description": case_desc,
-                    "issue": f"subcategory is not a string, it is {type(subcategory).__name__}",
-                    "value": subcategory
-                })
+                invalid_subcategory_cases.append(
+                    {
+                        "index": idx,
+                        "description": case_desc,
+                        "issue": f"subcategory is not a string, it is {type(subcategory).__name__}",
+                        "value": subcategory,
+                    }
+                )
             elif len(subcategory) == 0:
-                invalid_subcategory_cases.append({
-                    "index": idx,
-                    "description": case_desc,
-                    "issue": "subcategory is an empty string",
-                    "value": subcategory
-                })
+                invalid_subcategory_cases.append(
+                    {
+                        "index": idx,
+                        "description": case_desc,
+                        "issue": "subcategory is an empty string",
+                        "value": subcategory,
+                    }
+                )
 
         assert not invalid_subcategory_cases, (
             f"All cases should have non-empty string subcategories. "
@@ -325,12 +343,14 @@ class TestMetadataValidity:
             tags = case.get("tags")
             if not isinstance(tags, list):
                 case_desc = case.get("description", "No description")
-                non_list_tags_cases.append({
-                    "index": idx,
-                    "description": case_desc,
-                    "tags_type": type(tags).__name__,
-                    "value": tags
-                })
+                non_list_tags_cases.append(
+                    {
+                        "index": idx,
+                        "description": case_desc,
+                        "tags_type": type(tags).__name__,
+                        "value": tags,
+                    }
+                )
 
         assert not non_list_tags_cases, (
             f"All cases should have a 'tags' field that is a list. "
@@ -347,10 +367,7 @@ class TestMetadataValidity:
             tags = case.get("tags")
             if isinstance(tags, list) and len(tags) == 0:
                 case_desc = case.get("description", "No description")
-                empty_tags_cases.append({
-                    "index": idx,
-                    "description": case_desc
-                })
+                empty_tags_cases.append({"index": idx, "description": case_desc})
 
         assert not empty_tags_cases, (
             f"All cases should have at least one tag in the 'tags' list. "
@@ -369,13 +386,15 @@ class TestMetadataValidity:
                 case_desc = case.get("description", "No description")
                 for tag_idx, tag in enumerate(tags):
                     if not isinstance(tag, str):
-                        non_string_tag_cases.append({
-                            "case_index": idx,
-                            "description": case_desc,
-                            "tag_index": tag_idx,
-                            "tag_type": type(tag).__name__,
-                            "tag_value": tag
-                        })
+                        non_string_tag_cases.append(
+                            {
+                                "case_index": idx,
+                                "description": case_desc,
+                                "tag_index": tag_idx,
+                                "tag_type": type(tag).__name__,
+                                "tag_value": tag,
+                            }
+                        )
 
         assert not non_string_tag_cases, (
             f"All tags within 'tags' fields should be strings. "
@@ -426,11 +445,13 @@ class TestMetadataValidity:
                         )
 
             if case_violations:
-                violations.append({
-                    "index": idx,
-                    "description": case_desc,
-                    "violations": case_violations
-                })
+                violations.append(
+                    {
+                        "index": idx,
+                        "description": case_desc,
+                        "violations": case_violations,
+                    }
+                )
 
         assert not violations, (
             f"All cases should have valid metadata (category, subcategory, tags). "
@@ -446,9 +467,9 @@ class TestRustCasesCompatibility:
         """Test that exactly 30 rust cases are loaded by the dynamic loader."""
         rust_cases = [case for case in ALL_CASES if case.get("category") == "rust"]
 
-        assert len(rust_cases) == 30, (
-            f"Expected exactly 30 rust cases, but found {len(rust_cases)}"
-        )
+        assert (
+            len(rust_cases) == 30
+        ), f"Expected exactly 30 rust cases, but found {len(rust_cases)}"
 
     def test_all_rust_cases_have_metadata_fields(self):
         """Test that all rust cases have the required metadata fields."""
@@ -469,11 +490,13 @@ class TestRustCasesCompatibility:
 
             if missing_fields:
                 case_desc = case.get("problem", "No problem description")[:50]
-                missing_metadata_cases.append({
-                    "index": idx,
-                    "problem_snippet": case_desc,
-                    "missing_fields": missing_fields
-                })
+                missing_metadata_cases.append(
+                    {
+                        "index": idx,
+                        "problem_snippet": case_desc,
+                        "missing_fields": missing_fields,
+                    }
+                )
 
         assert not missing_metadata_cases, (
             f"All rust cases should have metadata fields (category, subcategory, tags). "
@@ -492,11 +515,13 @@ class TestRustCasesCompatibility:
             category = case.get("category")
             if category != "rust":
                 case_desc = case.get("problem", "No problem description")[:50]
-                invalid_category_cases.append({
-                    "index": idx,
-                    "problem_snippet": case_desc,
-                    "actual_category": category
-                })
+                invalid_category_cases.append(
+                    {
+                        "index": idx,
+                        "problem_snippet": case_desc,
+                        "actual_category": category,
+                    }
+                )
 
         assert not invalid_category_cases, (
             f"All rust cases should have category='rust'. "
@@ -516,19 +541,23 @@ class TestRustCasesCompatibility:
             case_desc = case.get("problem", "No problem description")[:50]
 
             if not isinstance(subcategory, str):
-                invalid_subcategory_cases.append({
-                    "index": idx,
-                    "problem_snippet": case_desc,
-                    "issue": f"subcategory is not a string, it is {type(subcategory).__name__}",
-                    "value": subcategory
-                })
+                invalid_subcategory_cases.append(
+                    {
+                        "index": idx,
+                        "problem_snippet": case_desc,
+                        "issue": f"subcategory is not a string, it is {type(subcategory).__name__}",
+                        "value": subcategory,
+                    }
+                )
             elif len(subcategory) == 0:
-                invalid_subcategory_cases.append({
-                    "index": idx,
-                    "problem_snippet": case_desc,
-                    "issue": "subcategory is an empty string",
-                    "value": subcategory
-                })
+                invalid_subcategory_cases.append(
+                    {
+                        "index": idx,
+                        "problem_snippet": case_desc,
+                        "issue": "subcategory is an empty string",
+                        "value": subcategory,
+                    }
+                )
 
         assert not invalid_subcategory_cases, (
             f"All rust cases should have non-empty string subcategories. "
@@ -548,30 +577,36 @@ class TestRustCasesCompatibility:
             case_desc = case.get("problem", "No problem description")[:50]
 
             if not isinstance(tags, list):
-                invalid_tags_cases.append({
-                    "index": idx,
-                    "problem_snippet": case_desc,
-                    "issue": f"tags is not a list, it is {type(tags).__name__}",
-                    "value": tags
-                })
+                invalid_tags_cases.append(
+                    {
+                        "index": idx,
+                        "problem_snippet": case_desc,
+                        "issue": f"tags is not a list, it is {type(tags).__name__}",
+                        "value": tags,
+                    }
+                )
             elif len(tags) == 0:
-                invalid_tags_cases.append({
-                    "index": idx,
-                    "problem_snippet": case_desc,
-                    "issue": "tags list is empty",
-                    "value": tags
-                })
+                invalid_tags_cases.append(
+                    {
+                        "index": idx,
+                        "problem_snippet": case_desc,
+                        "issue": "tags list is empty",
+                        "value": tags,
+                    }
+                )
             else:
                 # Check all tags are strings
                 for tag_idx, tag in enumerate(tags):
                     if not isinstance(tag, str):
-                        invalid_tags_cases.append({
-                            "index": idx,
-                            "problem_snippet": case_desc,
-                            "issue": f"tag at index {tag_idx} is not a string",
-                            "tag_type": type(tag).__name__,
-                            "tag_value": tag
-                        })
+                        invalid_tags_cases.append(
+                            {
+                                "index": idx,
+                                "problem_snippet": case_desc,
+                                "issue": f"tag at index {tag_idx} is not a string",
+                                "tag_type": type(tag).__name__,
+                                "tag_value": tag,
+                            }
+                        )
                         break  # Only report first non-string tag per case
 
         assert not invalid_tags_cases, (
@@ -594,11 +629,13 @@ class TestRustCasesCompatibility:
 
             if missing_fields:
                 case_desc = case.get("problem", "No problem description")[:50]
-                incomplete_cases.append({
-                    "index": idx,
-                    "problem_snippet": case_desc,
-                    "missing_fields": sorted(missing_fields)
-                })
+                incomplete_cases.append(
+                    {
+                        "index": idx,
+                        "problem_snippet": case_desc,
+                        "missing_fields": sorted(missing_fields),
+                    }
+                )
 
         assert not incomplete_cases, (
             f"All rust cases should have complete structure (problem, solution, category, subcategory, tags). "

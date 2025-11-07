@@ -5,8 +5,9 @@ This test module follows TDD approach - tests are written before implementation.
 Tests should initially fail (red phase) until the actual implementation is created.
 """
 
-import pytest
 from typing import Tuple
+
+import pytest
 from metadata_migration import MetadataMigration
 
 

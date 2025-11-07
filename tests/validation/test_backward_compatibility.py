@@ -21,6 +21,7 @@ def test_import_case_base():
 
     try:
         from case_base import CASE_BASE
+
         print("✓ Successfully imported CASE_BASE from case_base")
         print(f"  Type: {type(CASE_BASE)}")
         print(f"  Length: {len(CASE_BASE)}")
@@ -57,7 +58,9 @@ def test_case_base_equals_all_cases(case_base):
         if len(case_base) == len(ALL_CASES):
             print(f"✓ Both have same length: {len(case_base)}")
         else:
-            print(f"✗ FAILED: Length mismatch - CASE_BASE: {len(case_base)}, ALL_CASES: {len(ALL_CASES)}")
+            print(
+                f"✗ FAILED: Length mismatch - CASE_BASE: {len(case_base)}, ALL_CASES: {len(ALL_CASES)}"
+            )
             sys.exit(1)
 
         return True
@@ -191,12 +194,12 @@ def test_helper_functions():
 
     try:
         from case_base import (
+            add_case,
+            get_case_statistics,
+            load_case_base_from_file,
+            save_case_base_to_file,
             search_cases,
             validate_case_base,
-            get_case_statistics,
-            add_case,
-            save_case_base_to_file,
-            load_case_base_from_file
         )
 
         print("✓ All helper functions imported successfully:")
@@ -268,6 +271,7 @@ def test_common_usage_patterns(case_base):
         print(f"✗ FAILED: Common usage patterns test failed")
         print(f"  Error: {e}")
         import traceback
+
         traceback.print_exc()
         sys.exit(1)
 

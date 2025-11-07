@@ -17,12 +17,12 @@ Expected function signatures in cases/__init__.py:
 """
 
 import logging
-import pytest
 import sys
 from pathlib import Path
 from typing import Any, Dict, List
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
+import pytest
 
 # Define project structure
 PROJECT_ROOT = Path(__file__).parent.parent.parent
@@ -60,26 +60,38 @@ class TestModuleDiscovery:
         discovered_modules = discover_case_modules()
 
         # Verify we found modules
-        assert isinstance(discovered_modules, list), "Should return a list of module paths"
+        assert isinstance(
+            discovered_modules, list
+        ), "Should return a list of module paths"
         assert len(discovered_modules) > 0, "Should discover at least some case modules"
 
         # Extract subdirectories from discovered module paths
         discovered_subdirs = set()
         for module_path in discovered_modules:
             # Module path format: cases.{subdir}.{filename}
-            parts = module_path.split('.')
-            assert len(parts) >= 3, f"Module path should have at least 3 parts: {module_path}"
-            assert parts[0] == "cases", f"Module path should start with 'cases': {module_path}"
+            parts = module_path.split(".")
+            assert (
+                len(parts) >= 3
+            ), f"Module path should have at least 3 parts: {module_path}"
+            assert (
+                parts[0] == "cases"
+            ), f"Module path should start with 'cases': {module_path}"
             discovered_subdirs.add(parts[1])
 
         # Verify all expected subdirectories are represented
         # Note: Some may be empty initially, but rust/ should definitely be present
-        assert "rust" in discovered_subdirs, "Should discover rust/ directory with existing cases"
+        assert (
+            "rust" in discovered_subdirs
+        ), "Should discover rust/ directory with existing cases"
 
         # Verify module paths follow correct format
         for module_path in discovered_modules:
-            assert module_path.startswith("cases."), f"Module path should start with 'cases.': {module_path}"
-            assert "_cases" in module_path, f"Module path should contain '_cases': {module_path}"
+            assert module_path.startswith(
+                "cases."
+            ), f"Module path should start with 'cases.': {module_path}"
+            assert (
+                "_cases" in module_path
+            ), f"Module path should contain '_cases': {module_path}"
 
     def test_discover_case_modules_handles_empty_subdirectory(self, tmp_path):
         """
@@ -96,11 +108,15 @@ class TestModuleDiscovery:
         # Discovery should not fail even if some subdirectories are empty
         discovered_modules = discover_case_modules()
 
-        assert isinstance(discovered_modules, list), "Should return list even with empty subdirs"
+        assert isinstance(
+            discovered_modules, list
+        ), "Should return list even with empty subdirs"
 
         # rust/ directory exists with cases, so we should find at least those
         rust_modules = [m for m in discovered_modules if m.startswith("cases.rust.")]
-        assert len(rust_modules) > 0, "Should still discover rust/ modules despite other empty subdirs"
+        assert (
+            len(rust_modules) > 0
+        ), "Should still discover rust/ modules despite other empty subdirs"
 
     def test_discover_case_modules_excludes_non_cases_files(self):
         """
@@ -116,14 +132,16 @@ class TestModuleDiscovery:
         # Verify all discovered modules end with _cases
         for module_path in discovered_modules:
             # Module path format: cases.{subdir}.{filename}
-            filename = module_path.split('.')[-1]
-            assert filename.endswith("_cases"), (
-                f"Module filename should end with '_cases': {filename}"
-            )
+            filename = module_path.split(".")[-1]
+            assert filename.endswith(
+                "_cases"
+            ), f"Module filename should end with '_cases': {filename}"
 
         # Verify __init__ files are not included
         init_modules = [m for m in discovered_modules if "__init__" in m]
-        assert len(init_modules) == 0, "__init__.py files should not be included in discovery"
+        assert (
+            len(init_modules) == 0
+        ), "__init__.py files should not be included in discovery"
 
 
 class TestCaseLoading:
@@ -147,9 +165,9 @@ class TestCaseLoading:
         assert len(cases) > 0, "Should load at least one case from rust_actix_cases"
 
         # Verify all items are dictionaries
-        assert all(isinstance(case, dict) for case in cases), (
-            "All loaded cases should be dictionaries"
-        )
+        assert all(
+            isinstance(case, dict) for case in cases
+        ), "All loaded cases should be dictionaries"
 
         # Verify core fields (problem and solution should always be present)
         for case in cases:
@@ -177,9 +195,9 @@ class TestCaseLoading:
 
         # Should log the error
         assert len(caplog.records) > 0, "Should log import error"
-        assert any("invalid.nonexistent" in record.message for record in caplog.records), (
-            "Error log should mention the failed module path"
-        )
+        assert any(
+            "invalid.nonexistent" in record.message for record in caplog.records
+        ), "Error log should mention the failed module path"
 
     def test_load_cases_from_module_handles_missing_case_list(self, tmp_path, caplog):
         """
@@ -192,10 +210,12 @@ class TestCaseLoading:
 
         # Create a temporary module without a case list variable
         test_module = tmp_path / "test_module.py"
-        test_module.write_text("""
+        test_module.write_text(
+            """
 # Module with no case list
 SOME_OTHER_VARIABLE = "not a case list"
-""")
+"""
+        )
 
         # Add tmp_path to sys.path for import
         sys.path.insert(0, str(tmp_path))
@@ -205,20 +225,24 @@ SOME_OTHER_VARIABLE = "not a case list"
                 cases = load_cases_from_module("test_module")
 
             # Should return empty list
-            assert isinstance(cases, list), "Should return list for module without case list"
+            assert isinstance(
+                cases, list
+            ), "Should return list for module without case list"
             assert len(cases) == 0, "Should return empty list when no case list found"
 
             # Should log warning
-            assert any("No case list found" in record.message for record in caplog.records), (
-                "Should log warning about missing case list"
-            )
+            assert any(
+                "No case list found" in record.message for record in caplog.records
+            ), "Should log warning about missing case list"
         finally:
             # Cleanup
             sys.path.remove(str(tmp_path))
             if "test_module" in sys.modules:
                 del sys.modules["test_module"]
 
-    def test_load_cases_from_module_handles_non_list_case_variable(self, tmp_path, caplog):
+    def test_load_cases_from_module_handles_non_list_case_variable(
+        self, tmp_path, caplog
+    ):
         """
         Verify handling of *_CASES variable that's not a list.
 
@@ -229,10 +253,12 @@ SOME_OTHER_VARIABLE = "not a case list"
 
         # Create a temporary module with non-list CASES variable
         test_module = tmp_path / "test_cases.py"
-        test_module.write_text("""
+        test_module.write_text(
+            """
 # Module with CASES as dict instead of list
 TEST_CASES = {"problem": "test", "solution": "test"}
-""")
+"""
+        )
 
         # Add tmp_path to sys.path for import
         sys.path.insert(0, str(tmp_path))
@@ -246,9 +272,9 @@ TEST_CASES = {"problem": "test", "solution": "test"}
             # Either returns empty list or has proper validation
             if len(cases) > 0:
                 # If it returns something, it should have validated it's not the dict
-                assert cases != [{"problem": "test", "solution": "test"}], (
-                    "Should not return the dict as a single case"
-                )
+                assert cases != [
+                    {"problem": "test", "solution": "test"}
+                ], "Should not return the dict as a single case"
         finally:
             # Cleanup
             sys.path.remove(str(tmp_path))
@@ -309,14 +335,14 @@ class TestCaseAggregation:
         assert isinstance(all_cases, list), "Should return a list of all cases"
 
         # Should load at least the rust cases (5+ cases exist in rust/)
-        assert len(all_cases) >= 5, (
-            f"Should load at least 5 cases from rust/. Got {len(all_cases)}"
-        )
+        assert (
+            len(all_cases) >= 5
+        ), f"Should load at least 5 cases from rust/. Got {len(all_cases)}"
 
         # All items should be dictionaries
-        assert all(isinstance(case, dict) for case in all_cases), (
-            "All aggregated cases should be dictionaries"
-        )
+        assert all(
+            isinstance(case, dict) for case in all_cases
+        ), "All aggregated cases should be dictionaries"
 
         # All cases should have problem and solution
         for i, case in enumerate(all_cases):
@@ -336,7 +362,7 @@ class TestCaseAggregation:
         from cases import load_all_cases
 
         # Mock import_module to fail for one specific module
-        with patch('importlib.import_module') as mock_import:
+        with patch("importlib.import_module") as mock_import:
             # Set up mock to fail for one module but succeed for others
             original_import = __import__
 
@@ -353,7 +379,9 @@ class TestCaseAggregation:
                 all_cases = load_all_cases()
 
             # Should still return cases from successful modules
-            assert isinstance(all_cases, list), "Should return list despite partial failure"
+            assert isinstance(
+                all_cases, list
+            ), "Should return list despite partial failure"
             # Should have at least some cases from rust/
             assert len(all_cases) >= 5, "Should load cases from successful modules"
 
@@ -379,25 +407,25 @@ class TestCaseAggregation:
         full_log = "\n".join(log_messages)
 
         # Should log module discovery
-        assert any("Discovered" in msg and "modules" in msg for msg in log_messages), (
-            f"Should log number of discovered modules. Got:\n{full_log}"
-        )
+        assert any(
+            "Discovered" in msg and "modules" in msg for msg in log_messages
+        ), f"Should log number of discovered modules. Got:\n{full_log}"
 
         # Should log per-module loading
-        assert any("Loaded" in msg and "cases from" in msg for msg in log_messages), (
-            f"Should log per-module case counts. Got:\n{full_log}"
-        )
+        assert any(
+            "Loaded" in msg and "cases from" in msg for msg in log_messages
+        ), f"Should log per-module case counts. Got:\n{full_log}"
 
         # Should log total count
-        assert any("Total cases loaded" in msg for msg in log_messages), (
-            f"Should log total cases loaded. Got:\n{full_log}"
-        )
+        assert any(
+            "Total cases loaded" in msg for msg in log_messages
+        ), f"Should log total cases loaded. Got:\n{full_log}"
 
         # Verify the total count in log matches actual count
         total_log = [msg for msg in log_messages if "Total cases loaded" in msg][0]
-        assert str(len(all_cases)) in total_log, (
-            f"Log should show correct total count. Expected {len(all_cases)} in: {total_log}"
-        )
+        assert (
+            str(len(all_cases)) in total_log
+        ), f"Log should show correct total count. Expected {len(all_cases)} in: {total_log}"
 
 
 class TestLoaderFunctionSignatures:
@@ -407,25 +435,23 @@ class TestLoaderFunctionSignatures:
         """Verify discover_case_modules function exists and is callable."""
         from cases import discover_case_modules
 
-        assert callable(discover_case_modules), (
-            "discover_case_modules should be a callable function"
-        )
+        assert callable(
+            discover_case_modules
+        ), "discover_case_modules should be a callable function"
 
     def test_load_cases_from_module_function_exists(self):
         """Verify load_cases_from_module function exists and is callable."""
         from cases import load_cases_from_module
 
-        assert callable(load_cases_from_module), (
-            "load_cases_from_module should be a callable function"
-        )
+        assert callable(
+            load_cases_from_module
+        ), "load_cases_from_module should be a callable function"
 
     def test_load_all_cases_function_exists(self):
         """Verify load_all_cases function exists and is callable."""
         from cases import load_all_cases
 
-        assert callable(load_all_cases), (
-            "load_all_cases should be a callable function"
-        )
+        assert callable(load_all_cases), "load_all_cases should be a callable function"
 
     def test_all_cases_variable_exists(self):
         """
@@ -438,9 +464,9 @@ class TestLoaderFunctionSignatures:
 
         assert isinstance(ALL_CASES, list), "ALL_CASES should be a list"
         assert len(ALL_CASES) >= 5, "ALL_CASES should contain at least rust cases"
-        assert all(isinstance(case, dict) for case in ALL_CASES), (
-            "ALL_CASES should contain dictionaries"
-        )
+        assert all(
+            isinstance(case, dict) for case in ALL_CASES
+        ), "ALL_CASES should contain dictionaries"
 
 
 class TestCaseMetadataValidation:
@@ -454,7 +480,7 @@ class TestCaseMetadataValidation:
             "solution": "Use actix_cors::Cors middleware configuration.",
             "category": "rust",
             "subcategory": "web-frameworks",
-            "tags": ["actix-web", "cors", "middleware"]
+            "tags": ["actix-web", "cors", "middleware"],
         }
 
     @pytest.fixture
@@ -468,7 +494,7 @@ class TestCaseMetadataValidation:
             "webdev",
             "orchestration",
             "security",
-            "rust"
+            "rust",
         ]
 
     def test_validate_case_valid_case(self, valid_case):
@@ -482,7 +508,9 @@ class TestCaseMetadataValidation:
 
         result = validate_case(valid_case)
 
-        assert result is True, "Valid case with all required fields should pass validation"
+        assert (
+            result is True
+        ), "Valid case with all required fields should pass validation"
 
     def test_validate_case_missing_problem(self, valid_case):
         """
@@ -546,7 +574,9 @@ class TestCaseMetadataValidation:
 
         result = validate_case(case_without_subcategory)
 
-        assert result is False, "Case missing 'subcategory' field should fail validation"
+        assert (
+            result is False
+        ), "Case missing 'subcategory' field should fail validation"
 
     def test_validate_case_missing_tags(self, valid_case):
         """
@@ -578,7 +608,9 @@ class TestCaseMetadataValidation:
 
         result = validate_case(case_with_empty_problem)
 
-        assert result is False, "Case with empty 'problem' string should fail validation"
+        assert (
+            result is False
+        ), "Case with empty 'problem' string should fail validation"
 
     def test_validate_case_empty_solution(self, valid_case):
         """
@@ -594,7 +626,9 @@ class TestCaseMetadataValidation:
 
         result = validate_case(case_with_empty_solution)
 
-        assert result is False, "Case with empty 'solution' string should fail validation"
+        assert (
+            result is False
+        ), "Case with empty 'solution' string should fail validation"
 
     def test_validate_case_empty_category(self, valid_case):
         """
@@ -610,7 +644,9 @@ class TestCaseMetadataValidation:
 
         result = validate_case(case_with_empty_category)
 
-        assert result is False, "Case with empty 'category' string should fail validation"
+        assert (
+            result is False
+        ), "Case with empty 'category' string should fail validation"
 
     def test_validate_case_empty_subcategory(self, valid_case):
         """
@@ -626,7 +662,9 @@ class TestCaseMetadataValidation:
 
         result = validate_case(case_with_empty_subcategory)
 
-        assert result is False, "Case with empty 'subcategory' string should fail validation"
+        assert (
+            result is False
+        ), "Case with empty 'subcategory' string should fail validation"
 
     def test_validate_case_empty_tags(self, valid_case):
         """

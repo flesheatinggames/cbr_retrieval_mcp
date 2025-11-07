@@ -12,15 +12,17 @@ Differentiation from test_benchmark_case_loading.py:
 - test_performance.py: Tests benchmark RESULTS (actual performance vs requirements)
 """
 
-import pytest
-import sys
-import subprocess
 import re
+import subprocess
+import sys
 from pathlib import Path
+
+import pytest
 
 
 class BenchmarkResults:
     """Data class for parsed benchmark results."""
+
     def __init__(self):
         self.baseline_time_ms = None
         self.new_time_ms = None
@@ -60,7 +62,7 @@ def run_benchmark():
         [sys.executable, str(benchmark_path)],
         capture_output=True,
         text=True,
-        timeout=60  # 60 second timeout
+        timeout=60,  # 60 second timeout
     )
 
     return result.returncode, result.stdout, result.stderr
@@ -86,9 +88,7 @@ def parse_benchmark_output(stdout, stderr):
     # Parse baseline import time (look for pattern like "150.5 ms" or "150.5ms")
     # Note: times should not be negative, so we don't match negative numbers
     baseline_time_match = re.search(
-        r'baseline.*?(\d+\.?\d*)\s*ms',
-        output,
-        re.IGNORECASE
+        r"baseline.*?(\d+\.?\d*)\s*ms", output, re.IGNORECASE
     )
     if not baseline_time_match:
         raise ValueError(
@@ -99,16 +99,16 @@ def parse_benchmark_output(stdout, stderr):
 
     # Validate baseline time is reasonable
     if results.baseline_time_ms < 0:
-        raise ValueError(f"Invalid baseline time: {results.baseline_time_ms}ms (cannot be negative)")
+        raise ValueError(
+            f"Invalid baseline time: {results.baseline_time_ms}ms (cannot be negative)"
+        )
     if results.baseline_time_ms > 60000:
-        raise ValueError(f"Invalid baseline time: {results.baseline_time_ms}ms (> 1 minute, likely error)")
+        raise ValueError(
+            f"Invalid baseline time: {results.baseline_time_ms}ms (> 1 minute, likely error)"
+        )
 
     # Parse new module import time
-    new_time_match = re.search(
-        r'new.*?(\d+\.?\d*)\s*ms',
-        output,
-        re.IGNORECASE
-    )
+    new_time_match = re.search(r"new.*?(\d+\.?\d*)\s*ms", output, re.IGNORECASE)
     if not new_time_match:
         raise ValueError(
             "Could not find new module import time in benchmark output. "
@@ -118,15 +118,17 @@ def parse_benchmark_output(stdout, stderr):
 
     # Validate new time is reasonable
     if results.new_time_ms < 0:
-        raise ValueError(f"Invalid new module time: {results.new_time_ms}ms (cannot be negative)")
+        raise ValueError(
+            f"Invalid new module time: {results.new_time_ms}ms (cannot be negative)"
+        )
     if results.new_time_ms > 60000:
-        raise ValueError(f"Invalid new module time: {results.new_time_ms}ms (> 1 minute, likely error)")
+        raise ValueError(
+            f"Invalid new module time: {results.new_time_ms}ms (> 1 minute, likely error)"
+        )
 
     # Parse time overhead percentage (look for pattern like "10.5%" or "10.5 %")
     time_overhead_match = re.search(
-        r'time.*?overhead.*?(-?\d+\.?\d*)\s*%',
-        output,
-        re.IGNORECASE
+        r"time.*?overhead.*?(-?\d+\.?\d*)\s*%", output, re.IGNORECASE
     )
     if not time_overhead_match:
         raise ValueError(
@@ -137,9 +139,7 @@ def parse_benchmark_output(stdout, stderr):
 
     # Parse memory overhead percentage (can be negative if new uses less memory)
     memory_overhead_match = re.search(
-        r'memory.*?overhead.*?(-?\d+\.?\d*)\s*%',
-        output,
-        re.IGNORECASE
+        r"memory.*?overhead.*?(-?\d+\.?\d*)\s*%", output, re.IGNORECASE
     )
     if not memory_overhead_match:
         raise ValueError(
@@ -150,25 +150,19 @@ def parse_benchmark_output(stdout, stderr):
 
     # Parse baseline and new memory (optional, for reporting)
     baseline_memory_match = re.search(
-        r'baseline.*?memory.*?(\d+)',
-        output,
-        re.IGNORECASE
+        r"baseline.*?memory.*?(\d+)", output, re.IGNORECASE
     )
     if baseline_memory_match:
         results.baseline_memory_bytes = int(baseline_memory_match.group(1))
 
-    new_memory_match = re.search(
-        r'new.*?memory.*?(\d+)',
-        output,
-        re.IGNORECASE
-    )
+    new_memory_match = re.search(r"new.*?memory.*?(\d+)", output, re.IGNORECASE)
     if new_memory_match:
         results.new_memory_bytes = int(new_memory_match.group(1))
 
     # Check if output indicates all requirements met
-    if 'all requirements met' in output.lower():
+    if "all requirements met" in output.lower():
         results.all_requirements_met = True
-    elif 'requirements not met' in output.lower() or 'failed' in output.lower():
+    elif "requirements not met" in output.lower() or "failed" in output.lower():
         results.all_requirements_met = False
 
     return results
@@ -187,9 +181,7 @@ def test_benchmark_executable_exists():
         "Cannot run performance tests. Please create benchmark_case_loading.py first."
     )
 
-    assert benchmark_path.is_file(), (
-        f"{benchmark_path} exists but is not a file"
-    )
+    assert benchmark_path.is_file(), f"{benchmark_path} exists but is not a file"
 
 
 def test_benchmark_runs_successfully():
@@ -207,9 +199,7 @@ def test_benchmark_runs_successfully():
     )
 
     # Should produce some output
-    assert len(stdout) > 0 or len(stderr) > 0, (
-        "Benchmark produced no output"
-    )
+    assert len(stdout) > 0 or len(stderr) > 0, "Benchmark produced no output"
 
 
 def test_benchmark_output_contains_required_metrics():
@@ -342,9 +332,7 @@ def test_all_performance_requirements_met():
             f"(requirement: < 200ms)\n"
         )
     else:
-        failure_message += (
-            f"✓ Baseline import time: {results.baseline_time_ms:.2f}ms\n"
-        )
+        failure_message += f"✓ Baseline import time: {results.baseline_time_ms:.2f}ms\n"
 
     if not time_overhead_ok:
         failure_message += (
@@ -352,9 +340,7 @@ def test_all_performance_requirements_met():
             f"(requirement: < 15%)\n"
         )
     else:
-        failure_message += (
-            f"✓ Time overhead: {results.time_overhead_percent:.2f}%\n"
-        )
+        failure_message += f"✓ Time overhead: {results.time_overhead_percent:.2f}%\n"
 
     if not memory_overhead_ok:
         failure_message += (
@@ -382,9 +368,9 @@ def test_benchmark_failure_handling():
         if exit_code != 0:
             # Benchmark failed - this is what we're testing
             # We should get a clear error message
-            assert len(stderr) > 0 or len(stdout) > 0, (
-                "Benchmark failed but produced no error output"
-            )
+            assert (
+                len(stderr) > 0 or len(stdout) > 0
+            ), "Benchmark failed but produced no error output"
     except subprocess.TimeoutExpired:
         pytest.fail("Benchmark timed out after 60 seconds")
     except FileNotFoundError:
@@ -500,18 +486,16 @@ def test_benchmark_provides_context():
     output = stdout + stderr
 
     # Should mention what's being measured
-    assert any(keyword in output.lower() for keyword in [
-        'baseline',
-        'case_base',
-        'import',
-        'loading'
-    ]), "Benchmark should explain what's being measured"
+    assert any(
+        keyword in output.lower()
+        for keyword in ["baseline", "case_base", "import", "loading"]
+    ), "Benchmark should explain what's being measured"
 
     # Should mention performance requirements
-    assert any(keyword in output for keyword in [
-        '200',  # 200ms requirement
-        '15'    # 15% requirement
-    ]), "Benchmark should reference performance requirements"
+    assert any(
+        keyword in output
+        for keyword in ["200", "15"]  # 200ms requirement  # 15% requirement
+    ), "Benchmark should reference performance requirements"
 
 
 def test_performance_regression_detection():
@@ -536,14 +520,14 @@ def test_performance_regression_detection():
         warnings.warn(
             f"Time overhead ({results.time_overhead_percent:.2f}%) is approaching "
             f"the 15% limit. Consider optimizing.",
-            UserWarning
+            UserWarning,
         )
 
     if close_to_memory_limit:
         warnings.warn(
             f"Memory overhead ({results.memory_overhead_percent:.2f}%) is approaching "
             f"the 15% limit. Consider optimizing.",
-            UserWarning
+            UserWarning,
         )
 
     # This test always passes but issues warnings for near-threshold values

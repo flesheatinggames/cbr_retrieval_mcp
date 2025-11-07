@@ -63,14 +63,12 @@ class TestCaseBaseImports:
             pytest.fail("case_base.py should exist and be importable")
 
         # Verify CASE_BASE exists and is a list
-        assert isinstance(CASE_BASE, list), (
-            "CASE_BASE should be a list"
-        )
+        assert isinstance(CASE_BASE, list), "CASE_BASE should be a list"
 
         # Verify CASE_BASE equals ALL_CASES (same content)
-        assert CASE_BASE == ALL_CASES, (
-            "CASE_BASE should equal ALL_CASES after refactoring"
-        )
+        assert (
+            CASE_BASE == ALL_CASES
+        ), "CASE_BASE should equal ALL_CASES after refactoring"
 
         # Verify CASE_BASE is the same object reference (not a copy)
         assert CASE_BASE is ALL_CASES, (
@@ -107,9 +105,7 @@ class TestCaseBaseImports:
         )
 
         # Verify minimum case count (at least 5 cases)
-        assert len(CASE_BASE) >= 5, (
-            f"Expected at least 5 cases, got {len(CASE_BASE)}"
-        )
+        assert len(CASE_BASE) >= 5, f"Expected at least 5 cases, got {len(CASE_BASE)}"
 
     def test_case_base_can_be_imported_standalone(self):
         """
@@ -139,15 +135,15 @@ class TestCaseBaseImports:
         assert isinstance(CASE_BASE, list), "CASE_BASE should be a list"
 
         # Verify CASE_BASE is populated (minimum 5 cases)
-        assert len(CASE_BASE) >= 5, (
-            f"CASE_BASE should have at least 5 cases, got {len(CASE_BASE)}"
-        )
+        assert (
+            len(CASE_BASE) >= 5
+        ), f"CASE_BASE should have at least 5 cases, got {len(CASE_BASE)}"
 
         # Verify each case is a dictionary with required fields
         for i, case in enumerate(CASE_BASE[:3]):  # Check first 3 cases
-            assert isinstance(case, dict), (
-                f"Case {i} should be a dictionary, got {type(case)}"
-            )
+            assert isinstance(
+                case, dict
+            ), f"Case {i} should be a dictionary, got {type(case)}"
             assert "problem" in case, f"Case {i} missing 'problem' field"
             assert "solution" in case, f"Case {i} missing 'solution' field"
 
@@ -173,10 +169,10 @@ class TestCaseBaseHelperFunctions:
         try:
             from case_base import (
                 CASE_BASE,
+                get_case_statistics,
                 save_case_base_to_file,
                 search_cases,
                 validate_case_base,
-                get_case_statistics,
             )
         except ImportError as e:
             pytest.fail(f"Failed to import case_base or helper functions: {e}")
@@ -189,13 +185,13 @@ class TestCaseBaseHelperFunctions:
         assert output_file.is_file(), "Output should be a file"
 
         # Verify JSON is valid and contains all cases
-        with open(output_file, 'r', encoding='utf-8') as f:
+        with open(output_file, "r", encoding="utf-8") as f:
             loaded_cases = json.load(f)
 
         assert isinstance(loaded_cases, list), "Saved data should be a list"
-        assert len(loaded_cases) == len(CASE_BASE), (
-            f"Saved {len(loaded_cases)} cases but CASE_BASE has {len(CASE_BASE)}"
-        )
+        assert len(loaded_cases) == len(
+            CASE_BASE
+        ), f"Saved {len(loaded_cases)} cases but CASE_BASE has {len(CASE_BASE)}"
 
         # Test 2: search_cases returns relevant results
         search_results = search_cases("firebase")
@@ -211,8 +207,8 @@ class TestCaseBaseHelperFunctions:
                 assert isinstance(first_result, dict), "Search result should be a dict"
                 search_term = "firebase"
                 result_text = (
-                    first_result.get("problem", "").lower() +
-                    first_result.get("solution", "").lower()
+                    first_result.get("problem", "").lower()
+                    + first_result.get("solution", "").lower()
                 )
                 # Note: Current implementation may return any results, so this is flexible
 
@@ -226,15 +222,13 @@ class TestCaseBaseHelperFunctions:
         stats = get_case_statistics()
         assert isinstance(stats, dict), "get_case_statistics should return a dict"
         assert "total_cases" in stats, "Stats should include total_cases"
-        assert stats["total_cases"] == len(CASE_BASE), (
-            f"Stats show {stats['total_cases']} cases but CASE_BASE has {len(CASE_BASE)}"
-        )
+        assert stats["total_cases"] == len(
+            CASE_BASE
+        ), f"Stats show {stats['total_cases']} cases but CASE_BASE has {len(CASE_BASE)}"
 
         # Verify categories are tracked (after metadata migration)
         if "categories" in stats:
-            assert isinstance(stats["categories"], dict), (
-                "categories should be a dict"
-            )
+            assert isinstance(stats["categories"], dict), "categories should be a dict"
 
 
 class TestCaseBaseListOperations:
@@ -258,9 +252,9 @@ class TestCaseBaseListOperations:
             pytest.fail("case_base should be importable")
 
         # Verify CASE_BASE has cases
-        assert len(CASE_BASE) >= 5, (
-            f"Need at least 5 cases for indexing tests, got {len(CASE_BASE)}"
-        )
+        assert (
+            len(CASE_BASE) >= 5
+        ), f"Need at least 5 cases for indexing tests, got {len(CASE_BASE)}"
 
         # Test positive indexing
         first_case = CASE_BASE[0]
@@ -300,17 +294,17 @@ class TestCaseBaseListOperations:
             pytest.fail("case_base should be importable")
 
         # Verify CASE_BASE has cases
-        assert len(CASE_BASE) >= 5, (
-            f"Need at least 5 cases for iteration tests, got {len(CASE_BASE)}"
-        )
+        assert (
+            len(CASE_BASE) >= 5
+        ), f"Need at least 5 cases for iteration tests, got {len(CASE_BASE)}"
 
         # Test iteration
         case_count = 0
         for case in CASE_BASE:
             # Verify each case is a dictionary
-            assert isinstance(case, dict), (
-                f"Case {case_count} should be a dict, got {type(case)}"
-            )
+            assert isinstance(
+                case, dict
+            ), f"Case {case_count} should be a dict, got {type(case)}"
 
             # Verify required fields
             assert "problem" in case, f"Case {case_count} missing 'problem' field"
@@ -319,9 +313,9 @@ class TestCaseBaseListOperations:
             case_count += 1
 
         # Verify all cases were iterated
-        assert case_count == len(CASE_BASE), (
-            f"Iterated {case_count} cases but CASE_BASE has {len(CASE_BASE)}"
-        )
+        assert case_count == len(
+            CASE_BASE
+        ), f"Iterated {case_count} cases but CASE_BASE has {len(CASE_BASE)}"
 
     def test_case_base_slicing_works(self):
         """
@@ -349,9 +343,9 @@ class TestCaseBaseListOperations:
         # Test slice [0:10] - first 10 cases
         first_ten = CASE_BASE[0:10]
         assert isinstance(first_ten, list), "Slice should return a list"
-        assert len(first_ten) == min(10, len(CASE_BASE)), (
-            f"Slice [0:10] should return 10 cases, got {len(first_ten)}"
-        )
+        assert len(first_ten) == min(
+            10, len(CASE_BASE)
+        ), f"Slice [0:10] should return 10 cases, got {len(first_ten)}"
 
         # Verify sliced results contain valid case dictionaries
         for case in first_ten:
@@ -369,15 +363,17 @@ class TestCaseBaseListOperations:
         # Test slice [:5] - first 5 cases
         first_five = CASE_BASE[:5]
         assert isinstance(first_five, list), "Slice [:5] should return a list"
-        assert len(first_five) == 5, f"Slice [:5] should return 5 cases, got {len(first_five)}"
+        assert (
+            len(first_five) == 5
+        ), f"Slice [:5] should return 5 cases, got {len(first_five)}"
 
         # Test slice [::2] - every other case
         every_other = CASE_BASE[::2]
         assert isinstance(every_other, list), "Slice [::2] should return a list"
         expected_count = (len(CASE_BASE) + 1) // 2
-        assert len(every_other) == expected_count, (
-            f"Slice [::2] should return {expected_count} cases, got {len(every_other)}"
-        )
+        assert (
+            len(every_other) == expected_count
+        ), f"Slice [::2] should return {expected_count} cases, got {len(every_other)}"
 
         # Verify all sliced items are valid cases
         for case in every_other:
@@ -410,9 +406,12 @@ class TestCaseBaseBackwardCompatibility:
         # Pattern 2: import case_base
         try:
             import case_base
+
             cases = case_base.CASE_BASE
         except (ImportError, AttributeError) as e:
-            pytest.fail(f"Pattern 'import case_base; cases = case_base.CASE_BASE' should work: {e}")
+            pytest.fail(
+                f"Pattern 'import case_base; cases = case_base.CASE_BASE' should work: {e}"
+            )
 
         assert isinstance(cases, list), "cases should be a list"
         assert len(cases) >= 5, "cases should have cases"
@@ -421,7 +420,9 @@ class TestCaseBaseBackwardCompatibility:
         try:
             from case_base import CASE_BASE, search_cases
         except ImportError:
-            pytest.fail("Pattern 'from case_base import CASE_BASE, search_cases' should work")
+            pytest.fail(
+                "Pattern 'from case_base import CASE_BASE, search_cases' should work"
+            )
 
         assert callable(search_cases), "search_cases should be callable"
 
@@ -456,29 +457,28 @@ class TestCaseBaseBackwardCompatibility:
             assert "solution" in case, f"Case {i} missing 'solution' field"
 
             # Verify types
-            assert isinstance(case["problem"], str), (
-                f"Case {i} 'problem' should be a string"
-            )
-            assert isinstance(case["solution"], str), (
-                f"Case {i} 'solution' should be a string"
-            )
+            assert isinstance(
+                case["problem"], str
+            ), f"Case {i} 'problem' should be a string"
+            assert isinstance(
+                case["solution"], str
+            ), f"Case {i} 'solution' should be a string"
 
             # Optional metadata fields (may not exist yet)
             if "category" in case:
-                assert isinstance(case["category"], str), (
-                    f"Case {i} 'category' should be a string"
-                )
+                assert isinstance(
+                    case["category"], str
+                ), f"Case {i} 'category' should be a string"
 
             if "subcategory" in case:
-                assert isinstance(case["subcategory"], str), (
-                    f"Case {i} 'subcategory' should be a string"
-                )
+                assert isinstance(
+                    case["subcategory"], str
+                ), f"Case {i} 'subcategory' should be a string"
 
             if "tags" in case:
-                assert isinstance(case["tags"], (list, str)), (
-                    f"Case {i} 'tags' should be a list or string"
-                )
-
+                assert isinstance(
+                    case["tags"], (list, str)
+                ), f"Case {i} 'tags' should be a list or string"
 
 
 # ============================================
@@ -494,7 +494,7 @@ class TestSaveCaseBaseToFile:
         Verify save_case_base_to_file() creates a valid JSON file.
 
         After refactoring, this function should work with CASE_BASE = ALL_CASES.
-        
+
         Expected behavior:
         - Creates a file at the specified path
         - File contains valid JSON
@@ -508,28 +508,28 @@ class TestSaveCaseBaseToFile:
 
         # Create temporary file path
         output_file = tmp_path / "test_cases.json"
-        
+
         # Call the function
         result_filename = save_case_base_to_file(str(output_file))
-        
+
         # Verify file was created
         assert output_file.exists(), "File should exist after save_case_base_to_file()"
         assert output_file.is_file(), "Path should be a file, not a directory"
-        
+
         # Verify file contains valid JSON
-        with open(output_file, 'r', encoding='utf-8') as f:
+        with open(output_file, "r", encoding="utf-8") as f:
             loaded_data = json.load(f)
-        
+
         # Verify JSON structure
         assert isinstance(loaded_data, list), "Saved JSON should be a list"
-        assert len(loaded_data) == len(CASE_BASE), (
-            f"Saved {len(loaded_data)} cases but CASE_BASE has {len(CASE_BASE)}"
-        )
+        assert len(loaded_data) == len(
+            CASE_BASE
+        ), f"Saved {len(loaded_data)} cases but CASE_BASE has {len(CASE_BASE)}"
 
     def test_save_case_base_to_file_saves_all_cases_correctly(self, tmp_path: Path):
         """
         Verify all case data is correctly serialized to JSON.
-        
+
         Expected behavior:
         - Each case has required fields
         - Data matches CASE_BASE content
@@ -543,29 +543,33 @@ class TestSaveCaseBaseToFile:
 
         output_file = tmp_path / "test_cases.json"
         save_case_base_to_file(str(output_file))
-        
+
         # Load saved data
-        with open(output_file, 'r', encoding='utf-8') as f:
+        with open(output_file, "r", encoding="utf-8") as f:
             loaded_cases = json.load(f)
-        
+
         # Verify each case has required fields
         for i, case in enumerate(loaded_cases):
             assert isinstance(case, dict), f"Case {i} should be a dict"
             assert "problem" in case, f"Case {i} missing 'problem' field"
             assert "solution" in case, f"Case {i} missing 'solution' field"
-            assert isinstance(case["problem"], str), f"Case {i} 'problem' should be string"
-            assert isinstance(case["solution"], str), f"Case {i} 'solution' should be string"
-        
+            assert isinstance(
+                case["problem"], str
+            ), f"Case {i} 'problem' should be string"
+            assert isinstance(
+                case["solution"], str
+            ), f"Case {i} 'solution' should be string"
+
         # Verify data matches CASE_BASE
         assert loaded_cases == CASE_BASE, "Saved data should match CASE_BASE exactly"
-        
+
         # Verify JSON is formatted (check for indentation)
-        with open(output_file, 'r', encoding='utf-8') as f:
+        with open(output_file, "r", encoding="utf-8") as f:
             file_content = f.read()
-        
+
         # JSON with indent=2 should have newlines and spaces
-        assert '\n' in file_content, "JSON should be formatted with newlines"
-        assert '  ' in file_content, "JSON should be indented with spaces"
+        assert "\n" in file_content, "JSON should be formatted with newlines"
+        assert "  " in file_content, "JSON should be indented with spaces"
 
 
 class TestSearchCases:
@@ -574,7 +578,7 @@ class TestSearchCases:
     def test_search_cases_finds_by_keyword_in_problem(self):
         """
         Verify search finds cases matching keywords in problem field.
-        
+
         Expected behavior:
         - Returns a list
         - Results contain search keyword in problem
@@ -587,10 +591,10 @@ class TestSearchCases:
 
         # Search for a common keyword that should appear in problems
         results = search_cases("firebase")
-        
+
         # Verify returns a list
         assert isinstance(results, list), "search_cases should return a list"
-        
+
         # If results found, verify they contain the keyword
         if len(results) > 0:
             for case in results:
@@ -602,7 +606,7 @@ class TestSearchCases:
     def test_search_cases_finds_by_keyword_in_solution(self):
         """
         Verify search finds cases matching keywords in solution field.
-        
+
         Expected behavior:
         - Returns results when keyword only in solution
         - Solution matches score lower than problem matches
@@ -614,17 +618,17 @@ class TestSearchCases:
 
         # Search for a keyword likely in solutions
         results = search_cases("import")
-        
+
         # Verify returns a list
         assert isinstance(results, list), "search_cases should return a list"
-        
+
         # Results may be empty or non-empty depending on case base content
         # Just verify it doesn't crash and returns correct type
 
     def test_search_cases_respects_limit_parameter(self):
         """
         Verify search returns maximum of 5 results (hardcoded limit).
-        
+
         Expected behavior:
         - Returns at most 5 results
         - Returns top 5 most relevant
@@ -636,19 +640,19 @@ class TestSearchCases:
 
         # Search for a very common term that should match many cases
         results = search_cases("the")
-        
+
         # Verify returns a list
         assert isinstance(results, list), "search_cases should return a list"
-        
+
         # Verify limit of 5 results
-        assert len(results) <= 5, (
-            f"search_cases should return at most 5 results, got {len(results)}"
-        )
+        assert (
+            len(results) <= 5
+        ), f"search_cases should return at most 5 results, got {len(results)}"
 
     def test_search_cases_returns_empty_list_when_no_matches(self):
         """
         Verify search returns empty list when no cases match.
-        
+
         Expected behavior:
         - Returns empty list (not None)
         - Returns list type
@@ -660,10 +664,10 @@ class TestSearchCases:
 
         # Search for nonsensical query unlikely to match anything
         results = search_cases("xyzabc123nonexistent999")
-        
+
         # Verify returns a list
         assert isinstance(results, list), "search_cases should return a list"
-        
+
         # Should be empty
         assert len(results) == 0, "Should return empty list when no matches"
 
@@ -674,7 +678,7 @@ class TestValidateCaseBase:
     def test_validate_case_base_returns_true_for_valid_structure(self, capsys):
         """
         Verify validation passes for properly structured case base.
-        
+
         Expected behavior:
         - Returns True for valid CASE_BASE
         - Prints success message
@@ -686,23 +690,23 @@ class TestValidateCaseBase:
 
         # Validate the actual CASE_BASE
         result = validate_case_base()
-        
+
         # Should return boolean
         assert isinstance(result, bool), "validate_case_base should return boolean"
-        
+
         # Current CASE_BASE should be valid
         assert result is True, "CASE_BASE should be valid"
-        
+
         # Verify success message printed
         captured = capsys.readouterr()
-        assert "validation passed" in captured.out.lower(), (
-            "Should print success message"
-        )
+        assert (
+            "validation passed" in captured.out.lower()
+        ), "Should print success message"
 
     def test_validate_case_base_detects_missing_problem_field(self, capsys):
         """
         Verify validation detects missing 'problem' field.
-        
+
         Expected behavior:
         - Returns False
         - Prints error message about missing problem
@@ -713,26 +717,24 @@ class TestValidateCaseBase:
             pytest.fail(f"Failed to import from case_base: {e}")
 
         # Create invalid case base missing 'problem'
-        invalid_cases = [
-            {"solution": "Test solution"}
-        ]
-        
+        invalid_cases = [{"solution": "Test solution"}]
+
         # Validate the invalid case base
         result = validate_case_base(invalid_cases)
-        
+
         # Should return False
         assert result is False, "Should return False for invalid structure"
-        
+
         # Verify error message printed
         captured = capsys.readouterr()
-        assert "problem" in captured.out.lower(), (
-            "Should print error about missing 'problem' field"
-        )
+        assert (
+            "problem" in captured.out.lower()
+        ), "Should print error about missing 'problem' field"
 
     def test_validate_case_base_detects_missing_solution_field(self, capsys):
         """
         Verify validation detects missing 'solution' field.
-        
+
         Expected behavior:
         - Returns False
         - Prints error message about missing solution
@@ -743,26 +745,24 @@ class TestValidateCaseBase:
             pytest.fail(f"Failed to import from case_base: {e}")
 
         # Create invalid case base missing 'solution'
-        invalid_cases = [
-            {"problem": "Test problem"}
-        ]
-        
+        invalid_cases = [{"problem": "Test problem"}]
+
         # Validate the invalid case base
         result = validate_case_base(invalid_cases)
-        
+
         # Should return False
         assert result is False, "Should return False for invalid structure"
-        
+
         # Verify error message printed
         captured = capsys.readouterr()
-        assert "solution" in captured.out.lower(), (
-            "Should print error about missing 'solution' field"
-        )
+        assert (
+            "solution" in captured.out.lower()
+        ), "Should print error about missing 'solution' field"
 
     def test_validate_case_base_detects_invalid_field_types(self, capsys):
         """
         Verify validation detects non-string problem/solution fields.
-        
+
         Expected behavior:
         - Returns False for non-string problem
         - Returns False for non-string solution
@@ -773,21 +773,19 @@ class TestValidateCaseBase:
             pytest.fail(f"Failed to import from case_base: {e}")
 
         # Create invalid case base with non-string problem
-        invalid_cases = [
-            {"problem": 123, "solution": "Test solution"}
-        ]
-        
+        invalid_cases = [{"problem": 123, "solution": "Test solution"}]
+
         # Validate the invalid case base
         result = validate_case_base(invalid_cases)
-        
+
         # Should return False
         assert result is False, "Should return False for non-string problem"
-        
+
         # Create invalid case base with non-string solution
         invalid_cases = [
             {"problem": "Test problem", "solution": ["not", "a", "string"]}
         ]
-        
+
         result = validate_case_base(invalid_cases)
         assert result is False, "Should return False for non-string solution"
 
@@ -798,7 +796,7 @@ class TestGetCaseStatistics:
     def test_get_case_statistics_returns_correct_total_count(self):
         """
         Verify statistics show correct total case count.
-        
+
         Expected behavior:
         - Returns dictionary
         - 'total_cases' matches len(CASE_BASE)
@@ -811,27 +809,27 @@ class TestGetCaseStatistics:
 
         # Get statistics
         stats = get_case_statistics()
-        
+
         # Verify returns dictionary
         assert isinstance(stats, dict), "get_case_statistics should return dict"
-        
+
         # Verify total_cases field exists
         assert "total_cases" in stats, "Stats should include 'total_cases'"
-        
+
         # Verify total_cases matches CASE_BASE length
-        assert stats["total_cases"] == len(CASE_BASE), (
-            f"Stats show {stats['total_cases']} cases but CASE_BASE has {len(CASE_BASE)}"
-        )
-        
+        assert stats["total_cases"] == len(
+            CASE_BASE
+        ), f"Stats show {stats['total_cases']} cases but CASE_BASE has {len(CASE_BASE)}"
+
         # Verify it's an integer
-        assert isinstance(stats["total_cases"], int), (
-            "'total_cases' should be an integer"
-        )
+        assert isinstance(
+            stats["total_cases"], int
+        ), "'total_cases' should be an integer"
 
     def test_get_case_statistics_returns_category_counts(self):
         """
         Verify statistics include category breakdown.
-        
+
         Expected behavior:
         - Returns 'categories' dictionary
         - Contains expected category keys
@@ -844,33 +842,39 @@ class TestGetCaseStatistics:
 
         # Get statistics
         stats = get_case_statistics()
-        
+
         # Verify categories field exists
         assert "categories" in stats, "Stats should include 'categories'"
-        
+
         # Verify categories is a dictionary
-        assert isinstance(stats["categories"], dict), (
-            "'categories' should be a dictionary"
-        )
-        
+        assert isinstance(
+            stats["categories"], dict
+        ), "'categories' should be a dictionary"
+
         # Verify expected category keys exist
-        expected_categories = ["firebase_auth", "firestore", "nextjs", "bootstrap", "combined"]
+        expected_categories = [
+            "firebase_auth",
+            "firestore",
+            "nextjs",
+            "bootstrap",
+            "combined",
+        ]
         for category in expected_categories:
-            assert category in stats["categories"], (
-                f"Categories should include '{category}'"
-            )
-        
+            assert (
+                category in stats["categories"]
+            ), f"Categories should include '{category}'"
+
         # Verify all category counts are integers
         for category, count in stats["categories"].items():
-            assert isinstance(count, int), (
-                f"Category '{category}' count should be integer, got {type(count)}"
-            )
+            assert isinstance(
+                count, int
+            ), f"Category '{category}' count should be integer, got {type(count)}"
             assert count >= 0, f"Category '{category}' count should be non-negative"
 
     def test_get_case_statistics_calculates_average_solution_length(self):
         """
         Verify average solution length is calculated correctly.
-        
+
         Expected behavior:
         - Returns 'avg_solution_length' field
         - Value is an integer
@@ -883,26 +887,26 @@ class TestGetCaseStatistics:
 
         # Get statistics
         stats = get_case_statistics()
-        
+
         # Verify avg_solution_length field exists
-        assert "avg_solution_length" in stats, (
-            "Stats should include 'avg_solution_length'"
-        )
-        
+        assert (
+            "avg_solution_length" in stats
+        ), "Stats should include 'avg_solution_length'"
+
         # Verify it's an integer
-        assert isinstance(stats["avg_solution_length"], int), (
-            "'avg_solution_length' should be an integer"
-        )
-        
+        assert isinstance(
+            stats["avg_solution_length"], int
+        ), "'avg_solution_length' should be an integer"
+
         # If we have cases, average should be positive
         if len(CASE_BASE) > 0:
-            assert stats["avg_solution_length"] > 0, (
-                "Average solution length should be positive when cases exist"
-            )
+            assert (
+                stats["avg_solution_length"] > 0
+            ), "Average solution length should be positive when cases exist"
         else:
-            assert stats["avg_solution_length"] == 0, (
-                "Average solution length should be 0 when no cases exist"
-            )
+            assert (
+                stats["avg_solution_length"] == 0
+            ), "Average solution length should be 0 when no cases exist"
 
 
 class TestHelperFunctionsIntegration:
@@ -911,10 +915,10 @@ class TestHelperFunctionsIntegration:
     def test_helper_functions_work_with_new_structure(self, tmp_path: Path):
         """
         Verify all helper functions work with CASE_BASE = ALL_CASES.
-        
+
         This is an integration test that exercises all 4 helper functions
         to ensure they work correctly after the modular refactoring.
-        
+
         Expected behavior:
         - All functions can be imported
         - All functions execute without errors
@@ -924,10 +928,10 @@ class TestHelperFunctionsIntegration:
         try:
             from case_base import (
                 CASE_BASE,
+                get_case_statistics,
                 save_case_base_to_file,
                 search_cases,
                 validate_case_base,
-                get_case_statistics,
             )
         except ImportError as e:
             pytest.fail(f"Failed to import helper functions: {e}")

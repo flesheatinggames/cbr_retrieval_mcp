@@ -29,27 +29,30 @@ CASE_BASE = ALL_CASES
 # HELPER FUNCTIONS
 # ============================================
 
+
 def save_case_base_to_file(filename="firebase_nextjs_bootstrap_cases.json"):
     """Save the case base to a JSON file for easy loading."""
     import json
-    
-    with open(filename, 'w', encoding='utf-8') as f:
+
+    with open(filename, "w", encoding="utf-8") as f:
         json.dump(CASE_BASE, f, indent=2, ensure_ascii=False)
-    
+
     print(f"Case base saved to {filename}")
     print(f"Total cases: {len(CASE_BASE)}")
     return filename
 
+
 def load_case_base_from_file(filename="firebase_nextjs_bootstrap_cases.json"):
     """Load the case base from a JSON file."""
     import json
-    
+
     try:
-        with open(filename, 'r', encoding='utf-8') as f:
+        with open(filename, "r", encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
         print(f"File {filename} not found. Using default case base.")
         return CASE_BASE
+
 
 def search_cases(query, case_base=None):
     """Search for relevant cases based on a query.
@@ -95,19 +98,18 @@ def search_cases(query, case_base=None):
     # Return top 5 most relevant cases
     return [case for _, case in results[:5]]
 
+
 def add_case(problem, solution, case_base=None):
     """Add a new case to the case base."""
     if case_base is None:
         case_base = CASE_BASE
-    
-    new_case = {
-        "problem": problem,
-        "solution": solution
-    }
-    
+
+    new_case = {"problem": problem, "solution": solution}
+
     case_base.append(new_case)
     print(f"Added new case. Total cases: {len(case_base)}")
     return case_base
+
 
 def validate_case_base(case_base=None):
     """Validate that all cases have proper structure.
@@ -156,6 +158,7 @@ def validate_case_base(case_base=None):
         print(f"Total valid cases: {len(case_base)}")
         return True
 
+
 def get_case_statistics(case_base=None):
     """Get statistics about the case base.
 
@@ -172,9 +175,9 @@ def get_case_statistics(case_base=None):
             "firestore": 0,
             "nextjs": 0,
             "bootstrap": 0,
-            "combined": 0
+            "combined": 0,
         },
-        "avg_solution_length": 0
+        "avg_solution_length": 0,
     }
 
     total_length = 0
@@ -227,6 +230,7 @@ def get_case_statistics(case_base=None):
     print(f"\nAverage Solution Length: {stats['avg_solution_length']} characters")
 
     return stats
+
 
 # Main execution - demonstrates backward compatibility with CASE_BASE = ALL_CASES
 if __name__ == "__main__":

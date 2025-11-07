@@ -20,6 +20,7 @@ class TestModuleImport:
         """
         try:
             import cases.webdev.webdev_testing_cases
+
             assert True
         except ImportError as e:
             pytest.fail(f"Failed to import module: {e}")
@@ -35,8 +36,10 @@ class TestCaseListVariable:
         This verifies the expected export is present.
         """
         import cases.webdev.webdev_testing_cases as module
-        assert hasattr(module, "WEBDEV_TESTING_CASES"), \
-            "Module must export WEBDEV_TESTING_CASES variable"
+
+        assert hasattr(
+            module, "WEBDEV_TESTING_CASES"
+        ), "Module must export WEBDEV_TESTING_CASES variable"
 
     def test_case_list_is_list_type(self):
         """
@@ -45,8 +48,10 @@ class TestCaseListVariable:
         This verifies the variable has the correct type.
         """
         from cases.webdev.webdev_testing_cases import WEBDEV_TESTING_CASES
-        assert isinstance(WEBDEV_TESTING_CASES, list), \
-            "WEBDEV_TESTING_CASES must be a list"
+
+        assert isinstance(
+            WEBDEV_TESTING_CASES, list
+        ), "WEBDEV_TESTING_CASES must be a list"
 
     def test_case_list_contains_exactly_two_cases(self):
         """
@@ -56,8 +61,10 @@ class TestCaseListVariable:
         (Jest unit tests and React Testing Library examples).
         """
         from cases.webdev.webdev_testing_cases import WEBDEV_TESTING_CASES
-        assert len(WEBDEV_TESTING_CASES) == 2, \
-            f"Expected 2 cases, found {len(WEBDEV_TESTING_CASES)}"
+
+        assert (
+            len(WEBDEV_TESTING_CASES) == 2
+        ), f"Expected 2 cases, found {len(WEBDEV_TESTING_CASES)}"
 
 
 class TestRequiredFields:
@@ -70,9 +77,9 @@ class TestRequiredFields:
         This verifies each case includes the problem description.
         """
         from cases.webdev.webdev_testing_cases import WEBDEV_TESTING_CASES
+
         for i, case in enumerate(WEBDEV_TESTING_CASES):
-            assert "problem" in case, \
-                f"Case {i} missing 'problem' field"
+            assert "problem" in case, f"Case {i} missing 'problem' field"
 
     def test_all_cases_have_solution_field(self):
         """
@@ -81,9 +88,9 @@ class TestRequiredFields:
         This verifies each case includes the solution code.
         """
         from cases.webdev.webdev_testing_cases import WEBDEV_TESTING_CASES
+
         for i, case in enumerate(WEBDEV_TESTING_CASES):
-            assert "solution" in case, \
-                f"Case {i} missing 'solution' field"
+            assert "solution" in case, f"Case {i} missing 'solution' field"
 
     def test_all_problem_fields_are_non_empty_strings(self):
         """
@@ -92,11 +99,14 @@ class TestRequiredFields:
         This verifies problem descriptions are properly populated.
         """
         from cases.webdev.webdev_testing_cases import WEBDEV_TESTING_CASES
+
         for i, case in enumerate(WEBDEV_TESTING_CASES):
-            assert isinstance(case["problem"], str), \
-                f"Case {i} 'problem' field must be a string"
-            assert len(case["problem"].strip()) > 0, \
-                f"Case {i} 'problem' field must not be empty"
+            assert isinstance(
+                case["problem"], str
+            ), f"Case {i} 'problem' field must be a string"
+            assert (
+                len(case["problem"].strip()) > 0
+            ), f"Case {i} 'problem' field must not be empty"
 
     def test_all_solution_fields_are_non_empty_strings(self):
         """
@@ -105,11 +115,14 @@ class TestRequiredFields:
         This verifies solution code is properly populated.
         """
         from cases.webdev.webdev_testing_cases import WEBDEV_TESTING_CASES
+
         for i, case in enumerate(WEBDEV_TESTING_CASES):
-            assert isinstance(case["solution"], str), \
-                f"Case {i} 'solution' field must be a string"
-            assert len(case["solution"].strip()) > 0, \
-                f"Case {i} 'solution' field must not be empty"
+            assert isinstance(
+                case["solution"], str
+            ), f"Case {i} 'solution' field must be a string"
+            assert (
+                len(case["solution"].strip()) > 0
+            ), f"Case {i} 'solution' field must not be empty"
 
 
 class TestMetadataValidation:
@@ -122,11 +135,12 @@ class TestMetadataValidation:
         This verifies cases are properly categorized as web development.
         """
         from cases.webdev.webdev_testing_cases import WEBDEV_TESTING_CASES
+
         for i, case in enumerate(WEBDEV_TESTING_CASES):
-            assert "category" in case, \
-                f"Case {i} missing 'category' field"
-            assert case["category"] == "webdev", \
-                f"Case {i} must have category='webdev', found '{case['category']}'"
+            assert "category" in case, f"Case {i} missing 'category' field"
+            assert (
+                case["category"] == "webdev"
+            ), f"Case {i} must have category='webdev', found '{case['category']}'"
 
     def test_all_cases_have_subcategory_testing(self):
         """
@@ -135,11 +149,12 @@ class TestMetadataValidation:
         This verifies cases are properly subcategorized as testing examples.
         """
         from cases.webdev.webdev_testing_cases import WEBDEV_TESTING_CASES
+
         for i, case in enumerate(WEBDEV_TESTING_CASES):
-            assert "subcategory" in case, \
-                f"Case {i} missing 'subcategory' field"
-            assert case["subcategory"] == "testing", \
-                f"Case {i} must have subcategory='testing', found '{case['subcategory']}'"
+            assert "subcategory" in case, f"Case {i} missing 'subcategory' field"
+            assert (
+                case["subcategory"] == "testing"
+            ), f"Case {i} must have subcategory='testing', found '{case['subcategory']}'"
 
     def test_all_cases_have_tags_list(self):
         """
@@ -148,11 +163,12 @@ class TestMetadataValidation:
         This verifies tags are present and properly typed.
         """
         from cases.webdev.webdev_testing_cases import WEBDEV_TESTING_CASES
+
         for i, case in enumerate(WEBDEV_TESTING_CASES):
-            assert "tags" in case, \
-                f"Case {i} missing 'tags' field"
-            assert isinstance(case["tags"], list), \
-                f"Case {i} 'tags' field must be a list"
+            assert "tags" in case, f"Case {i} missing 'tags' field"
+            assert isinstance(
+                case["tags"], list
+            ), f"Case {i} 'tags' field must be a list"
 
     def test_all_cases_have_at_least_two_tags(self):
         """
@@ -161,9 +177,11 @@ class TestMetadataValidation:
         This verifies adequate tagging for searchability.
         """
         from cases.webdev.webdev_testing_cases import WEBDEV_TESTING_CASES
+
         for i, case in enumerate(WEBDEV_TESTING_CASES):
-            assert len(case["tags"]) >= 2, \
-                f"Case {i} must have at least 2 tags, found {len(case['tags'])}"
+            assert (
+                len(case["tags"]) >= 2
+            ), f"Case {i} must have at least 2 tags, found {len(case['tags'])}"
 
     def test_tags_contain_relevant_testing_keywords(self):
         """
@@ -176,10 +194,30 @@ class TestMetadataValidation:
         from cases.webdev.webdev_testing_cases import WEBDEV_TESTING_CASES
 
         relevant_keywords = {
-            "jest", "testing-library", "unit-tests", "unit-test", "mocking", "mock",
-            "assertions", "assert", "test", "testing", "spec", "describe", "it",
-            "expect", "react", "component", "rtl", "fireEvent", "render", "screen",
-            "waitFor", "hooks", "integration", "snapshot"
+            "jest",
+            "testing-library",
+            "unit-tests",
+            "unit-test",
+            "mocking",
+            "mock",
+            "assertions",
+            "assert",
+            "test",
+            "testing",
+            "spec",
+            "describe",
+            "it",
+            "expect",
+            "react",
+            "component",
+            "rtl",
+            "fireEvent",
+            "render",
+            "screen",
+            "waitFor",
+            "hooks",
+            "integration",
+            "snapshot",
         }
 
         for i, case in enumerate(WEBDEV_TESTING_CASES):
@@ -187,8 +225,9 @@ class TestMetadataValidation:
             has_relevant_tag = any(
                 keyword in tag for tag in tags_lower for keyword in relevant_keywords
             )
-            assert has_relevant_tag, \
-                f"Case {i} should have at least one testing-related tag from {relevant_keywords}, found {case['tags']}"
+            assert (
+                has_relevant_tag
+            ), f"Case {i} should have at least one testing-related tag from {relevant_keywords}, found {case['tags']}"
 
 
 class TestContentPreservation:
@@ -204,8 +243,16 @@ class TestContentPreservation:
         from cases.webdev.webdev_testing_cases import WEBDEV_TESTING_CASES
 
         jest_keywords = [
-            "jest", "describe", "it(", "test(", "expect",
-            "unit test", "mock", "spy", "toBe", "toEqual"
+            "jest",
+            "describe",
+            "it(",
+            "test(",
+            "expect",
+            "unit test",
+            "mock",
+            "spy",
+            "toBe",
+            "toEqual",
         ]
 
         jest_case_found = False
@@ -214,16 +261,19 @@ class TestContentPreservation:
             solution_lower = case["solution"].lower()
 
             # Check if this case is about Jest unit testing
-            if any(keyword in problem_lower or keyword in solution_lower
-                   for keyword in jest_keywords):
+            if any(
+                keyword in problem_lower or keyword in solution_lower
+                for keyword in jest_keywords
+            ):
                 jest_case_found = True
                 # Verify solution contains Jest test patterns
-                assert any(pattern in solution_lower for pattern in ["describe(", "it(", "test(", "expect("]), \
-                    "Jest case must contain test block patterns (describe/it/test/expect)"
+                assert any(
+                    pattern in solution_lower
+                    for pattern in ["describe(", "it(", "test(", "expect("]
+                ), "Jest case must contain test block patterns (describe/it/test/expect)"
                 break
 
-        assert jest_case_found, \
-            "Must have a case about Jest unit testing"
+        assert jest_case_found, "Must have a case about Jest unit testing"
 
     def test_react_testing_library_case_exists(self):
         """
@@ -235,9 +285,17 @@ class TestContentPreservation:
         from cases.webdev.webdev_testing_cases import WEBDEV_TESTING_CASES
 
         rtl_keywords = [
-            "testing-library", "react testing library", "@testing-library/react",
-            "render", "screen", "fireEvent", "waitFor", "getByRole",
-            "getByText", "getByTestId", "userEvent"
+            "testing-library",
+            "react testing library",
+            "@testing-library/react",
+            "render",
+            "screen",
+            "fireEvent",
+            "waitFor",
+            "getByRole",
+            "getByText",
+            "getByTestId",
+            "userEvent",
         ]
 
         rtl_case_found = False
@@ -246,16 +304,19 @@ class TestContentPreservation:
             solution_lower = case["solution"].lower()
 
             # Check if this case is about React Testing Library
-            if any(keyword in problem_lower or keyword in solution_lower
-                   for keyword in rtl_keywords):
+            if any(
+                keyword in problem_lower or keyword in solution_lower
+                for keyword in rtl_keywords
+            ):
                 rtl_case_found = True
                 # Verify solution contains RTL patterns
-                assert any(pattern in solution_lower for pattern in ["render(", "screen.", "fireEvent", "waitFor"]), \
-                    "React Testing Library case must contain RTL patterns (render/screen/fireEvent/waitFor)"
+                assert any(
+                    pattern in solution_lower
+                    for pattern in ["render(", "screen.", "fireEvent", "waitFor"]
+                ), "React Testing Library case must contain RTL patterns (render/screen/fireEvent/waitFor)"
                 break
 
-        assert rtl_case_found, \
-            "Must have a case about React Testing Library"
+        assert rtl_case_found, "Must have a case about React Testing Library"
 
     def test_cases_have_distinct_problems(self):
         """
@@ -266,14 +327,14 @@ class TestContentPreservation:
         """
         from cases.webdev.webdev_testing_cases import WEBDEV_TESTING_CASES
 
-        assert len(WEBDEV_TESTING_CASES) == 2, \
-            "Expected exactly 2 cases"
+        assert len(WEBDEV_TESTING_CASES) == 2, "Expected exactly 2 cases"
 
         problem_0 = WEBDEV_TESTING_CASES[0]["problem"].strip()
         problem_1 = WEBDEV_TESTING_CASES[1]["problem"].strip()
 
-        assert problem_0 != problem_1, \
-            "Cases 0 and 1 must have distinct problem descriptions"
+        assert (
+            problem_0 != problem_1
+        ), "Cases 0 and 1 must have distinct problem descriptions"
 
 
 class TestCodeQuality:
@@ -289,17 +350,29 @@ class TestCodeQuality:
         from cases.webdev.webdev_testing_cases import WEBDEV_TESTING_CASES
 
         testing_patterns = [
-            "describe", "it(", "test(", "expect", "assert",
-            "render(", "screen", "fireEvent", "waitFor",
-            "jest.fn", "jest.mock", "beforeEach", "afterEach"
+            "describe",
+            "it(",
+            "test(",
+            "expect",
+            "assert",
+            "render(",
+            "screen",
+            "fireEvent",
+            "waitFor",
+            "jest.fn",
+            "jest.mock",
+            "beforeEach",
+            "afterEach",
         ]
 
         for i, case in enumerate(WEBDEV_TESTING_CASES):
             solution_lower = case["solution"].lower()
-            has_testing_pattern = any(pattern.lower() in solution_lower
-                                      for pattern in testing_patterns)
-            assert has_testing_pattern, \
-                f"Case {i} solution should contain testing patterns (describe/it/expect/render/etc.)"
+            has_testing_pattern = any(
+                pattern.lower() in solution_lower for pattern in testing_patterns
+            )
+            assert (
+                has_testing_pattern
+            ), f"Case {i} solution should contain testing patterns (describe/it/expect/render/etc.)"
 
     def test_solutions_contain_jest_or_rtl_imports(self):
         """
@@ -310,9 +383,13 @@ class TestCodeQuality:
         from cases.webdev.webdev_testing_cases import WEBDEV_TESTING_CASES
 
         import_patterns = [
-            "import", "from '@testing-library", "from 'jest'",
-            "require('@testing-library", "require('jest')",
-            "@testing-library/react", "@testing-library/jest-dom"
+            "import",
+            "from '@testing-library",
+            "from 'jest'",
+            "require('@testing-library",
+            "require('jest')",
+            "@testing-library/react",
+            "@testing-library/jest-dom",
         ]
 
         has_testing_imports = False
@@ -322,8 +399,9 @@ class TestCodeQuality:
                 has_testing_imports = True
                 break
 
-        assert has_testing_imports, \
-            "At least one case should contain testing library imports"
+        assert (
+            has_testing_imports
+        ), "At least one case should contain testing library imports"
 
     def test_solutions_are_substantial_code_examples(self):
         """
@@ -336,5 +414,6 @@ class TestCodeQuality:
 
         for i, case in enumerate(WEBDEV_TESTING_CASES):
             # Substantial code should be at least 500 characters
-            assert len(case["solution"]) >= 500, \
-                f"Case {i} solution should be a substantial code example (>= 500 chars), found {len(case['solution'])} chars"
+            assert (
+                len(case["solution"]) >= 500
+            ), f"Case {i} solution should be a substantial code example (>= 500 chars), found {len(case['solution'])} chars"

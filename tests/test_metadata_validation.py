@@ -16,12 +16,12 @@ Expected behavior:
 - Wrong type (tags): Returns False, logs warning about type
 """
 
-import pytest
 from typing import Any, Dict, List
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 from cases import validate_case
-
 
 # Test data fixtures based on test specification
 COMPLETE_CASE = {
@@ -104,9 +104,9 @@ def test_validate_case_missing_category(mock_logger):
     # And: A warning is logged
     mock_logger.warning.assert_called_once()
     warning_message = mock_logger.warning.call_args[0][0]
-    assert "category" in warning_message.lower(), (
-        "Warning message must mention missing category field"
-    )
+    assert (
+        "category" in warning_message.lower()
+    ), "Warning message must mention missing category field"
 
 
 @patch("cases.logger")
@@ -131,9 +131,9 @@ def test_validate_case_missing_subcategory(mock_logger):
     # And: A warning is logged
     mock_logger.warning.assert_called_once()
     warning_message = mock_logger.warning.call_args[0][0]
-    assert "subcategory" in warning_message.lower(), (
-        "Warning message must mention missing subcategory field"
-    )
+    assert (
+        "subcategory" in warning_message.lower()
+    ), "Warning message must mention missing subcategory field"
 
 
 @patch("cases.logger")
@@ -158,9 +158,9 @@ def test_validate_case_missing_tags(mock_logger):
     # And: A warning is logged
     mock_logger.warning.assert_called_once()
     warning_message = mock_logger.warning.call_args[0][0]
-    assert "tags" in warning_message.lower(), (
-        "Warning message must mention missing tags field"
-    )
+    assert (
+        "tags" in warning_message.lower()
+    ), "Warning message must mention missing tags field"
 
 
 @patch("cases.logger")
@@ -185,12 +185,10 @@ def test_validate_case_tags_not_list(mock_logger):
     # And: A warning is logged about type error
     mock_logger.warning.assert_called_once()
     warning_message = mock_logger.warning.call_args[0][0]
-    assert "tags" in warning_message.lower(), (
-        "Warning message must mention tags field"
-    )
-    assert "list" in warning_message.lower(), (
-        "Warning message must mention list type requirement"
-    )
+    assert "tags" in warning_message.lower(), "Warning message must mention tags field"
+    assert (
+        "list" in warning_message.lower()
+    ), "Warning message must mention list type requirement"
 
 
 def test_metadata_list_validation_before_storage():
@@ -237,6 +235,6 @@ def test_metadata_list_validation_before_storage():
 
     # When/Then: Assertion would fail for mismatched lengths
     with pytest.raises(AssertionError):
-        assert len(mismatched_metadata_list) == expected_length, (
-            "Length mismatch should raise assertion error"
-        )
+        assert (
+            len(mismatched_metadata_list) == expected_length
+        ), "Length mismatch should raise assertion error"

@@ -13,14 +13,14 @@ Expected metadata format:
 }
 """
 
-import pytest
 from typing import Any
+
+import pytest
 
 from cbr_mcp_server.metadata_extraction import (
     extract_metadata_from_case,
     extract_metadata_list,
 )
-
 
 # Test data fixtures
 COMPLETE_CASE = {

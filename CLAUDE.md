@@ -1,5 +1,12 @@
 # CBR MCP Server - Claude Instructions
 
+<critical_behavior_directive>
+   ALWAYS do what the user asked, exactly as asked. Do not assume that you know what the user wants. Do not jump to some task that was not asked for based on an assumption.
+   NEVER assume ANYTHING.
+
+   Your full behavioral gudiance is in your best practices document, linked below.
+</critical_behavior_directive>
+
 ## Agent OS Documentation
 
 ### Product Context
@@ -10,7 +17,7 @@
 
 ### Development Standards
 - **Code Style:** @~/.agent-os/standards/code-style.md
-- **Best Practices:** @~/.claude/standards/best-practices.md
+- **Best Practices:** @~/.agent-os/standards/best-practices.md
 
 ### Project Management
 - **Active Specs:** @.agent-os/specs/

@@ -16,9 +16,10 @@ Test Coverage:
 - Case completeness checks
 """
 
-import pytest
 import os
 from pathlib import Path
+
+import pytest
 
 
 # Fixtures for reusable test data
@@ -28,6 +29,7 @@ def completion_cases():
     from cases.orchestration.orchestration_completion_cases import (
         ORCHESTRATION_COMPLETION_CASES,
     )
+
     return ORCHESTRATION_COMPLETION_CASES
 
 
@@ -83,6 +85,7 @@ class TestModuleStructure:
         """Test that the module can be imported successfully."""
         try:
             from cases.orchestration import orchestration_completion_cases
+
             assert orchestration_completion_cases is not None
         except ImportError as e:
             pytest.fail(f"Failed to import orchestration_completion_cases: {e}")
@@ -130,9 +133,7 @@ class TestMetadataSchema:
 
     def test_metadata_has_subcategory(self, case_metadata):
         """Test that metadata contains 'subcategory' field."""
-        assert (
-            "subcategory" in case_metadata
-        ), "Metadata must have 'subcategory' field"
+        assert "subcategory" in case_metadata, "Metadata must have 'subcategory' field"
 
     def test_metadata_has_tags(self, case_metadata):
         """Test that metadata contains 'tags' field."""
@@ -148,9 +149,7 @@ class TestMetadataSchema:
 
     def test_category_is_string(self, case_metadata):
         """Test that category is a string."""
-        assert isinstance(
-            case_metadata["category"], str
-        ), "Category must be a string"
+        assert isinstance(case_metadata["category"], str), "Category must be a string"
 
     def test_subcategory_is_string(self, case_metadata):
         """Test that subcategory is a string."""
@@ -191,9 +190,7 @@ class TestCategoryAndSubcategory:
 
     def test_category_not_empty(self, case_metadata):
         """Test that category is not an empty string."""
-        assert (
-            case_metadata["category"].strip() != ""
-        ), "Category must not be empty"
+        assert case_metadata["category"].strip() != "", "Category must not be empty"
 
     def test_subcategory_not_empty(self, case_metadata):
         """Test that subcategory is not an empty string."""
@@ -212,9 +209,7 @@ class TestTagsContent:
             assert isinstance(tag, str), f"Tag must be string, found {type(tag)}"
             assert tag.strip() != "", "Tag must not be empty"
 
-    def test_tags_include_completion_keywords(
-        self, case_metadata, completion_keywords
-    ):
+    def test_tags_include_completion_keywords(self, case_metadata, completion_keywords):
         """Test that tags include completion-related keywords."""
         tags_lower = [tag.lower() for tag in case_metadata["tags"]]
         matching_keywords = [
@@ -240,21 +235,13 @@ class TestProblemAndSolution:
 
     def test_problem_is_non_empty_string(self, case_metadata):
         """Test that problem is a non-empty string."""
-        assert isinstance(
-            case_metadata["problem"], str
-        ), "Problem must be a string"
-        assert (
-            case_metadata["problem"].strip() != ""
-        ), "Problem must not be empty"
+        assert isinstance(case_metadata["problem"], str), "Problem must be a string"
+        assert case_metadata["problem"].strip() != "", "Problem must not be empty"
 
     def test_solution_is_non_empty_string(self, case_metadata):
         """Test that solution is a non-empty string."""
-        assert isinstance(
-            case_metadata["solution"], str
-        ), "Solution must be a string"
-        assert (
-            case_metadata["solution"].strip() != ""
-        ), "Solution must not be empty"
+        assert isinstance(case_metadata["solution"], str), "Solution must be a string"
+        assert case_metadata["solution"].strip() != "", "Solution must not be empty"
 
     def test_problem_has_substantial_content(self, case_metadata):
         """Test that problem has substantial content (>20 characters)."""
@@ -389,9 +376,7 @@ class TestCaseCompleteness:
         """Test that the case structure matches expected schema."""
         required_keys = ["category", "subcategory", "tags", "problem", "solution"]
         for key in required_keys:
-            assert (
-                key in completion_case
-            ), f"Case missing required key: {key}"
+            assert key in completion_case, f"Case missing required key: {key}"
 
     def test_all_metadata_fields_non_empty(self, case_metadata):
         """Test that all metadata fields have non-empty values."""

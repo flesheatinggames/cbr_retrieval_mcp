@@ -151,15 +151,21 @@ python scripts/utilities/setup_vectordb.py
 # Or load only specific categories you need
 python scripts/utilities/setup_vectordb.py --category firebase rust
 
+# Force rebuild (required if upgrading from older database without complete metadata)
+python scripts/utilities/setup_vectordb.py --force
+
 # See all filtering options
 python scripts/utilities/setup_vectordb.py --help
 ```
 
 This creates the `./db/` directory with your ChromaDB vector database. The setup process:
 - Downloads the embedding model (nomic-ai/nomic-embed-text-v1.5) on first run
+- Validates all cases have complete metadata (category, subcategory, tags)
 - Generates embeddings for case problems
-- Populates ChromaDB with cases and embeddings
+- Populates ChromaDB with cases, embeddings, and complete metadata
 - Takes 2-5 minutes depending on case count and system performance
+
+**Metadata Schema:** As of November 2025, all cases are stored with complete metadata including category, subcategory, and tags. This enables powerful category-based filtering. If you have an existing database from before November 2025, use `--force` to rebuild with complete metadata. See [Metadata Schema Guide](Documentation/Metadata-Schema-Guide.md) for details.
 
 For detailed filtering options and use cases, see the [Loading Specific Cases into Vector Database](#loading-specific-cases-into-vector-database) section below.
 
@@ -490,20 +496,25 @@ Open the selected file and add your case to the case list. Each case requires th
 
 #### Step 3: Required Metadata Fields
 
-All cases must include these metadata fields:
+All cases must include these metadata fields for proper database storage and category-based search:
 
 - **`category`** (string, required): Top-level technology or domain category
   - Must be one of: `firebase`, `react`, `nextjs`, `bootstrap`, `webdev`, `orchestration`, `security`, `rust`
   - Should match the directory name where the case file is located
+  - **Used for category filtering**: Enables `cbr_search_category(category="orchestration")`
 
 - **`subcategory`** (string, required): Specific subdomain or pattern type
   - Examples: `auth`, `components`, `routing`, `planning`, `validation`
   - Should match the file name pattern (e.g., "auth" from `firebase_auth_cases.py`)
+  - **Used for refined filtering**: Enables `cbr_search_category(category="X", subcategory="Y")`
 
 - **`tags`** (list of strings, required): Keywords for search and discovery
   - Include technology names, frameworks, concepts, and patterns
   - Examples: `["authentication", "react", "hooks", "typescript", "async"]`
   - Minimum 1 tag required, recommend 3-7 tags per case
+  - **Stored in ChromaDB metadata**: Helps identify technical context of cases
+
+**Important:** Missing any of these fields will cause validation warnings and may prevent the case from being stored correctly in ChromaDB. See the [Metadata Schema Guide](Documentation/Metadata-Schema-Guide.md) for complete details on the metadata system.
 
 #### Step 4: Complete Example
 

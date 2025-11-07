@@ -10,13 +10,13 @@ This test module validates that migrated cases have:
 These are integration tests using actual ChromaDB collections.
 """
 
-import pytest
-import chromadb
-from chromadb.config import Settings
-import tempfile
 import shutil
-from typing import List, Dict, Any
+import tempfile
+from typing import Any, Dict, List
 
+import chromadb
+import pytest
+from chromadb.config import Settings
 
 # Category taxonomy from tech_spec.md
 VALID_CATEGORIES = ["code", "orchestration", "best-practice", "anti-pattern"]
@@ -94,9 +94,7 @@ class TestMetadataValidation:
         except Exception:
             pass
 
-    def _create_valid_test_cases(
-        self, collection, count: int = 10
-    ) -> List[str]:
+    def _create_valid_test_cases(self, collection, count: int = 10) -> List[str]:
         """
         Create test cases with valid metadata for validation testing.
 
@@ -309,9 +307,7 @@ class TestMetadataValidation:
             metadata = results["metadatas"][i]
 
             # Check category field exists
-            assert (
-                "category" in metadata
-            ), f"Case {case_id} missing category field"
+            assert "category" in metadata, f"Case {case_id} missing category field"
 
             # Check category value is valid
             category = metadata["category"]
@@ -420,9 +416,9 @@ class TestMetadataValidation:
             # If tags not empty, verify comma-separated format
             if tags:
                 # Check for lowercase (all characters should be lowercase if alphabetic)
-                assert tags == tags.lower(), (
-                    f"Case {case_id} tags should be lowercase, got '{tags}'"
-                )
+                assert (
+                    tags == tags.lower()
+                ), f"Case {case_id} tags should be lowercase, got '{tags}'"
 
                 # Verify comma-separated format (no spaces after commas in our standard)
                 # Tags should not have leading/trailing whitespace
@@ -779,7 +775,9 @@ class TestMetadataValidation:
         ), f"Found {len(validation_errors)} validation errors: {validation_errors}"
 
         # Verify we tested all expected cases
-        expected_count = sum(len(subcats) for subcats in CATEGORY_SUBCATEGORIES.values())
+        expected_count = sum(
+            len(subcats) for subcats in CATEGORY_SUBCATEGORIES.values()
+        )
         assert (
             len(results["ids"]) == expected_count
         ), f"Expected {expected_count} cases, found {len(results['ids'])}"

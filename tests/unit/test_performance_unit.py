@@ -9,18 +9,18 @@ This test module validates that:
 These are integration tests using actual ChromaDB collections to measure real-world performance.
 """
 
-import pytest
-import chromadb
-from chromadb.config import Settings
-import tempfile
-import shutil
-import time
-import psutil
-import os
-from typing import List, Dict, Any
-import numpy as np
 import asyncio
+import os
+import shutil
+import tempfile
+import time
+from typing import Any, Dict, List
 
+import chromadb
+import numpy as np
+import psutil
+import pytest
+from chromadb.config import Settings
 
 # Test will fail until MetadataMigration and search_by_category are implemented
 try:
@@ -30,7 +30,7 @@ except ImportError:
 
 
 try:
-    from cbr_mcp_server import ProductionCBRRetriever, CBRServerConfig
+    from cbr_mcp_server import CBRServerConfig, ProductionCBRRetriever
 except ImportError:
     ProductionCBRRetriever = None
     CBRServerConfig = None
@@ -163,7 +163,9 @@ class TestPerformanceMetrics:
 
         # Calculate cases per category
         categories = list(distribution.keys())
-        cases_per_category = {cat: int(count * pct) for cat, pct in distribution.items()}
+        cases_per_category = {
+            cat: int(count * pct) for cat, pct in distribution.items()
+        }
 
         # Adjust for rounding errors
         total_assigned = sum(cases_per_category.values())
@@ -201,7 +203,9 @@ class TestPerformanceMetrics:
                 case_idx += 1
 
         # Add all cases to collection in one batch
-        collection.add(ids=ids, documents=documents, embeddings=embeddings, metadatas=metadatas)
+        collection.add(
+            ids=ids, documents=documents, embeddings=embeddings, metadatas=metadatas
+        )
 
         return ids
 
@@ -242,7 +246,9 @@ class TestPerformanceMetrics:
             metadatas.append({"source": "test_case", "created_at": "2025-10-27"})
 
         # Add all cases in batch
-        collection.add(ids=ids, documents=documents, embeddings=embeddings, metadatas=metadatas)
+        collection.add(
+            ids=ids, documents=documents, embeddings=embeddings, metadatas=metadatas
+        )
 
         return ids
 
@@ -277,8 +283,11 @@ class TestPerformanceMetrics:
         print(f"[Performance Test] Setup completed in {setup_time:.2f}s")
 
         # Create retriever
-        config = CBRServerConfig(db_path=temp_db_path, collection_name=test_collection.name)
+        config = CBRServerConfig(
+            db_path=temp_db_path, collection_name=test_collection.name
+        )
         from unittest.mock import Mock
+
         mock_logger = Mock()
         retriever = ProductionCBRRetriever(config, mock_logger)
 
@@ -423,13 +432,17 @@ class TestPerformanceMetrics:
         # Verify all cases were migrated correctly
         all_cases = test_collection.get(include=["metadatas"])
         for metadata in all_cases["metadatas"]:
-            assert "category" in metadata, "All cases should have category after migration"
+            assert (
+                "category" in metadata
+            ), "All cases should have category after migration"
             assert (
                 "subcategory" in metadata
             ), "All cases should have subcategory after migration"
 
         # Verify no database corruption
-        assert len(all_cases["ids"]) == 1000, "All cases should still exist after migration"
+        assert (
+            len(all_cases["ids"]) == 1000
+        ), "All cases should still exist after migration"
 
         print(f"[Migration Performance] ✓ Migration performance test passed!")
 
@@ -466,8 +479,11 @@ class TestPerformanceMetrics:
         print(f"[Large Result Set] Setup completed in {setup_time:.2f}s")
 
         # Create retriever
-        config = CBRServerConfig(db_path=temp_db_path, collection_name=test_collection.name)
+        config = CBRServerConfig(
+            db_path=temp_db_path, collection_name=test_collection.name
+        )
         from unittest.mock import Mock
+
         mock_logger = Mock()
         retriever = ProductionCBRRetriever(config, mock_logger)
 
@@ -537,7 +553,9 @@ class TestPerformanceMetrics:
         ProductionCBRRetriever is None, reason="ProductionCBRRetriever not implemented"
     )
     @pytest.mark.asyncio
-    async def test_memory_stability_repeated_queries(self, temp_db_path, test_collection):
+    async def test_memory_stability_repeated_queries(
+        self, temp_db_path, test_collection
+    ):
         """
         Test that memory usage remains stable across repeated queries.
 
@@ -548,8 +566,11 @@ class TestPerformanceMetrics:
         self._create_test_cases_with_categories(test_collection, 1000)
 
         # Create retriever
-        config = CBRServerConfig(db_path=temp_db_path, collection_name=test_collection.name)
+        config = CBRServerConfig(
+            db_path=temp_db_path, collection_name=test_collection.name
+        )
         from unittest.mock import Mock
+
         mock_logger = Mock()
         retriever = ProductionCBRRetriever(config, mock_logger)
 
@@ -565,7 +586,9 @@ class TestPerformanceMetrics:
 
         for i in range(200):
             category = categories[i % len(categories)]
-            await retriever.search_by_category(category=category, query="test", limit=10)
+            await retriever.search_by_category(
+                category=category, query="test", limit=10
+            )
 
             # Sample memory every 50 queries
             if i % 50 == 49:

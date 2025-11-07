@@ -16,6 +16,7 @@ dependencies = [
     "pydantic",
     "einops",
     "psutil",
+    "cachetools>=5.3.0",
 ]
 requires-python = ">=3.10"
 
@@ -26,6 +27,8 @@ cbr-mcp-server = "cbr_mcp_server:main"
 dev = [
     "pytest",
     "pytest-asyncio",
+    "pytest-benchmark",
+    "memory_profiler",
     "black",
     "isort",
     "mypy"
@@ -50,7 +53,7 @@ warn_unused_configs = true
 disallow_untyped_defs = true
 
 [tool.pytest.ini_options]
-pythonpath = ["."]
+pythonpath = ["src"]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]

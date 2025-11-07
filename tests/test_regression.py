@@ -21,7 +21,7 @@ during the modular refactoring process.
 """
 
 import difflib
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 import pytest
 
@@ -86,12 +86,12 @@ class TestCaseIDCompleteness:
         # Build case ID mapping for both structures
         original_ids = {}
         for idx, case in enumerate(CASE_BASE):
-            case_id = case.get('id', f'case_{idx}')
+            case_id = case.get("id", f"case_{idx}")
             original_ids[case_id] = case
 
         new_ids = {}
         for idx, case in enumerate(ALL_CASES):
-            case_id = case.get('id', f'case_{idx}')
+            case_id = case.get("id", f"case_{idx}")
             new_ids[case_id] = case
 
         original_id_set = set(original_ids.keys())
@@ -146,12 +146,12 @@ class TestProblemFieldRegression:
         # Build case ID mapping
         original_cases = {}
         for idx, case in enumerate(CASE_BASE):
-            case_id = case.get('id', f'case_{idx}')
+            case_id = case.get("id", f"case_{idx}")
             original_cases[case_id] = case
 
         new_cases = {}
         for idx, case in enumerate(ALL_CASES):
-            case_id = case.get('id', f'case_{idx}')
+            case_id = case.get("id", f"case_{idx}")
             new_cases[case_id] = case
 
         # Compare problem field for each case
@@ -163,26 +163,30 @@ class TestProblemFieldRegression:
             original_case = original_cases[case_id]
             new_case = new_cases[case_id]
 
-            original_problem = original_case.get('problem', '')
-            new_problem = new_case.get('problem', '')
+            original_problem = original_case.get("problem", "")
+            new_problem = new_case.get("problem", "")
 
             # Check exact match
             if original_problem != new_problem:
                 # Generate unified diff
-                diff = list(difflib.unified_diff(
-                    original_problem.splitlines(keepends=True),
-                    new_problem.splitlines(keepends=True),
-                    fromfile=f'Original [{case_id}]',
-                    tofile=f'New [{case_id}]',
-                    lineterm=''
-                ))
+                diff = list(
+                    difflib.unified_diff(
+                        original_problem.splitlines(keepends=True),
+                        new_problem.splitlines(keepends=True),
+                        fromfile=f"Original [{case_id}]",
+                        tofile=f"New [{case_id}]",
+                        lineterm="",
+                    )
+                )
 
-                differences.append({
-                    'case_id': case_id,
-                    'original_length': len(original_problem),
-                    'new_length': len(new_problem),
-                    'diff': ''.join(diff)
-                })
+                differences.append(
+                    {
+                        "case_id": case_id,
+                        "original_length": len(original_problem),
+                        "new_length": len(new_problem),
+                        "diff": "".join(diff),
+                    }
+                )
 
         # Report all differences
         if differences:
@@ -192,7 +196,9 @@ class TestProblemFieldRegression:
 
             for idx, diff_info in enumerate(differences, 1):
                 error_msg += f"Difference {idx}/{len(differences)}: Case ID = {diff_info['case_id']}\n"
-                error_msg += f"  Original length: {diff_info['original_length']} characters\n"
+                error_msg += (
+                    f"  Original length: {diff_info['original_length']} characters\n"
+                )
                 error_msg += f"  New length: {diff_info['new_length']} characters\n"
                 error_msg += f"  Diff:\n{diff_info['diff']}\n"
                 error_msg += f"{'-'*80}\n\n"
@@ -228,12 +234,12 @@ class TestSolutionFieldRegression:
         # Build case ID mapping
         original_cases = {}
         for idx, case in enumerate(CASE_BASE):
-            case_id = case.get('id', f'case_{idx}')
+            case_id = case.get("id", f"case_{idx}")
             original_cases[case_id] = case
 
         new_cases = {}
         for idx, case in enumerate(ALL_CASES):
-            case_id = case.get('id', f'case_{idx}')
+            case_id = case.get("id", f"case_{idx}")
             new_cases[case_id] = case
 
         # Compare solution field for each case
@@ -245,26 +251,30 @@ class TestSolutionFieldRegression:
             original_case = original_cases[case_id]
             new_case = new_cases[case_id]
 
-            original_solution = original_case.get('solution', '')
-            new_solution = new_case.get('solution', '')
+            original_solution = original_case.get("solution", "")
+            new_solution = new_case.get("solution", "")
 
             # Check exact match
             if original_solution != new_solution:
                 # Generate unified diff
-                diff = list(difflib.unified_diff(
-                    original_solution.splitlines(keepends=True),
-                    new_solution.splitlines(keepends=True),
-                    fromfile=f'Original [{case_id}]',
-                    tofile=f'New [{case_id}]',
-                    lineterm=''
-                ))
+                diff = list(
+                    difflib.unified_diff(
+                        original_solution.splitlines(keepends=True),
+                        new_solution.splitlines(keepends=True),
+                        fromfile=f"Original [{case_id}]",
+                        tofile=f"New [{case_id}]",
+                        lineterm="",
+                    )
+                )
 
-                differences.append({
-                    'case_id': case_id,
-                    'original_length': len(original_solution),
-                    'new_length': len(new_solution),
-                    'diff': ''.join(diff)
-                })
+                differences.append(
+                    {
+                        "case_id": case_id,
+                        "original_length": len(original_solution),
+                        "new_length": len(new_solution),
+                        "diff": "".join(diff),
+                    }
+                )
 
         # Report all differences
         if differences:
@@ -274,7 +284,9 @@ class TestSolutionFieldRegression:
 
             for idx, diff_info in enumerate(differences, 1):
                 error_msg += f"Difference {idx}/{len(differences)}: Case ID = {diff_info['case_id']}\n"
-                error_msg += f"  Original length: {diff_info['original_length']} characters\n"
+                error_msg += (
+                    f"  Original length: {diff_info['original_length']} characters\n"
+                )
                 error_msg += f"  New length: {diff_info['new_length']} characters\n"
                 error_msg += f"  Diff:\n{diff_info['diff']}\n"
                 error_msg += f"{'-'*80}\n\n"
@@ -307,12 +319,12 @@ class TestWhitespacePreservation:
         # Build case ID mapping
         original_cases = {}
         for idx, case in enumerate(CASE_BASE):
-            case_id = case.get('id', f'case_{idx}')
+            case_id = case.get("id", f"case_{idx}")
             original_cases[case_id] = case
 
         new_cases = {}
         for idx, case in enumerate(ALL_CASES):
-            case_id = case.get('id', f'case_{idx}')
+            case_id = case.get("id", f"case_{idx}")
             new_cases[case_id] = case
 
         # Check whitespace preservation
@@ -325,30 +337,34 @@ class TestWhitespacePreservation:
             new_case = new_cases[case_id]
 
             # Check problem field
-            orig_prob = original_case.get('problem', '')
-            new_prob = new_case.get('problem', '')
+            orig_prob = original_case.get("problem", "")
+            new_prob = new_case.get("problem", "")
 
             if orig_prob != new_prob:
                 # Check for whitespace normalization
                 if orig_prob.strip() == new_prob.strip():
-                    whitespace_issues.append({
-                        'case_id': case_id,
-                        'field': 'problem',
-                        'issue': 'leading/trailing whitespace changed'
-                    })
+                    whitespace_issues.append(
+                        {
+                            "case_id": case_id,
+                            "field": "problem",
+                            "issue": "leading/trailing whitespace changed",
+                        }
+                    )
 
             # Check solution field
-            orig_sol = original_case.get('solution', '')
-            new_sol = new_case.get('solution', '')
+            orig_sol = original_case.get("solution", "")
+            new_sol = new_case.get("solution", "")
 
             if orig_sol != new_sol:
                 # Check for whitespace normalization
                 if orig_sol.strip() == new_sol.strip():
-                    whitespace_issues.append({
-                        'case_id': case_id,
-                        'field': 'solution',
-                        'issue': 'leading/trailing whitespace changed'
-                    })
+                    whitespace_issues.append(
+                        {
+                            "case_id": case_id,
+                            "field": "solution",
+                            "issue": "leading/trailing whitespace changed",
+                        }
+                    )
 
         assert len(whitespace_issues) == 0, (
             f"Whitespace normalization detected in {len(whitespace_issues)} case(s):\n"
@@ -378,12 +394,12 @@ class TestWhitespacePreservation:
         # Build case ID mapping
         original_cases = {}
         for idx, case in enumerate(CASE_BASE):
-            case_id = case.get('id', f'case_{idx}')
+            case_id = case.get("id", f"case_{idx}")
             original_cases[case_id] = case
 
         new_cases = {}
         for idx, case in enumerate(ALL_CASES):
-            case_id = case.get('id', f'case_{idx}')
+            case_id = case.get("id", f"case_{idx}")
             new_cases[case_id] = case
 
         # Check for internal whitespace changes
@@ -396,28 +412,22 @@ class TestWhitespacePreservation:
             new_case = new_cases[case_id]
 
             # Check problem field
-            orig_prob = original_case.get('problem', '')
-            new_prob = new_case.get('problem', '')
+            orig_prob = original_case.get("problem", "")
+            new_prob = new_case.get("problem", "")
 
             if orig_prob != new_prob:
                 # Check if only internal whitespace differs
-                if ''.join(orig_prob.split()) == ''.join(new_prob.split()):
-                    indentation_issues.append({
-                        'case_id': case_id,
-                        'field': 'problem'
-                    })
+                if "".join(orig_prob.split()) == "".join(new_prob.split()):
+                    indentation_issues.append({"case_id": case_id, "field": "problem"})
 
             # Check solution field
-            orig_sol = original_case.get('solution', '')
-            new_sol = new_case.get('solution', '')
+            orig_sol = original_case.get("solution", "")
+            new_sol = new_case.get("solution", "")
 
             if orig_sol != new_sol:
                 # Check if only internal whitespace differs
-                if ''.join(orig_sol.split()) == ''.join(new_sol.split()):
-                    indentation_issues.append({
-                        'case_id': case_id,
-                        'field': 'solution'
-                    })
+                if "".join(orig_sol.split()) == "".join(new_sol.split()):
+                    indentation_issues.append({"case_id": case_id, "field": "solution"})
 
         assert len(indentation_issues) == 0, (
             f"Indentation/internal whitespace changed in {len(indentation_issues)} case(s):\n"
@@ -442,10 +452,10 @@ class TestMetadataFieldsPresent:
 
         cases_without_category = []
         for idx, case in enumerate(ALL_CASES):
-            case_id = case.get('id', f'case_{idx}')
-            if 'category' not in case:
+            case_id = case.get("id", f"case_{idx}")
+            if "category" not in case:
                 cases_without_category.append(case_id)
-            elif not case['category']:
+            elif not case["category"]:
                 cases_without_category.append(f"{case_id} (empty)")
 
         assert len(cases_without_category) == 0, (
@@ -467,10 +477,10 @@ class TestMetadataFieldsPresent:
 
         cases_without_subcategory = []
         for idx, case in enumerate(ALL_CASES):
-            case_id = case.get('id', f'case_{idx}')
-            if 'subcategory' not in case:
+            case_id = case.get("id", f"case_{idx}")
+            if "subcategory" not in case:
                 cases_without_subcategory.append(case_id)
-            elif not case['subcategory']:
+            elif not case["subcategory"]:
                 cases_without_subcategory.append(f"{case_id} (empty)")
 
         assert len(cases_without_subcategory) == 0, (
@@ -493,22 +503,22 @@ class TestMetadataFieldsPresent:
 
         cases_with_tag_issues = []
         for idx, case in enumerate(ALL_CASES):
-            case_id = case.get('id', f'case_{idx}')
+            case_id = case.get("id", f"case_{idx}")
 
             # Check field exists
-            if 'tags' not in case:
+            if "tags" not in case:
                 cases_with_tag_issues.append(f"{case_id}: missing 'tags' field")
                 continue
 
             # Check it's a list
-            if not isinstance(case['tags'], list):
+            if not isinstance(case["tags"], list):
                 cases_with_tag_issues.append(
                     f"{case_id}: 'tags' is {type(case['tags']).__name__}, not list"
                 )
                 continue
 
             # Check it's not empty
-            if not case['tags']:
+            if not case["tags"]:
                 cases_with_tag_issues.append(f"{case_id}: 'tags' is empty list")
 
         assert len(cases_with_tag_issues) == 0, (
@@ -551,13 +561,13 @@ class TestOriginalFieldsUnchanged:
         # Build case mapping
         new_cases = {}
         for idx, case in enumerate(ALL_CASES):
-            case_id = case.get('id', f'case_{idx}')
+            case_id = case.get("id", f"case_{idx}")
             new_cases[case_id] = case
 
         # Check that original fields are present
         missing_fields = []
         for idx, original_case in enumerate(CASE_BASE):
-            case_id = original_case.get('id', f'case_{idx}')
+            case_id = original_case.get("id", f"case_{idx}")
             if case_id not in new_cases:
                 continue
 
@@ -567,10 +577,9 @@ class TestOriginalFieldsUnchanged:
             # Check for missing original fields
             missing = original_fields - new_fields
             if missing:
-                missing_fields.append({
-                    'case_id': case_id,
-                    'missing_fields': list(missing)
-                })
+                missing_fields.append(
+                    {"case_id": case_id, "missing_fields": list(missing)}
+                )
 
         assert len(missing_fields) == 0, (
             f"Original fields missing in {len(missing_fields)} case(s):\n"
@@ -601,12 +610,12 @@ class TestBinaryContentComparison:
         # Build case mapping
         original_cases = {}
         for idx, case in enumerate(CASE_BASE):
-            case_id = case.get('id', f'case_{idx}')
+            case_id = case.get("id", f"case_{idx}")
             original_cases[case_id] = case
 
         new_cases = {}
         for idx, case in enumerate(ALL_CASES):
-            case_id = case.get('id', f'case_{idx}')
+            case_id = case.get("id", f"case_{idx}")
             new_cases[case_id] = case
 
         # Compare at bytes level
@@ -618,20 +627,22 @@ class TestBinaryContentComparison:
             original_case = original_cases[case_id]
             new_case = new_cases[case_id]
 
-            orig_prob = original_case.get('problem', '')
-            new_prob = new_case.get('problem', '')
+            orig_prob = original_case.get("problem", "")
+            new_prob = new_case.get("problem", "")
 
             # Encode to bytes and compare
-            orig_bytes = orig_prob.encode('utf-8')
-            new_bytes = new_prob.encode('utf-8')
+            orig_bytes = orig_prob.encode("utf-8")
+            new_bytes = new_prob.encode("utf-8")
 
             if orig_bytes != new_bytes:
-                encoding_issues.append({
-                    'case_id': case_id,
-                    'field': 'problem',
-                    'original_bytes': len(orig_bytes),
-                    'new_bytes': len(new_bytes)
-                })
+                encoding_issues.append(
+                    {
+                        "case_id": case_id,
+                        "field": "problem",
+                        "original_bytes": len(orig_bytes),
+                        "new_bytes": len(new_bytes),
+                    }
+                )
 
         assert len(encoding_issues) == 0, (
             f"Encoding differences detected in {len(encoding_issues)} case(s):\n"
@@ -658,12 +669,12 @@ class TestBinaryContentComparison:
         # Build case mapping
         original_cases = {}
         for idx, case in enumerate(CASE_BASE):
-            case_id = case.get('id', f'case_{idx}')
+            case_id = case.get("id", f"case_{idx}")
             original_cases[case_id] = case
 
         new_cases = {}
         for idx, case in enumerate(ALL_CASES):
-            case_id = case.get('id', f'case_{idx}')
+            case_id = case.get("id", f"case_{idx}")
             new_cases[case_id] = case
 
         # Compare at bytes level
@@ -675,20 +686,22 @@ class TestBinaryContentComparison:
             original_case = original_cases[case_id]
             new_case = new_cases[case_id]
 
-            orig_sol = original_case.get('solution', '')
-            new_sol = new_case.get('solution', '')
+            orig_sol = original_case.get("solution", "")
+            new_sol = new_case.get("solution", "")
 
             # Encode to bytes and compare
-            orig_bytes = orig_sol.encode('utf-8')
-            new_bytes = new_sol.encode('utf-8')
+            orig_bytes = orig_sol.encode("utf-8")
+            new_bytes = new_sol.encode("utf-8")
 
             if orig_bytes != new_bytes:
-                encoding_issues.append({
-                    'case_id': case_id,
-                    'field': 'solution',
-                    'original_bytes': len(orig_bytes),
-                    'new_bytes': len(new_bytes)
-                })
+                encoding_issues.append(
+                    {
+                        "case_id": case_id,
+                        "field": "solution",
+                        "original_bytes": len(orig_bytes),
+                        "new_bytes": len(new_bytes),
+                    }
+                )
 
         assert len(encoding_issues) == 0, (
             f"Encoding differences detected in {len(encoding_issues)} case(s):\n"
@@ -719,13 +732,13 @@ class TestComprehensiveCoverage:
 
         # Verify we have sufficient cases (at least 100)
         min_expected_cases = 100
-        assert len(CASE_BASE) >= min_expected_cases, (
-            f"Expected at least {min_expected_cases} cases in CASE_BASE, got {len(CASE_BASE)}"
-        )
+        assert (
+            len(CASE_BASE) >= min_expected_cases
+        ), f"Expected at least {min_expected_cases} cases in CASE_BASE, got {len(CASE_BASE)}"
 
-        assert len(ALL_CASES) >= min_expected_cases, (
-            f"Expected at least {min_expected_cases} cases in ALL_CASES, got {len(ALL_CASES)}"
-        )
+        assert (
+            len(ALL_CASES) >= min_expected_cases
+        ), f"Expected at least {min_expected_cases} cases in ALL_CASES, got {len(ALL_CASES)}"
 
         # Verify counts match (most important check)
         assert len(CASE_BASE) == len(ALL_CASES), (
@@ -736,12 +749,12 @@ class TestComprehensiveCoverage:
         # Build case ID sets
         original_ids = set()
         for idx, case in enumerate(CASE_BASE):
-            case_id = case.get('id', f'case_{idx}')
+            case_id = case.get("id", f"case_{idx}")
             original_ids.add(case_id)
 
         new_ids = set()
         for idx, case in enumerate(ALL_CASES):
-            case_id = case.get('id', f'case_{idx}')
+            case_id = case.get("id", f"case_{idx}")
             new_ids.add(case_id)
 
         # Verify all IDs are unique (no duplicates)

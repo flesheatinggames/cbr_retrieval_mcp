@@ -10,8 +10,9 @@ These tests are designed to FAIL initially (before the refactoring is complete)
 and PASS once case_base.py has been refactored to import from the cases module.
 """
 
+from typing import Any, Dict, List
+
 import pytest
-from typing import Dict, Any, List
 
 
 class TestCaseBaseImport:
@@ -45,9 +46,9 @@ class TestCaseBaseEquality:
         from cases import ALL_CASES
 
         # Check if they are the same object (identity)
-        assert CASE_BASE is ALL_CASES, (
-            "CASE_BASE should be the same object as ALL_CASES (same reference)"
-        )
+        assert (
+            CASE_BASE is ALL_CASES
+        ), "CASE_BASE should be the same object as ALL_CASES (same reference)"
 
     def test_case_base_equals_all_cases_by_content(self):
         """
@@ -60,9 +61,9 @@ class TestCaseBaseEquality:
         from cases import ALL_CASES
 
         # Check if they have the same content (equality)
-        assert CASE_BASE == ALL_CASES, (
-            "CASE_BASE should have identical content to ALL_CASES"
-        )
+        assert (
+            CASE_BASE == ALL_CASES
+        ), "CASE_BASE should have identical content to ALL_CASES"
 
         # Also verify they have the same length
         assert len(CASE_BASE) == len(ALL_CASES), (
@@ -82,9 +83,9 @@ class TestCaseBaseStructure:
         """
         from case_base import CASE_BASE
 
-        assert isinstance(CASE_BASE, list), (
-            f"CASE_BASE should be a list, but got {type(CASE_BASE).__name__}"
-        )
+        assert isinstance(
+            CASE_BASE, list
+        ), f"CASE_BASE should be a list, but got {type(CASE_BASE).__name__}"
 
     def test_case_base_contains_case_dictionaries(self):
         """
@@ -99,9 +100,9 @@ class TestCaseBaseStructure:
 
         # Verify each item is a dictionary
         for idx, case in enumerate(CASE_BASE):
-            assert isinstance(case, dict), (
-                f"Case at index {idx} should be a dict, but got {type(case).__name__}"
-            )
+            assert isinstance(
+                case, dict
+            ), f"Case at index {idx} should be a dict, but got {type(case).__name__}"
 
 
 class TestCaseBaseRequiredFields:
@@ -214,9 +215,9 @@ class TestBackwardCompatibilityImportPattern:
         import case_base
 
         # Verify the module has CASE_BASE attribute
-        assert hasattr(case_base, "CASE_BASE"), (
-            "case_base module should have CASE_BASE attribute"
-        )
+        assert hasattr(
+            case_base, "CASE_BASE"
+        ), "case_base module should have CASE_BASE attribute"
 
         # Verify CASE_BASE is accessible via module
         assert case_base.CASE_BASE is not None

@@ -2,8 +2,11 @@
 Validation tests for security fixes from second audit.
 Tests confirm CWE-209 and CWE-20 fixes are working correctly.
 """
+
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
+
 from cbr_mcp_server import ProductionCBRRetriever
 
 
@@ -41,14 +44,13 @@ class TestSecurityFixes:
             "SSL certificate verification failed for host db.internal.company.com:8000"
         )
         mock_retriever.collection.query.side_effect = chromadb_error
-        mock_retriever.embedding_model.encode.return_value = Mock(tolist=lambda: [0.1] * 384)
+        mock_retriever.embedding_model.encode.return_value = Mock(
+            tolist=lambda: [0.1] * 384
+        )
 
         # Execute and verify sanitized error
         with pytest.raises(RuntimeError) as exc_info:
-            await mock_retriever.search_by_category(
-                category="code",
-                query="test"
-            )
+            await mock_retriever.search_by_category(category="code", query="test")
 
         # SECURITY VALIDATION: Error message must be sanitized
         error_message = str(exc_info.value)
@@ -100,15 +102,14 @@ class TestSecurityFixes:
         # Verify protection is in place
         for category in VALID_CATEGORIES:
             # All current categories have subcategories (good configuration)
-            assert category in VALID_SUBCATEGORIES, \
-                f"Category {category} should have subcategories defined"
+            assert (
+                category in VALID_SUBCATEGORIES
+            ), f"Category {category} should have subcategories defined"
 
         # Test 2: Reject invalid subcategory for any category
         with pytest.raises(ValueError) as exc_info:
             await mock_retriever.search_by_category(
-                category="code",
-                subcategory="any-invalid-value",
-                query="test"
+                category="code", subcategory="any-invalid-value", query="test"
             )
 
         error_message = str(exc_info.value)
@@ -121,14 +122,13 @@ class TestSecurityFixes:
             "ids": ["test-1"],
             "documents": ["Test case"],
             "metadatas": [{"category": "code"}],
-            "distances": [[0.5]]
+            "distances": [[0.5]],
         }
-        mock_retriever.embedding_model.encode.return_value = Mock(tolist=lambda: [0.1] * 384)
-
-        results = await mock_retriever.search_by_category(
-            category="code",
-            query="test"
+        mock_retriever.embedding_model.encode.return_value = Mock(
+            tolist=lambda: [0.1] * 384
         )
+
+        results = await mock_retriever.search_by_category(category="code", query="test")
         assert len(results) > 0
 
         print("✓ CWE-20 FIX VALIDATED: Complete subcategory validation, no bypass")
@@ -144,15 +144,15 @@ class TestSecurityFixes:
             "ids": ["valid-1"],
             "documents": ["Valid result"],
             "metadatas": [{"category": "code", "subcategory": "firebase-auth"}],
-            "distances": [[0.3]]
+            "distances": [[0.3]],
         }
-        mock_retriever.embedding_model.encode.return_value = Mock(tolist=lambda: [0.1] * 384)
+        mock_retriever.embedding_model.encode.return_value = Mock(
+            tolist=lambda: [0.1] * 384
+        )
 
         # This should succeed - valid category + subcategory
         results = await mock_retriever.search_by_category(
-            category="code",
-            subcategory="firebase-auth",
-            query="authentication"
+            category="code", subcategory="firebase-auth", query="authentication"
         )
 
         assert len(results) > 0

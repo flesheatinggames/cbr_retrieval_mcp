@@ -65,14 +65,15 @@ class TestMainBlockExecution:
         # Verify no errors in stderr (allow warnings)
         # Filter out common warnings that don't indicate failures
         stderr_lines = [
-            line for line in result.stderr.split('\n')
-            if line and not any(w in line.lower() for w in ['warning', 'deprecation'])
+            line
+            for line in result.stderr.split("\n")
+            if line and not any(w in line.lower() for w in ["warning", "deprecation"])
         ]
         if stderr_lines:
             # Some stderr output is acceptable, but check for actual errors
-            assert not any('error' in line.lower() for line in stderr_lines), (
-                f"Script stderr contains errors:\n{result.stderr}"
-            )
+            assert not any(
+                "error" in line.lower() for line in stderr_lines
+            ), f"Script stderr contains errors:\n{result.stderr}"
 
     def test_main_block_validation_banner_is_printed(self):
         """
@@ -99,20 +100,20 @@ class TestMainBlockExecution:
         stdout = result.stdout
 
         # Verify banner separator (50 equals signs)
-        assert "=" * 50 in stdout, (
-            "Output should contain decorative banner separator (50 equals signs)"
-        )
+        assert (
+            "=" * 50 in stdout
+        ), "Output should contain decorative banner separator (50 equals signs)"
 
         # Verify banner text
-        assert "Firebase/Next.js/Bootstrap Case-Based Reasoning Dataset" in stdout, (
-            "Output should contain banner title"
-        )
+        assert (
+            "Firebase/Next.js/Bootstrap Case-Based Reasoning Dataset" in stdout
+        ), "Output should contain banner title"
 
         # Verify banner appears near the start (within first 200 characters)
         banner_position = stdout.find("Firebase/Next.js/Bootstrap")
-        assert banner_position >= 0 and banner_position < 200, (
-            "Banner should appear near the start of output"
-        )
+        assert (
+            banner_position >= 0 and banner_position < 200
+        ), "Banner should appear near the start of output"
 
 
 class TestMainBlockValidation:
@@ -180,14 +181,12 @@ class TestMainBlockValidation:
         stdout = result.stdout.lower()
 
         # Verify validation passed
-        assert "validation passed" in stdout, (
-            "CASE_BASE should pass validation"
-        )
+        assert "validation passed" in stdout, "CASE_BASE should pass validation"
 
         # Verify case count is shown
-        assert "total valid cases:" in stdout or "total cases:" in stdout, (
-            "Validation should show total case count"
-        )
+        assert (
+            "total valid cases:" in stdout or "total cases:" in stdout
+        ), "Validation should show total case count"
 
 
 class TestMainBlockStatistics:
@@ -218,19 +217,17 @@ class TestMainBlockStatistics:
         stdout = result.stdout
 
         # Verify statistics header is present
-        assert "Case Base Statistics" in stdout, (
-            "Output should contain 'Case Base Statistics' header"
-        )
+        assert (
+            "Case Base Statistics" in stdout
+        ), "Output should contain 'Case Base Statistics' header"
 
         # Verify total cases is shown
-        assert "Total Cases:" in stdout, (
-            "Statistics should include 'Total Cases:' line"
-        )
+        assert "Total Cases:" in stdout, "Statistics should include 'Total Cases:' line"
 
         # Verify categories section is shown
-        assert "Categories:" in stdout, (
-            "Statistics should include 'Categories:' section"
-        )
+        assert (
+            "Categories:" in stdout
+        ), "Statistics should include 'Categories:' section"
 
     def test_statistics_show_category_breakdown(self):
         """
@@ -291,14 +288,14 @@ class TestMainBlockStatistics:
         stdout = result.stdout
 
         # Verify average solution length is shown
-        assert "Average Solution Length:" in stdout, (
-            "Statistics should include 'Average Solution Length:' line"
-        )
+        assert (
+            "Average Solution Length:" in stdout
+        ), "Statistics should include 'Average Solution Length:' line"
 
         # Verify it has the "characters" unit
-        assert "characters" in stdout, (
-            "Average solution length should be measured in characters"
-        )
+        assert (
+            "characters" in stdout
+        ), "Average solution length should be measured in characters"
 
 
 class TestMainBlockJsonFileCreation:
@@ -330,9 +327,9 @@ class TestMainBlockJsonFileCreation:
         stdout = result.stdout.lower()
 
         # Verify save message is shown
-        assert "case base saved to" in stdout, (
-            "Output should contain 'Case base saved to' message"
-        )
+        assert (
+            "case base saved to" in stdout
+        ), "Output should contain 'Case base saved to' message"
 
     def test_json_file_is_created(self):
         """
@@ -367,40 +364,26 @@ class TestMainBlockJsonFileCreation:
 
         try:
             # Verify file was created
-            assert output_file.exists(), (
-                f"JSON file should be created at {output_file}"
-            )
+            assert output_file.exists(), f"JSON file should be created at {output_file}"
 
             # Verify file is not empty
-            assert output_file.stat().st_size > 0, (
-                "JSON file should not be empty"
-            )
+            assert output_file.stat().st_size > 0, "JSON file should not be empty"
 
             # Verify file contains valid JSON
-            with open(output_file, 'r', encoding='utf-8') as f:
+            with open(output_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
 
             # Verify JSON is a list
-            assert isinstance(data, list), (
-                "JSON file should contain a list"
-            )
+            assert isinstance(data, list), "JSON file should contain a list"
 
             # Verify list has cases (at least 1)
-            assert len(data) > 0, (
-                "JSON file should contain at least one case"
-            )
+            assert len(data) > 0, "JSON file should contain at least one case"
 
             # Verify each case has required fields
             for i, case in enumerate(data[:3]):  # Check first 3 cases
-                assert isinstance(case, dict), (
-                    f"Case {i} should be a dictionary"
-                )
-                assert "problem" in case, (
-                    f"Case {i} should have 'problem' field"
-                )
-                assert "solution" in case, (
-                    f"Case {i} should have 'solution' field"
-                )
+                assert isinstance(case, dict), f"Case {i} should be a dictionary"
+                assert "problem" in case, f"Case {i} should have 'problem' field"
+                assert "solution" in case, f"Case {i} should have 'solution' field"
 
         finally:
             # Clean up
@@ -423,6 +406,7 @@ class TestMainBlockJsonFileCreation:
         sys.path.insert(0, "/Users/traviswilliams/Projects/cbr_retrieval_mcp")
         try:
             from case_base import CASE_BASE
+
             expected_count = len(CASE_BASE)
         except ImportError:
             pytest.skip("Cannot import CASE_BASE")
@@ -446,13 +430,13 @@ class TestMainBlockJsonFileCreation:
 
         try:
             # Load saved JSON
-            with open(output_file, 'r', encoding='utf-8') as f:
+            with open(output_file, "r", encoding="utf-8") as f:
                 saved_cases = json.load(f)
 
             # Verify count matches
-            assert len(saved_cases) == expected_count, (
-                f"JSON file should have {expected_count} cases, got {len(saved_cases)}"
-            )
+            assert (
+                len(saved_cases) == expected_count
+            ), f"JSON file should have {expected_count} cases, got {len(saved_cases)}"
 
         finally:
             if output_file.exists():
@@ -487,14 +471,14 @@ class TestMainBlockExampleSearch:
         stdout = result.stdout
 
         # Verify example search header
-        assert "Example Search:" in stdout, (
-            "Output should contain 'Example Search:' header"
-        )
+        assert (
+            "Example Search:" in stdout
+        ), "Output should contain 'Example Search:' header"
 
         # Verify search query is shown
-        assert "Firebase authentication" in stdout, (
-            "Output should show search query 'Firebase authentication'"
-        )
+        assert (
+            "Firebase authentication" in stdout
+        ), "Output should show search query 'Firebase authentication'"
 
     def test_search_results_are_displayed(self):
         """
@@ -522,23 +506,21 @@ class TestMainBlockExampleSearch:
         stdout = result.stdout
 
         # Verify numbered results (looking for patterns like "1. " or "2. ")
-        has_numbered_results = any(
-            f"\n{i}. " in stdout for i in range(1, 6)
-        )
+        has_numbered_results = any(f"\n{i}. " in stdout for i in range(1, 6))
 
-        assert has_numbered_results, (
-            "Output should contain numbered search results (1., 2., etc.)"
-        )
+        assert (
+            has_numbered_results
+        ), "Output should contain numbered search results (1., 2., etc.)"
 
         # Verify solution length is shown
-        assert "Solution length:" in stdout, (
-            "Search results should show 'Solution length:' for each result"
-        )
+        assert (
+            "Solution length:" in stdout
+        ), "Search results should show 'Solution length:' for each result"
 
         # Verify "characters" unit is used
-        assert "characters" in stdout, (
-            "Solution length should be measured in characters"
-        )
+        assert (
+            "characters" in stdout
+        ), "Solution length should be measured in characters"
 
     def test_search_results_show_problem_text(self):
         """
@@ -573,13 +555,9 @@ class TestMainBlockExampleSearch:
         search_results_section = stdout[example_search_pos:]
 
         # Verify we have numbered results in this section
-        has_results = any(
-            f"\n{i}. " in search_results_section for i in range(1, 6)
-        )
+        has_results = any(f"\n{i}. " in search_results_section for i in range(1, 6))
 
-        assert has_results, (
-            "Example search section should contain numbered results"
-        )
+        assert has_results, "Example search section should contain numbered results"
 
 
 class TestMainBlockOutputFormatting:
@@ -617,9 +595,9 @@ class TestMainBlockOutputFormatting:
         # Should have at least 2 banners:
         # 1. Main title banner (open and close)
         # 2. Example search banner (open and close)
-        assert banner_count >= 2, (
-            f"Output should have at least 2 banner separators, got {banner_count}"
-        )
+        assert (
+            banner_count >= 2
+        ), f"Output should have at least 2 banner separators, got {banner_count}"
 
     def test_output_is_readable_and_structured(self):
         """
@@ -650,18 +628,16 @@ class TestMainBlockOutputFormatting:
         assert len(stdout) > 0, "Output should not be empty"
 
         # Verify output has newlines (not all on one line)
-        assert '\n' in stdout, "Output should have multiple lines"
+        assert "\n" in stdout, "Output should have multiple lines"
 
         # Verify output has at least 10 lines (reasonable for all sections)
-        line_count = len(stdout.split('\n'))
-        assert line_count >= 10, (
-            f"Output should have at least 10 lines, got {line_count}"
-        )
+        line_count = len(stdout.split("\n"))
+        assert (
+            line_count >= 10
+        ), f"Output should have at least 10 lines, got {line_count}"
 
         # Verify output has some indentation (spaces for formatting)
-        assert '  ' in stdout, (
-            "Output should have indentation for readability"
-        )
+        assert "  " in stdout, "Output should have indentation for readability"
 
 
 class TestMainBlockGuard:
@@ -693,6 +669,7 @@ class TestMainBlockGuard:
             with redirect_stdout(captured_output):
                 # Import case_base (main block should NOT run)
                 import case_base
+
                 # Force module to load
                 _ = case_base.CASE_BASE
         finally:
@@ -702,15 +679,16 @@ class TestMainBlockGuard:
 
         # Verify main block did NOT run during import
         # (no banner, no statistics, no search example)
-        assert "Firebase/Next.js/Bootstrap Case-Based Reasoning Dataset" not in import_output, (
-            "Main block should NOT run when importing as module"
-        )
-        assert "Case Base Statistics" not in import_output, (
-            "Statistics should NOT print when importing as module"
-        )
-        assert "Example Search" not in import_output, (
-            "Example search should NOT run when importing as module"
-        )
+        assert (
+            "Firebase/Next.js/Bootstrap Case-Based Reasoning Dataset"
+            not in import_output
+        ), "Main block should NOT run when importing as module"
+        assert (
+            "Case Base Statistics" not in import_output
+        ), "Statistics should NOT print when importing as module"
+        assert (
+            "Example Search" not in import_output
+        ), "Example search should NOT run when importing as module"
 
     def test_main_block_runs_when_script_executed_directly(self):
         """
@@ -736,15 +714,15 @@ class TestMainBlockGuard:
         stdout = result.stdout
 
         # Verify main block DID run
-        assert "Firebase/Next.js/Bootstrap Case-Based Reasoning Dataset" in stdout, (
-            "Main block should run when executing script directly"
-        )
-        assert "Case Base Statistics" in stdout, (
-            "Statistics should print when executing script directly"
-        )
-        assert "Example Search" in stdout, (
-            "Example search should run when executing script directly"
-        )
+        assert (
+            "Firebase/Next.js/Bootstrap Case-Based Reasoning Dataset" in stdout
+        ), "Main block should run when executing script directly"
+        assert (
+            "Case Base Statistics" in stdout
+        ), "Statistics should print when executing script directly"
+        assert (
+            "Example Search" in stdout
+        ), "Example search should run when executing script directly"
 
 
 class TestMainBlockModularStructure:
@@ -783,27 +761,25 @@ class TestMainBlockModularStructure:
 
         # Verify no module import errors in stderr
         stderr_lower = result.stderr.lower()
-        assert "importerror" not in stderr_lower, (
-            f"Should not have ImportError with modular structure:\n{result.stderr}"
-        )
-        assert "modulenotfounderror" not in stderr_lower, (
-            f"Should not have ModuleNotFoundError with modular structure:\n{result.stderr}"
-        )
+        assert (
+            "importerror" not in stderr_lower
+        ), f"Should not have ImportError with modular structure:\n{result.stderr}"
+        assert (
+            "modulenotfounderror" not in stderr_lower
+        ), f"Should not have ModuleNotFoundError with modular structure:\n{result.stderr}"
 
         # Verify all expected operations completed
         stdout = result.stdout
-        assert "validation passed" in stdout.lower(), (
-            "validate_case_base() should work with ALL_CASES"
-        )
-        assert "Case Base Statistics" in stdout, (
-            "get_case_statistics() should work with ALL_CASES"
-        )
-        assert "Case base saved to" in stdout, (
-            "save_case_base_to_file() should work with ALL_CASES"
-        )
-        assert "Example Search" in stdout, (
-            "search_cases() should work with ALL_CASES"
-        )
+        assert (
+            "validation passed" in stdout.lower()
+        ), "validate_case_base() should work with ALL_CASES"
+        assert (
+            "Case Base Statistics" in stdout
+        ), "get_case_statistics() should work with ALL_CASES"
+        assert (
+            "Case base saved to" in stdout
+        ), "save_case_base_to_file() should work with ALL_CASES"
+        assert "Example Search" in stdout, "search_cases() should work with ALL_CASES"
 
     def test_main_block_validates_new_metadata_structure(self):
         """
@@ -830,11 +806,11 @@ class TestMainBlockModularStructure:
         stdout = result.stdout.lower()
 
         # Verify validation passed (accepts new metadata structure)
-        assert "validation passed" in stdout, (
-            "Validation should pass for cases with new metadata structure"
-        )
+        assert (
+            "validation passed" in stdout
+        ), "Validation should pass for cases with new metadata structure"
 
         # Verify no validation errors about metadata fields
-        assert "validation issues" not in stdout or "validation passed" in stdout, (
-            "Should not have validation issues with new metadata fields"
-        )
+        assert (
+            "validation issues" not in stdout or "validation passed" in stdout
+        ), "Should not have validation issues with new metadata fields"

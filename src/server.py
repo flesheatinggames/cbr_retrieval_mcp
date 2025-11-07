@@ -1,8 +1,9 @@
+import uvicorn
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import uvicorn
+
 from retriever import CBRRetriever  # Import the CLASS, not an instance
-from dotenv import load_dotenv
 
 # Load environment variables from a .env file if it exists
 load_dotenv()
@@ -10,16 +11,18 @@ load_dotenv()
 app = FastAPI(
     title="Case-Based Reasoning (CBR) Tool Server",
     description="An API for retrieving relevant code examples from a local vector database.",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # Create a single instance of the retriever for the server's lifetime
 # This is now very fast because the model is lazy-loaded on first use.
 cbr_retriever = CBRRetriever()
 
+
 class RetrievalRequest(BaseModel):
     query: str
     n_results: int = 3
+
 
 @app.post("/retrieve", summary="Retrieve relevant code examples")
 async def retrieve(request: RetrievalRequest):
@@ -30,19 +33,20 @@ async def retrieve(request: RetrievalRequest):
     """
     try:
         examples = cbr_retriever.retrieve_relevant_examples(
-            query=request.query,
-            n_results=request.n_results
+            query=request.query, n_results=request.n_results
         )
         if not examples:
             return {"message": "No relevant examples found.", "examples": []}
-        
+
         return {"examples": examples}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @app.get("/", summary="Health Check")
 async def root():
     return {"status": "ok", "message": "CBR Tool Server is running."}
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

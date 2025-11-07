@@ -5,10 +5,10 @@ This module provides functions to extract metadata from case dictionaries
 and convert them into ChromaDB-compatible format.
 """
 
-from typing import Any
+from typing import Any, Dict, List
 
 
-def extract_metadata_from_case(case: dict[str, Any]) -> dict[str, str]:
+def extract_metadata_from_case(case: Dict[str, Any]) -> Dict[str, str]:
     """
     Extract metadata from a single case dictionary.
 
@@ -37,7 +37,7 @@ def extract_metadata_from_case(case: dict[str, Any]) -> dict[str, str]:
     }
 
 
-def extract_metadata_list(cases: list[dict[str, Any]]) -> list[dict[str, str]]:
+def extract_metadata_list(cases: List[Dict[str, Any]]) -> List[Dict[str, str]]:
     """
     Extract metadata from a list of cases.
 

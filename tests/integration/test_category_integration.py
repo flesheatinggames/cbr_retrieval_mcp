@@ -9,14 +9,15 @@ complete integration testing of the category filtering functionality implemented
 in Tasks 2-3.
 """
 
-import pytest
-import tempfile
-import shutil
-from pathlib import Path
-from typing import List, Dict, Any
 import logging
+import shutil
+import tempfile
+from pathlib import Path
+from typing import Any, Dict, List
 
-from cbr_mcp_server import ProductionCBRRetriever, CBRServerConfig, StructuredLogger
+import pytest
+
+from cbr_mcp_server import CBRServerConfig, ProductionCBRRetriever, StructuredLogger
 
 
 @pytest.fixture
@@ -36,9 +37,7 @@ def retriever_with_mixed_categories(temp_db_path):
     """
     # Create config and logger for retriever
     config = CBRServerConfig(
-        use_real_db=True,
-        database_path=temp_db_path,
-        collection_name="test_case_base"
+        use_real_db=True, database_path=temp_db_path, collection_name="test_case_base"
     )
     logger = StructuredLogger(config)
 
@@ -56,8 +55,8 @@ def retriever_with_mixed_categories(temp_db_path):
                 "category": "orchestration",
                 "subcategory": "agent-delegation",
                 "tags": "workflow,agents,coordination",
-                "title": "Multi-Agent Task Delegation"
-            }
+                "title": "Multi-Agent Task Delegation",
+            },
         },
         {
             "id": "orch-002",
@@ -66,8 +65,8 @@ def retriever_with_mixed_categories(temp_db_path):
                 "category": "orchestration",
                 "subcategory": "task-coordination",
                 "tags": "tasks,dependencies,workflow",
-                "title": "Dependency-Based Task Coordination"
-            }
+                "title": "Dependency-Based Task Coordination",
+            },
         },
         {
             "id": "orch-003",
@@ -76,9 +75,9 @@ def retriever_with_mixed_categories(temp_db_path):
                 "category": "orchestration",
                 "subcategory": "workflow-management",
                 "tags": "workflow,execution,patterns",
-                "title": "Sequential and Parallel Workflow Execution"
-            }
-        }
+                "title": "Sequential and Parallel Workflow Execution",
+            },
+        },
     ]
 
     # Code cases
@@ -90,8 +89,8 @@ def retriever_with_mixed_categories(temp_db_path):
                 "category": "code",
                 "subcategory": "react-components",
                 "tags": "react,forms,validation",
-                "title": "User Authentication Form Component"
-            }
+                "title": "User Authentication Form Component",
+            },
         },
         {
             "id": "code-002",
@@ -100,8 +99,8 @@ def retriever_with_mixed_categories(temp_db_path):
                 "category": "code",
                 "subcategory": "api-routes",
                 "tags": "api,rest,backend",
-                "title": "User Registration API Endpoint"
-            }
+                "title": "User Registration API Endpoint",
+            },
         },
         {
             "id": "code-003",
@@ -110,9 +109,9 @@ def retriever_with_mixed_categories(temp_db_path):
                 "category": "code",
                 "subcategory": "utilities",
                 "tags": "validation,utilities,helpers",
-                "title": "Data Validation Utility"
-            }
-        }
+                "title": "Data Validation Utility",
+            },
+        },
     ]
 
     # Best practice cases
@@ -124,8 +123,8 @@ def retriever_with_mixed_categories(temp_db_path):
                 "category": "best-practice",
                 "subcategory": "error-handling",
                 "tags": "errors,logging,reliability",
-                "title": "Comprehensive Error Handling Pattern"
-            }
+                "title": "Comprehensive Error Handling Pattern",
+            },
         },
         {
             "id": "bp-002",
@@ -134,9 +133,9 @@ def retriever_with_mixed_categories(temp_db_path):
                 "category": "best-practice",
                 "subcategory": "logging",
                 "tags": "logging,monitoring,observability",
-                "title": "Production Logging Standards"
-            }
-        }
+                "title": "Production Logging Standards",
+            },
+        },
     ]
 
     # Add all cases to the collection
@@ -147,14 +146,14 @@ def retriever_with_mixed_categories(temp_db_path):
     ids = [case["id"] for case in all_cases]
     documents = [case["content"] for case in all_cases]
     metadatas = [case["metadata"] for case in all_cases]
-    embeddings = [retriever.embedding_model.encode(doc, normalize_embeddings=True).tolist() for doc in documents]
+    embeddings = [
+        retriever.embedding_model.encode(doc, normalize_embeddings=True).tolist()
+        for doc in documents
+    ]
 
     # Add with embeddings to ensure dimension consistency
     retriever.collection.add(
-        ids=ids,
-        documents=documents,
-        metadatas=metadatas,
-        embeddings=embeddings
+        ids=ids, documents=documents, metadatas=metadatas, embeddings=embeddings
     )
 
     return retriever
@@ -167,9 +166,7 @@ def retriever_with_code_subcategories(temp_db_path):
     firebase-auth,react-components,and api-routes.
     """
     config = CBRServerConfig(
-        use_real_db=True,
-        database_path=temp_db_path,
-        collection_name="test_case_base"
+        use_real_db=True, database_path=temp_db_path, collection_name="test_case_base"
     )
     logger = StructuredLogger(config)
 
@@ -187,8 +184,8 @@ def retriever_with_code_subcategories(temp_db_path):
                 "category": "code",
                 "subcategory": "firebase-auth",
                 "tags": "firebase,authentication,login",
-                "title": "Firebase Email/Password Login"
-            }
+                "title": "Firebase Email/Password Login",
+            },
         },
         {
             "id": "fb-auth-002",
@@ -197,8 +194,8 @@ def retriever_with_code_subcategories(temp_db_path):
                 "category": "code",
                 "subcategory": "firebase-auth",
                 "tags": "firebase,signup,email-verification",
-                "title": "Firebase User Signup with Verification"
-            }
+                "title": "Firebase User Signup with Verification",
+            },
         },
         {
             "id": "fb-auth-003",
@@ -207,9 +204,9 @@ def retriever_with_code_subcategories(temp_db_path):
                 "category": "code",
                 "subcategory": "firebase-auth",
                 "tags": "firebase,password-reset,security",
-                "title": "Firebase Password Reset Flow"
-            }
-        }
+                "title": "Firebase Password Reset Flow",
+            },
+        },
     ]
 
     # React Components cases
@@ -221,8 +218,8 @@ def retriever_with_code_subcategories(temp_db_path):
                 "category": "code",
                 "subcategory": "react-components",
                 "tags": "react,ui,button",
-                "title": "Reusable Button Component"
-            }
+                "title": "Reusable Button Component",
+            },
         },
         {
             "id": "react-comp-002",
@@ -231,8 +228,8 @@ def retriever_with_code_subcategories(temp_db_path):
                 "category": "code",
                 "subcategory": "react-components",
                 "tags": "react,modal,accessibility",
-                "title": "Accessible Modal Dialog"
-            }
+                "title": "Accessible Modal Dialog",
+            },
         },
         {
             "id": "react-comp-003",
@@ -241,9 +238,9 @@ def retriever_with_code_subcategories(temp_db_path):
                 "category": "code",
                 "subcategory": "react-components",
                 "tags": "react,forms,validation",
-                "title": "Validated Form Component"
-            }
-        }
+                "title": "Validated Form Component",
+            },
+        },
     ]
 
     # API Routes cases
@@ -255,8 +252,8 @@ def retriever_with_code_subcategories(temp_db_path):
                 "category": "code",
                 "subcategory": "api-routes",
                 "tags": "api,rest,user-profile",
-                "title": "User Profile REST Endpoint"
-            }
+                "title": "User Profile REST Endpoint",
+            },
         },
         {
             "id": "api-route-002",
@@ -265,9 +262,9 @@ def retriever_with_code_subcategories(temp_db_path):
                 "category": "code",
                 "subcategory": "api-routes",
                 "tags": "graphql,resolver,queries",
-                "title": "GraphQL Nested Query Resolver"
-            }
-        }
+                "title": "GraphQL Nested Query Resolver",
+            },
+        },
     ]
 
     # Add all cases to the collection
@@ -278,14 +275,14 @@ def retriever_with_code_subcategories(temp_db_path):
     ids = [case["id"] for case in all_cases]
     documents = [case["content"] for case in all_cases]
     metadatas = [case["metadata"] for case in all_cases]
-    embeddings = [retriever.embedding_model.encode(doc, normalize_embeddings=True).tolist() for doc in documents]
+    embeddings = [
+        retriever.embedding_model.encode(doc, normalize_embeddings=True).tolist()
+        for doc in documents
+    ]
 
     # Add with embeddings to ensure dimension consistency
     retriever.collection.add(
-        ids=ids,
-        documents=documents,
-        metadatas=metadatas,
-        embeddings=embeddings
+        ids=ids, documents=documents, metadatas=metadatas, embeddings=embeddings
     )
 
     return retriever
@@ -298,9 +295,7 @@ def retriever_with_all_categories(temp_db_path):
     orchestration,code,best-practice,and documentation.
     """
     config = CBRServerConfig(
-        use_real_db=True,
-        database_path=temp_db_path,
-        collection_name="test_case_base"
+        use_real_db=True, database_path=temp_db_path, collection_name="test_case_base"
     )
     logger = StructuredLogger(config)
 
@@ -318,8 +313,8 @@ def retriever_with_all_categories(temp_db_path):
                 "category": "orchestration",
                 "subcategory": "agent-coordination",
                 "tags": "workflow,agents",
-                "title": "Multi-Step Agent Coordination"
-            }
+                "title": "Multi-Step Agent Coordination",
+            },
         },
         {
             "id": "orch-002",
@@ -328,8 +323,8 @@ def retriever_with_all_categories(temp_db_path):
                 "category": "orchestration",
                 "subcategory": "task-planning",
                 "tags": "planning,tasks",
-                "title": "Task Decomposition Strategy"
-            }
+                "title": "Task Decomposition Strategy",
+            },
         },
         # Code cases
         {
@@ -339,8 +334,8 @@ def retriever_with_all_categories(temp_db_path):
                 "category": "code",
                 "subcategory": "database",
                 "tags": "database,schema,users",
-                "title": "User Management Database Schema"
-            }
+                "title": "User Management Database Schema",
+            },
         },
         {
             "id": "code-002",
@@ -349,8 +344,8 @@ def retriever_with_all_categories(temp_db_path):
                 "category": "code",
                 "subcategory": "middleware",
                 "tags": "auth,middleware,security",
-                "title": "Authentication Middleware"
-            }
+                "title": "Authentication Middleware",
+            },
         },
         # Best practice cases
         {
@@ -360,8 +355,8 @@ def retriever_with_all_categories(temp_db_path):
                 "category": "best-practice",
                 "subcategory": "security",
                 "tags": "security,api,best-practices",
-                "title": "API Security Best Practices"
-            }
+                "title": "API Security Best Practices",
+            },
         },
         {
             "id": "bp-002",
@@ -370,8 +365,8 @@ def retriever_with_all_categories(temp_db_path):
                 "category": "best-practice",
                 "subcategory": "code-review",
                 "tags": "code-review,quality,standards",
-                "title": "Code Review Guidelines"
-            }
+                "title": "Code Review Guidelines",
+            },
         },
         # Documentation cases
         {
@@ -381,8 +376,8 @@ def retriever_with_all_categories(temp_db_path):
                 "category": "documentation",
                 "subcategory": "api-docs",
                 "tags": "documentation,api,templates",
-                "title": "API Documentation Template"
-            }
+                "title": "API Documentation Template",
+            },
         },
         {
             "id": "doc-002",
@@ -391,9 +386,9 @@ def retriever_with_all_categories(temp_db_path):
                 "category": "documentation",
                 "subcategory": "user-guides",
                 "tags": "documentation,onboarding,guides",
-                "title": "User Onboarding Guide"
-            }
-        }
+                "title": "User Onboarding Guide",
+            },
+        },
     ]
 
     # Generate embeddings using the nomic-ai model (768-dimensional)
@@ -401,14 +396,14 @@ def retriever_with_all_categories(temp_db_path):
     ids = [case["id"] for case in cases]
     documents = [case["content"] for case in cases]
     metadatas = [case["metadata"] for case in cases]
-    embeddings = [retriever.embedding_model.encode(doc, normalize_embeddings=True).tolist() for doc in documents]
+    embeddings = [
+        retriever.embedding_model.encode(doc, normalize_embeddings=True).tolist()
+        for doc in documents
+    ]
 
     # Add with embeddings to ensure dimension consistency
     retriever.collection.add(
-        ids=ids,
-        documents=documents,
-        metadatas=metadatas,
-        embeddings=embeddings
+        ids=ids, documents=documents, metadatas=metadatas, embeddings=embeddings
     )
 
     return retriever
@@ -421,9 +416,7 @@ def retriever_with_existing_metadata(temp_db_path):
     that should be preserved during migration/enrichment.
     """
     config = CBRServerConfig(
-        use_real_db=True,
-        database_path=temp_db_path,
-        collection_name="test_case_base"
+        use_real_db=True, database_path=temp_db_path, collection_name="test_case_base"
     )
     logger = StructuredLogger(config)
 
@@ -440,8 +433,8 @@ def retriever_with_existing_metadata(temp_db_path):
                 "source": "legacy-system",
                 "type": "example",
                 "version": "2.0",
-                "author": "original-team"
-            }
+                "author": "original-team",
+            },
         },
         {
             "id": "legacy-002",
@@ -450,8 +443,8 @@ def retriever_with_existing_metadata(temp_db_path):
                 "source": "manual-entry",
                 "type": "template",
                 "created_date": "2024-01-15",
-                "reviewer": "tech-lead"
-            }
+                "reviewer": "tech-lead",
+            },
         },
         {
             "id": "legacy-003",
@@ -460,9 +453,9 @@ def retriever_with_existing_metadata(temp_db_path):
                 "author": "user123",
                 "version": "1.0",
                 "language": "typescript",
-                "framework": "react"
-            }
-        }
+                "framework": "react",
+            },
+        },
     ]
 
     # Generate embeddings using the nomic-ai model (768-dimensional)
@@ -470,14 +463,14 @@ def retriever_with_existing_metadata(temp_db_path):
     ids = [case["id"] for case in cases]
     documents = [case["content"] for case in cases]
     metadatas = [case["metadata"] for case in cases]
-    embeddings = [retriever.embedding_model.encode(doc, normalize_embeddings=True).tolist() for doc in documents]
+    embeddings = [
+        retriever.embedding_model.encode(doc, normalize_embeddings=True).tolist()
+        for doc in documents
+    ]
 
     # Add with embeddings to ensure dimension consistency
     retriever.collection.add(
-        ids=ids,
-        documents=documents,
-        metadatas=metadatas,
-        embeddings=embeddings
+        ids=ids, documents=documents, metadatas=metadatas, embeddings=embeddings
     )
 
     return retriever
@@ -499,39 +492,45 @@ class TestCategoryFilteringEndToEnd:
         """
         # Query for orchestration cases
         results = await retriever_with_mixed_categories.search_by_category(
-            query="workflow management for agents",
-            category="orchestration",
-            limit=10
+            query="workflow management for agents", category="orchestration", limit=10
         )
 
         # Should return orchestration cases only
-        assert len(results) > 0,"Should return at least one orchestration case"
-        assert len(results) <= 3,"Should return at most 3 orchestration cases"
+        assert len(results) > 0, "Should return at least one orchestration case"
+        assert len(results) <= 3, "Should return at most 3 orchestration cases"
 
         # Verify all results are orchestration category
         for result in results:
-            assert result["metadata"]["category"] == "orchestration",\
-                f"Result {result['id']} should be orchestration category"
+            assert (
+                result["metadata"]["category"] == "orchestration"
+            ), f"Result {result['id']} should be orchestration category"
 
         # Verify no code cases in results
-        code_ids = {"code-001","code-002","code-003"}
+        code_ids = {"code-001", "code-002", "code-003"}
         result_ids = {result["id"] for result in results}
-        assert result_ids.isdisjoint(code_ids),\
-            "Results should not contain any code category cases"
+        assert result_ids.isdisjoint(
+            code_ids
+        ), "Results should not contain any code category cases"
 
         # Verify no best-practice cases in results
-        bp_ids = {"bp-001","bp-002"}
-        assert result_ids.isdisjoint(bp_ids),\
-            "Results should not contain any best-practice category cases"
+        bp_ids = {"bp-001", "bp-002"}
+        assert result_ids.isdisjoint(
+            bp_ids
+        ), "Results should not contain any best-practice category cases"
 
         # Verify results are ranked by similarity (descending order)
         if len(results) > 1:
-            scores = [result.get("similarity",result.get("score",1.0)) for result in results]
-            assert scores == sorted(scores,reverse=True),\
-                "Results should be ranked by similarity score in descending order"
+            scores = [
+                result.get("similarity", result.get("score", 1.0)) for result in results
+            ]
+            assert scores == sorted(
+                scores, reverse=True
+            ), "Results should be ranked by similarity score in descending order"
 
     @pytest.mark.asyncio
-    async def test_filter_by_category_and_subcategory_e2e(self, retriever_with_code_subcategories):
+    async def test_filter_by_category_and_subcategory_e2e(
+        self, retriever_with_code_subcategories
+    ):
         """
         Test that combined category + subcategory filtering works correctly
         and excludes cases from other subcategories.
@@ -546,39 +545,48 @@ class TestCategoryFilteringEndToEnd:
             query="user authentication with Firebase",
             category="code",
             subcategory="firebase-auth",
-            limit=10
+            limit=10,
         )
 
         # Should return firebase-auth cases only
-        assert len(results) > 0,"Should return at least one firebase-auth case"
-        assert len(results) <= 3,"Should return at most 3 firebase-auth cases"
+        assert len(results) > 0, "Should return at least one firebase-auth case"
+        assert len(results) <= 3, "Should return at most 3 firebase-auth cases"
 
         # Verify all results are code/firebase-auth
         for result in results:
-            assert result["metadata"]["category"] == "code",\
-                f"Result {result['id']} should be code category"
-            assert result["metadata"]["subcategory"] == "firebase-auth",\
-                f"Result {result['id']} should be firebase-auth subcategory"
+            assert (
+                result["metadata"]["category"] == "code"
+            ), f"Result {result['id']} should be code category"
+            assert (
+                result["metadata"]["subcategory"] == "firebase-auth"
+            ), f"Result {result['id']} should be firebase-auth subcategory"
 
         # Verify no react-components cases in results
-        react_ids = {"react-comp-001","react-comp-002","react-comp-003"}
+        react_ids = {"react-comp-001", "react-comp-002", "react-comp-003"}
         result_ids = {result["id"] for result in results}
-        assert result_ids.isdisjoint(react_ids),\
-            "Results should not contain any react-components subcategory cases"
+        assert result_ids.isdisjoint(
+            react_ids
+        ), "Results should not contain any react-components subcategory cases"
 
         # Verify no api-routes cases in results
-        api_ids = {"api-route-001","api-route-002"}
-        assert result_ids.isdisjoint(api_ids),\
-            "Results should not contain any api-routes subcategory cases"
+        api_ids = {"api-route-001", "api-route-002"}
+        assert result_ids.isdisjoint(
+            api_ids
+        ), "Results should not contain any api-routes subcategory cases"
 
         # Verify results are ranked by similarity
         if len(results) > 1:
-            scores = [result.get("similarity",result.get("score",1.0)) for result in results]
-            assert scores == sorted(scores,reverse=True),\
-                "Results should be ranked by similarity score in descending order"
+            scores = [
+                result.get("similarity", result.get("score", 1.0)) for result in results
+            ]
+            assert scores == sorted(
+                scores, reverse=True
+            ), "Results should be ranked by similarity score in descending order"
 
     @pytest.mark.asyncio
-    async def test_backward_compatibility_no_filter(self, retriever_with_all_categories):
+    async def test_backward_compatibility_no_filter(
+        self, retriever_with_all_categories
+    ):
         """
         Test that the original retrieve functionality (no category parameter)
         returns cases from all categories without filtering.
@@ -590,32 +598,40 @@ class TestCategoryFilteringEndToEnd:
         """
         # Query without category filter (original behavior)
         results = await retriever_with_all_categories.retrieve_relevant_examples(
-            query="authentication and security implementation",
-            max_results=10
+            query="authentication and security implementation", max_results=10
         )
 
         # Should return results from multiple categories
-        assert len(results) > 0,"Should return at least one result"
+        assert len(results) > 0, "Should return at least one result"
 
         # Collect categories from results
         categories_in_results = set()
         for result in results:
-            if "category" in result.get("metadata",{}):
+            if "category" in result.get("metadata", {}):
                 categories_in_results.add(result["metadata"]["category"])
 
         # Should have cases from at least 2 different categories
-        assert len(categories_in_results) >= 2,\
-            f"Should return cases from multiple categories, found: {categories_in_results}"
+        assert (
+            len(categories_in_results) >= 2
+        ), f"Should return cases from multiple categories, found: {categories_in_results}"
 
         # Verify no filtering was applied - should be purely similarity-based
         # The query mentions "authentication and security" which should match
         # cases from code,best-practice,and potentially other categories
-        expected_possible_categories = {"code","best-practice","orchestration","documentation"}
-        assert categories_in_results.issubset(expected_possible_categories),\
-            f"Results should only contain valid categories, found: {categories_in_results}"
+        expected_possible_categories = {
+            "code",
+            "best-practice",
+            "orchestration",
+            "documentation",
+        }
+        assert categories_in_results.issubset(
+            expected_possible_categories
+        ), f"Results should only contain valid categories, found: {categories_in_results}"
 
     @pytest.mark.asyncio
-    async def test_backward_compatibility_existing_metadata(self, retriever_with_existing_metadata):
+    async def test_backward_compatibility_existing_metadata(
+        self, retriever_with_existing_metadata
+    ):
         """
         Test that migration/enrichment preserves existing metadata fields
         while adding new category fields.
@@ -633,44 +649,58 @@ class TestCategoryFilteringEndToEnd:
         for i, case_id in enumerate(all_results["ids"]):
             results_by_id[case_id] = {
                 "id": case_id,
-                "metadata": all_results["metadatas"][i] if all_results["metadatas"] else {}
+                "metadata": (
+                    all_results["metadatas"][i] if all_results["metadatas"] else {}
+                ),
             }
 
         # Verify legacy-001 preserves existing metadata
         legacy_001 = results_by_id.get("legacy-001")
-        assert legacy_001 is not None,"legacy-001 case should exist"
-        assert legacy_001["metadata"].get("source") == "legacy-system",\
-            "Existing source field should be preserved"
-        assert legacy_001["metadata"].get("type") == "example",\
-            "Existing type field should be preserved"
-        assert legacy_001["metadata"].get("version") == "2.0",\
-            "Existing version field should be preserved"
-        assert legacy_001["metadata"].get("author") == "original-team",\
-            "Existing author field should be preserved"
+        assert legacy_001 is not None, "legacy-001 case should exist"
+        assert (
+            legacy_001["metadata"].get("source") == "legacy-system"
+        ), "Existing source field should be preserved"
+        assert (
+            legacy_001["metadata"].get("type") == "example"
+        ), "Existing type field should be preserved"
+        assert (
+            legacy_001["metadata"].get("version") == "2.0"
+        ), "Existing version field should be preserved"
+        assert (
+            legacy_001["metadata"].get("author") == "original-team"
+        ), "Existing author field should be preserved"
 
         # Verify legacy-002 preserves existing metadata
         legacy_002 = results_by_id.get("legacy-002")
-        assert legacy_002 is not None,"legacy-002 case should exist"
-        assert legacy_002["metadata"].get("source") == "manual-entry",\
-            "Existing source field should be preserved"
-        assert legacy_002["metadata"].get("type") == "template",\
-            "Existing type field should be preserved"
-        assert legacy_002["metadata"].get("created_date") == "2024-01-15",\
-            "Existing created_date field should be preserved"
-        assert legacy_002["metadata"].get("reviewer") == "tech-lead",\
-            "Existing reviewer field should be preserved"
+        assert legacy_002 is not None, "legacy-002 case should exist"
+        assert (
+            legacy_002["metadata"].get("source") == "manual-entry"
+        ), "Existing source field should be preserved"
+        assert (
+            legacy_002["metadata"].get("type") == "template"
+        ), "Existing type field should be preserved"
+        assert (
+            legacy_002["metadata"].get("created_date") == "2024-01-15"
+        ), "Existing created_date field should be preserved"
+        assert (
+            legacy_002["metadata"].get("reviewer") == "tech-lead"
+        ), "Existing reviewer field should be preserved"
 
         # Verify legacy-003 preserves existing metadata
         legacy_003 = results_by_id.get("legacy-003")
-        assert legacy_003 is not None,"legacy-003 case should exist"
-        assert legacy_003["metadata"].get("author") == "user123",\
-            "Existing author field should be preserved"
-        assert legacy_003["metadata"].get("version") == "1.0",\
-            "Existing version field should be preserved"
-        assert legacy_003["metadata"].get("language") == "typescript",\
-            "Existing language field should be preserved"
-        assert legacy_003["metadata"].get("framework") == "react",\
-            "Existing framework field should be preserved"
+        assert legacy_003 is not None, "legacy-003 case should exist"
+        assert (
+            legacy_003["metadata"].get("author") == "user123"
+        ), "Existing author field should be preserved"
+        assert (
+            legacy_003["metadata"].get("version") == "1.0"
+        ), "Existing version field should be preserved"
+        assert (
+            legacy_003["metadata"].get("language") == "typescript"
+        ), "Existing language field should be preserved"
+        assert (
+            legacy_003["metadata"].get("framework") == "react"
+        ), "Existing framework field should be preserved"
 
         # Note: The test assumes that if category enrichment is run,
         # new fields like category, subcategory, tags would be added.
@@ -685,11 +715,14 @@ class TestCategoryFilteringEndToEnd:
             if "category" in metadata:
                 # Verify original fields still exist for each case
                 if case_id == "legacy-001":
-                    assert metadata.get("source") == "legacy-system",\
-                        "Category enrichment should not overwrite existing source"
+                    assert (
+                        metadata.get("source") == "legacy-system"
+                    ), "Category enrichment should not overwrite existing source"
                 elif case_id == "legacy-002":
-                    assert metadata.get("type") == "template",\
-                        "Category enrichment should not overwrite existing type"
+                    assert (
+                        metadata.get("type") == "template"
+                    ), "Category enrichment should not overwrite existing type"
                 elif case_id == "legacy-003":
-                    assert metadata.get("author") == "user123",\
-                        "Category enrichment should not overwrite existing author"
+                    assert (
+                        metadata.get("author") == "user123"
+                    ), "Category enrichment should not overwrite existing author"

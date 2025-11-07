@@ -15,19 +15,21 @@ Test Coverage:
 """
 
 import asyncio
-import pytest
-from unittest.mock import AsyncMock, Mock, patch, call
 from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, Mock, call, patch
+
+import pytest
 
 # Import the actual classes and handle missing dependencies gracefully
 try:
     from cbr_mcp_server import CBRMCPServer, ProductionCBRRetriever
     from retriever import CBRRetriever
+
     # Mock MCP dependencies that aren't available in test environment
     try:
-        from mcp.server.fastmcp import FastMCP, Context
-        from mcp.types import Tool, Resource, TextContent
         import mcp.server.stdio
+        from mcp.server.fastmcp import Context, FastMCP
+        from mcp.types import Resource, TextContent, Tool
     except ImportError:
         # Create mock classes for MCP components
         class FastMCP:
@@ -47,17 +49,20 @@ try:
                 self.text = text
 
         # Make these available globally for tests
-        globals()['FastMCP'] = FastMCP
-        globals()['Context'] = Context
-        globals()['TextContent'] = TextContent
+        globals()["FastMCP"] = FastMCP
+        globals()["Context"] = Context
+        globals()["TextContent"] = TextContent
 
 except ImportError as e:
     print(f"Import error in tests: {e}")
+
     # Fallback: create basic mock classes for testing
     class CBRMCPServer:
         pass
+
     class ProductionCBRRetriever:
         pass
+
     class CBRRetriever:
         pass
 
@@ -121,17 +126,23 @@ def mock_server_config():
 @pytest.fixture
 def mock_server_with_config(mock_server_config):
     """Fixture to create a CBRMCPServer with mocked dependencies."""
+
     def _create_server(retriever=None):
-        with patch('cbr_mcp_server.CBRServerConfig') as mock_config_class:
+        with patch("cbr_mcp_server.CBRServerConfig") as mock_config_class:
             mock_config_class.from_environment.return_value = mock_server_config
 
-            with patch('cbr_mcp_server.startup_configuration_validator') as mock_validator:
+            with patch(
+                "cbr_mcp_server.startup_configuration_validator"
+            ) as mock_validator:
                 mock_validator.return_value = True
 
-                with patch('cbr_mcp_server.LogConfig'):
-                    with patch('cbr_mcp_server.LoggerManager'):
-                        with patch('cbr_mcp_server.StructuredLogger'):
-                            return CBRMCPServer(retriever=retriever, config=mock_server_config)
+                with patch("cbr_mcp_server.LogConfig"):
+                    with patch("cbr_mcp_server.LoggerManager"):
+                        with patch("cbr_mcp_server.StructuredLogger"):
+                            return CBRMCPServer(
+                                retriever=retriever, config=mock_server_config
+                            )
+
     return _create_server
 
 
@@ -151,22 +162,24 @@ def mock_context():
 def mock_cbr_retriever():
     """Mock ProductionCBRRetriever for tool tests."""
     retriever = Mock(spec=ProductionCBRRetriever)
-    retriever.search_by_category = AsyncMock(return_value=[
-        {
-            "id": "cat_001",
-            "content": "Category specific example 1",
-            "category": "brewing",
-            "subcategory": "IPA",
-            "similarity_score": 0.92
-        },
-        {
-            "id": "cat_002",
-            "content": "Category specific example 2",
-            "category": "brewing",
-            "subcategory": "IPA",
-            "similarity_score": 0.88
-        }
-    ])
+    retriever.search_by_category = AsyncMock(
+        return_value=[
+            {
+                "id": "cat_001",
+                "content": "Category specific example 1",
+                "category": "brewing",
+                "subcategory": "IPA",
+                "similarity_score": 0.92,
+            },
+            {
+                "id": "cat_002",
+                "content": "Category specific example 2",
+                "category": "brewing",
+                "subcategory": "IPA",
+                "similarity_score": 0.88,
+            },
+        ]
+    )
     return retriever
 
 
@@ -175,19 +188,14 @@ class TestSubcategoryParameterAcceptance:
 
     @pytest.mark.asyncio
     async def test_subcategory_parameter_accepted_none_default(
-        self,
-        mock_cbr_retriever,
-        mock_context
+        self, mock_cbr_retriever, mock_context
     ):
         """Test tool accepts subcategory=None as default value."""
         server = CBRMCPServer(retriever=mock_cbr_retriever)
 
         # Call without subcategory parameter (should use default None)
         result = await server.cbr_search_category(
-            category="brewing",
-            query="IPA techniques",
-            limit=10,
-            ctx=mock_context
+            category="brewing", query="IPA techniques", limit=10, ctx=mock_context
         )
 
         # Should not raise any errors
@@ -196,9 +204,7 @@ class TestSubcategoryParameterAcceptance:
 
     @pytest.mark.asyncio
     async def test_subcategory_parameter_accepted_with_value(
-        self,
-        mock_cbr_retriever,
-        mock_context
+        self, mock_cbr_retriever, mock_context
     ):
         """Test tool accepts subcategory with a specific value."""
         server = CBRMCPServer(retriever=mock_cbr_retriever)
@@ -209,7 +215,7 @@ class TestSubcategoryParameterAcceptance:
             subcategory="IPA",
             query="hops selection",
             limit=10,
-            ctx=mock_context
+            ctx=mock_context,
         )
 
         # Should not raise any errors
@@ -218,9 +224,7 @@ class TestSubcategoryParameterAcceptance:
 
     @pytest.mark.asyncio
     async def test_subcategory_parameter_accepted_explicit_none(
-        self,
-        mock_cbr_retriever,
-        mock_context
+        self, mock_cbr_retriever, mock_context
     ):
         """Test tool accepts subcategory=None explicitly."""
         server = CBRMCPServer(retriever=mock_cbr_retriever)
@@ -231,7 +235,7 @@ class TestSubcategoryParameterAcceptance:
             subcategory=None,
             query="general brewing",
             limit=10,
-            ctx=mock_context
+            ctx=mock_context,
         )
 
         # Should not raise any errors
@@ -244,18 +248,13 @@ class TestSubcategoryPassedToImplementation:
 
     @pytest.mark.asyncio
     async def test_subcategory_none_passed_to_implementation(
-        self,
-        mock_cbr_retriever,
-        mock_context
+        self, mock_cbr_retriever, mock_context
     ):
         """Test subcategory=None is passed to implementation method."""
         server = CBRMCPServer(retriever=mock_cbr_retriever)
 
         await server.cbr_search_category(
-            category="brewing",
-            query="IPA",
-            limit=10,
-            ctx=mock_context
+            category="brewing", query="IPA", limit=10, ctx=mock_context
         )
 
         # Verify retriever was called with subcategory=None
@@ -266,9 +265,7 @@ class TestSubcategoryPassedToImplementation:
 
     @pytest.mark.asyncio
     async def test_subcategory_value_passed_to_implementation(
-        self,
-        mock_cbr_retriever,
-        mock_context
+        self, mock_cbr_retriever, mock_context
     ):
         """Test subcategory value is passed to implementation method."""
         server = CBRMCPServer(retriever=mock_cbr_retriever)
@@ -278,7 +275,7 @@ class TestSubcategoryPassedToImplementation:
             subcategory="IPA",
             query="hops",
             limit=10,
-            ctx=mock_context
+            ctx=mock_context,
         )
 
         # Verify retriever was called with subcategory="IPA"
@@ -292,26 +289,18 @@ class TestCategoryOnlyFiltering:
 
     @pytest.mark.asyncio
     async def test_category_only_search_default_subcategory(
-        self,
-        mock_cbr_retriever,
-        mock_context
+        self, mock_cbr_retriever, mock_context
     ):
         """Test category search without subcategory uses default None."""
         server = CBRMCPServer(retriever=mock_cbr_retriever)
 
         result = await server.cbr_search_category(
-            category="brewing",
-            query="general brewing",
-            limit=10,
-            ctx=mock_context
+            category="brewing", query="general brewing", limit=10, ctx=mock_context
         )
 
         # Verify retriever called with category and subcategory=None
         mock_cbr_retriever.search_by_category.assert_called_once_with(
-            category="brewing",
-            query="general brewing",
-            limit=10,
-            subcategory=None
+            category="brewing", query="general brewing", limit=10, subcategory=None
         )
 
         # Verify response structure
@@ -322,9 +311,7 @@ class TestCategoryOnlyFiltering:
 
     @pytest.mark.asyncio
     async def test_category_only_search_explicit_none(
-        self,
-        mock_cbr_retriever,
-        mock_context
+        self, mock_cbr_retriever, mock_context
     ):
         """Test category search with explicit subcategory=None."""
         server = CBRMCPServer(retriever=mock_cbr_retriever)
@@ -334,7 +321,7 @@ class TestCategoryOnlyFiltering:
             subcategory=None,
             query="temperature control",
             limit=5,
-            ctx=mock_context
+            ctx=mock_context,
         )
 
         # Verify retriever called correctly
@@ -342,7 +329,7 @@ class TestCategoryOnlyFiltering:
             category="fermentation",
             query="temperature control",
             limit=5,
-            subcategory=None
+            subcategory=None,
         )
 
         # Verify response
@@ -355,9 +342,7 @@ class TestCategoryAndSubcategoryFiltering:
 
     @pytest.mark.asyncio
     async def test_category_and_subcategory_search(
-        self,
-        mock_cbr_retriever,
-        mock_context
+        self, mock_cbr_retriever, mock_context
     ):
         """Test search with both category and subcategory specified."""
         server = CBRMCPServer(retriever=mock_cbr_retriever)
@@ -367,15 +352,12 @@ class TestCategoryAndSubcategoryFiltering:
             subcategory="IPA",
             query="hops selection",
             limit=10,
-            ctx=mock_context
+            ctx=mock_context,
         )
 
         # Verify retriever called with both parameters
         mock_cbr_retriever.search_by_category.assert_called_once_with(
-            category="brewing",
-            query="hops selection",
-            limit=10,
-            subcategory="IPA"
+            category="brewing", query="hops selection", limit=10, subcategory="IPA"
         )
 
         # Verify response structure includes both
@@ -386,9 +368,7 @@ class TestCategoryAndSubcategoryFiltering:
 
     @pytest.mark.asyncio
     async def test_different_subcategories_same_category(
-        self,
-        mock_cbr_retriever,
-        mock_context
+        self, mock_cbr_retriever, mock_context
     ):
         """Test multiple searches with different subcategories in same category."""
         server = CBRMCPServer(retriever=mock_cbr_retriever)
@@ -399,7 +379,7 @@ class TestCategoryAndSubcategoryFiltering:
             subcategory="IPA",
             query="hops",
             limit=10,
-            ctx=mock_context
+            ctx=mock_context,
         )
 
         # Second search with subcategory "Stout"
@@ -408,7 +388,7 @@ class TestCategoryAndSubcategoryFiltering:
             subcategory="Stout",
             query="roasted malt",
             limit=10,
-            ctx=mock_context
+            ctx=mock_context,
         )
 
         # Verify both calls were made with correct subcategories
@@ -425,10 +405,7 @@ class TestSubcategoryParameterValidation:
 
     @pytest.mark.asyncio
     async def test_subcategory_empty_string_handling(
-        self,
-        mock_cbr_retriever,
-        mock_context,
-        mock_server_with_config
+        self, mock_cbr_retriever, mock_context, mock_server_with_config
     ):
         """Test empty string subcategory is handled correctly."""
         server = mock_server_with_config(mock_cbr_retriever)
@@ -439,7 +416,7 @@ class TestSubcategoryParameterValidation:
             subcategory="",
             query="general",
             limit=10,
-            ctx=mock_context
+            ctx=mock_context,
         )
 
         # Verify call was made (empty string handling depends on implementation)
@@ -450,10 +427,7 @@ class TestSubcategoryParameterValidation:
 
     @pytest.mark.asyncio
     async def test_subcategory_whitespace_only_handling(
-        self,
-        mock_cbr_retriever,
-        mock_context,
-        mock_server_with_config
+        self, mock_cbr_retriever, mock_context, mock_server_with_config
     ):
         """Test whitespace-only subcategory is handled correctly."""
         server = mock_server_with_config(mock_cbr_retriever)
@@ -464,7 +438,7 @@ class TestSubcategoryParameterValidation:
             subcategory="   ",
             query="general",
             limit=10,
-            ctx=mock_context
+            ctx=mock_context,
         )
 
         # Verify validation or sanitization occurred
@@ -476,10 +450,7 @@ class TestSubcategoryErrorHandling:
 
     @pytest.mark.asyncio
     async def test_error_handling_retriever_exception_with_subcategory(
-        self,
-        mock_cbr_retriever,
-        mock_context,
-        mock_server_with_config
+        self, mock_cbr_retriever, mock_context, mock_server_with_config
     ):
         """Test error handling when retriever fails with subcategory."""
         mock_cbr_retriever.search_by_category.side_effect = Exception(
@@ -495,7 +466,7 @@ class TestSubcategoryErrorHandling:
                 subcategory="unknown_subcategory",
                 query="test",
                 limit=10,
-                ctx=mock_context
+                ctx=mock_context,
             )
 
         # Verify context.error was called
@@ -505,10 +476,7 @@ class TestSubcategoryErrorHandling:
 
     @pytest.mark.asyncio
     async def test_error_message_sanitization_with_subcategory(
-        self,
-        mock_cbr_retriever,
-        mock_context,
-        mock_server_with_config
+        self, mock_cbr_retriever, mock_context, mock_server_with_config
     ):
         """Test error messages are properly sanitized with subcategory."""
         mock_cbr_retriever.search_by_category.side_effect = Exception(
@@ -523,7 +491,7 @@ class TestSubcategoryErrorHandling:
                 subcategory="IPA",
                 query="test",
                 limit=10,
-                ctx=mock_context
+                ctx=mock_context,
             )
 
         # Error should be logged through context
@@ -535,19 +503,14 @@ class TestBackwardCompatibility:
 
     @pytest.mark.asyncio
     async def test_existing_calls_without_subcategory_still_work(
-        self,
-        mock_cbr_retriever,
-        mock_context
+        self, mock_cbr_retriever, mock_context
     ):
         """Test existing code calling without subcategory continues to work."""
         server = CBRMCPServer(retriever=mock_cbr_retriever)
 
         # Call exactly as in existing code (no subcategory parameter)
         result = await server.cbr_search_category(
-            category="brewing",
-            query="IPA techniques",
-            limit=10,
-            ctx=mock_context
+            category="brewing", query="IPA techniques", limit=10, ctx=mock_context
         )
 
         # Should work without errors
@@ -563,18 +526,13 @@ class TestBackwardCompatibility:
 
     @pytest.mark.asyncio
     async def test_response_format_unchanged_without_subcategory(
-        self,
-        mock_cbr_retriever,
-        mock_context
+        self, mock_cbr_retriever, mock_context
     ):
         """Test response format remains the same when subcategory not used."""
         server = CBRMCPServer(retriever=mock_cbr_retriever)
 
         result = await server.cbr_search_category(
-            category="fermentation",
-            query="temperature",
-            limit=5,
-            ctx=mock_context
+            category="fermentation", query="temperature", limit=5, ctx=mock_context
         )
 
         # Response should have same structure as before
@@ -589,37 +547,24 @@ class TestSubcategoryEdgeCases:
     """Test edge cases and boundary conditions with subcategory parameter."""
 
     @pytest.mark.asyncio
-    async def test_subcategory_with_empty_query(
-        self,
-        mock_cbr_retriever,
-        mock_context
-    ):
+    async def test_subcategory_with_empty_query(self, mock_cbr_retriever, mock_context):
         """Test subcategory filtering works with empty query string."""
         server = CBRMCPServer(retriever=mock_cbr_retriever)
 
         result = await server.cbr_search_category(
-            category="brewing",
-            subcategory="IPA",
-            query="",
-            limit=10,
-            ctx=mock_context
+            category="brewing", subcategory="IPA", query="", limit=10, ctx=mock_context
         )
 
         # Should work with empty query
         mock_cbr_retriever.search_by_category.assert_called_once_with(
-            category="brewing",
-            query="",
-            limit=10,
-            subcategory="IPA"
+            category="brewing", query="", limit=10, subcategory="IPA"
         )
 
         assert result is not None
 
     @pytest.mark.asyncio
     async def test_subcategory_with_limit_parameter(
-        self,
-        mock_cbr_retriever,
-        mock_context
+        self, mock_cbr_retriever, mock_context
     ):
         """Test subcategory works correctly with limit parameter."""
         server = CBRMCPServer(retriever=mock_cbr_retriever)
@@ -630,21 +575,16 @@ class TestSubcategoryEdgeCases:
             subcategory="IPA",
             query="hops",
             limit=5,
-            ctx=mock_context
+            ctx=mock_context,
         )
 
         mock_cbr_retriever.search_by_category.assert_called_once_with(
-            category="brewing",
-            query="hops",
-            limit=5,
-            subcategory="IPA"
+            category="brewing", query="hops", limit=5, subcategory="IPA"
         )
 
     @pytest.mark.asyncio
     async def test_subcategory_with_special_characters(
-        self,
-        mock_cbr_retriever,
-        mock_context
+        self, mock_cbr_retriever, mock_context
     ):
         """Test subcategory with special characters in name."""
         server = CBRMCPServer(retriever=mock_cbr_retriever)
@@ -655,7 +595,7 @@ class TestSubcategoryEdgeCases:
             subcategory="West Coast IPA",
             query="hops",
             limit=10,
-            ctx=mock_context
+            ctx=mock_context,
         )
 
         # Should handle special characters
@@ -664,11 +604,7 @@ class TestSubcategoryEdgeCases:
         assert call_kwargs["subcategory"] == "West Coast IPA"
 
     @pytest.mark.asyncio
-    async def test_subcategory_case_sensitivity(
-        self,
-        mock_cbr_retriever,
-        mock_context
-    ):
+    async def test_subcategory_case_sensitivity(self, mock_cbr_retriever, mock_context):
         """Test subcategory parameter preserves case."""
         server = CBRMCPServer(retriever=mock_cbr_retriever)
 
@@ -678,7 +614,7 @@ class TestSubcategoryEdgeCases:
             subcategory="IPA",
             query="test",
             limit=10,
-            ctx=mock_context
+            ctx=mock_context,
         )
 
         first_call_kwargs = mock_cbr_retriever.search_by_category.call_args.kwargs
@@ -692,7 +628,7 @@ class TestSubcategoryEdgeCases:
             subcategory="ipa",
             query="test",
             limit=10,
-            ctx=mock_context
+            ctx=mock_context,
         )
 
         second_call_kwargs = mock_cbr_retriever.search_by_category.call_args.kwargs

@@ -11,14 +11,14 @@ These integration tests verify the MetadataMigration class can correctly:
 These are TRUE integration tests using actual ChromaDB collections, not mocks.
 """
 
-import pytest
-import chromadb
-from chromadb.config import Settings
-import tempfile
 import shutil
-from typing import List, Dict, Any
-import numpy as np
+import tempfile
+from typing import Any, Dict, List
 
+import chromadb
+import numpy as np
+import pytest
+from chromadb.config import Settings
 
 # Test will fail until MetadataMigration is implemented
 try:
@@ -42,8 +42,7 @@ class TestMetadataMigrationIntegration:
     def chroma_client(self, temp_db_path):
         """Create a ChromaDB client with temporary database."""
         client = chromadb.PersistentClient(
-            path=temp_db_path,
-            settings=Settings(anonymized_telemetry=False)
+            path=temp_db_path, settings=Settings(anonymized_telemetry=False)
         )
         return client
 
@@ -60,7 +59,7 @@ class TestMetadataMigrationIntegration:
 
         collection = chroma_client.create_collection(
             name=collection_name,
-            metadata={"description": "Test collection for migration"}
+            metadata={"description": "Test collection for migration"},
         )
 
         yield collection
@@ -127,7 +126,7 @@ class TestMetadataMigrationIntegration:
             "Error tracking service setup",
             "Documentation generation tools",
             "Code quality metrics dashboard",
-            "Dependency management strategy"
+            "Dependency management strategy",
         ]
 
         ids = []
@@ -145,21 +144,17 @@ class TestMetadataMigrationIntegration:
             embeddings.append(embedding)
 
             # Unmigrated cases have no category metadata
-            metadatas.append({
-                "source": "test_case",
-                "created_at": "2025-10-27"
-            })
+            metadatas.append({"source": "test_case", "created_at": "2025-10-27"})
 
         collection.add(
-            ids=ids,
-            documents=documents,
-            embeddings=embeddings,
-            metadatas=metadatas
+            ids=ids, documents=documents, embeddings=embeddings, metadatas=metadatas
         )
 
         return ids
 
-    def _create_migrated_cases(self, collection, count: int, start_id: int = 0) -> List[str]:
+    def _create_migrated_cases(
+        self, collection, count: int, start_id: int = 0
+    ) -> List[str]:
         """
         Create already-migrated test cases (with complete metadata).
 
@@ -170,32 +165,32 @@ class TestMetadataMigrationIntegration:
                 "content": "Firebase authentication setup with email/password",
                 "category": "code",
                 "subcategory": "firebase-auth",
-                "tags": "firebase,auth,security"
+                "tags": "firebase,auth,security",
             },
             {
                 "content": "Remediation protocol for failed verification",
                 "category": "orchestration",
                 "subcategory": "remediation",
-                "tags": "protocol,remediation,verification"
+                "tags": "protocol,remediation,verification",
             },
             {
                 "content": "Completion bias in task execution",
                 "category": "anti-pattern",
                 "subcategory": "completion-bias",
-                "tags": "anti-pattern,bias,workflow"
+                "tags": "anti-pattern,bias,workflow",
             },
             {
                 "content": "React component for user profile display",
                 "category": "code",
                 "subcategory": "react-components",
-                "tags": "react,ui,frontend"
+                "tags": "react,ui,frontend",
             },
             {
                 "content": "API endpoint for user data retrieval",
                 "category": "code",
                 "subcategory": "api-routes",
-                "tags": "api,backend,rest"
-            }
+                "tags": "api,backend,rest",
+            },
         ]
 
         ids = []
@@ -215,29 +210,25 @@ class TestMetadataMigrationIntegration:
             embeddings.append(embedding)
 
             # Already migrated with complete metadata
-            metadatas.append({
-                "source": "test_case",
-                "created_at": "2025-10-27",
-                "category": case["category"],
-                "subcategory": case["subcategory"],
-                "tags": case["tags"]
-            })
+            metadatas.append(
+                {
+                    "source": "test_case",
+                    "created_at": "2025-10-27",
+                    "category": case["category"],
+                    "subcategory": case["subcategory"],
+                    "tags": case["tags"],
+                }
+            )
 
         collection.add(
-            ids=ids,
-            documents=documents,
-            embeddings=embeddings,
-            metadatas=metadatas
+            ids=ids, documents=documents, embeddings=embeddings, metadatas=metadatas
         )
 
         return ids
 
     def _get_embeddings(self, collection, ids: List[str]) -> Dict[str, List[float]]:
         """Get embeddings for specified case IDs."""
-        results = collection.get(
-            ids=ids,
-            include=["embeddings"]
-        )
+        results = collection.get(ids=ids, include=["embeddings"])
 
         return {
             case_id: embedding
@@ -246,17 +237,16 @@ class TestMetadataMigrationIntegration:
 
     def _get_metadata(self, collection, ids: List[str]) -> Dict[str, Dict[str, Any]]:
         """Get metadata for specified case IDs."""
-        results = collection.get(
-            ids=ids,
-            include=["metadatas"]
-        )
+        results = collection.get(ids=ids, include=["metadatas"])
 
         return {
             case_id: metadata
             for case_id, metadata in zip(results["ids"], results["metadatas"])
         }
 
-    @pytest.mark.skipif(MetadataMigration is None, reason="MetadataMigration not yet implemented")
+    @pytest.mark.skipif(
+        MetadataMigration is None, reason="MetadataMigration not yet implemented"
+    )
     def test_full_collection_migration(self, test_collection):
         """
         Test Subtask 4.1: Full collection migration.
@@ -273,9 +263,15 @@ class TestMetadataMigrationIntegration:
         # Verify cases are unmigrated (no category metadata)
         metadata_before = self._get_metadata(test_collection, case_ids)
         for case_id, metadata in metadata_before.items():
-            assert "category" not in metadata, f"Case {case_id} should not have category before migration"
-            assert "subcategory" not in metadata, f"Case {case_id} should not have subcategory before migration"
-            assert "tags" not in metadata, f"Case {case_id} should not have tags before migration"
+            assert (
+                "category" not in metadata
+            ), f"Case {case_id} should not have category before migration"
+            assert (
+                "subcategory" not in metadata
+            ), f"Case {case_id} should not have subcategory before migration"
+            assert (
+                "tags" not in metadata
+            ), f"Case {case_id} should not have tags before migration"
 
         # Execute: Run migration
         migrator = MetadataMigration()
@@ -287,14 +283,20 @@ class TestMetadataMigrationIntegration:
         # Verify: All cases now have complete metadata
         metadata_after = self._get_metadata(test_collection, case_ids)
         for case_id, metadata in metadata_after.items():
-            assert "category" in metadata, f"Case {case_id} missing category after migration"
-            assert "subcategory" in metadata, f"Case {case_id} missing subcategory after migration"
+            assert (
+                "category" in metadata
+            ), f"Case {case_id} missing category after migration"
+            assert (
+                "subcategory" in metadata
+            ), f"Case {case_id} missing subcategory after migration"
             assert "tags" in metadata, f"Case {case_id} missing tags after migration"
 
             # Verify metadata values are non-empty
             assert metadata["category"], f"Case {case_id} has empty category"
             assert metadata["subcategory"], f"Case {case_id} has empty subcategory"
-            assert isinstance(metadata["tags"], str), f"Case {case_id} tags should be a string"
+            assert isinstance(
+                metadata["tags"], str
+            ), f"Case {case_id} tags should be a string"
 
         # Verify: Embeddings unchanged (allow tiny floating-point precision differences)
         embeddings_after = self._get_embeddings(test_collection, case_ids)
@@ -304,10 +306,12 @@ class TestMetadataMigrationIntegration:
                 embeddings_after[case_id],
                 rtol=1e-6,
                 atol=1e-6,
-                err_msg=f"Embeddings significantly changed for case {case_id}"
+                err_msg=f"Embeddings significantly changed for case {case_id}",
             )
 
-    @pytest.mark.skipif(MetadataMigration is None, reason="MetadataMigration not yet implemented")
+    @pytest.mark.skipif(
+        MetadataMigration is None, reason="MetadataMigration not yet implemented"
+    )
     def test_idempotent_migration(self, test_collection):
         """
         Test Subtask 4.2: Idempotent migration.
@@ -324,8 +328,12 @@ class TestMetadataMigrationIntegration:
 
         # Verify cases are already migrated
         for case_id, metadata in metadata_before.items():
-            assert "category" in metadata, f"Test setup error: {case_id} should be migrated"
-            assert "subcategory" in metadata, f"Test setup error: {case_id} should be migrated"
+            assert (
+                "category" in metadata
+            ), f"Test setup error: {case_id} should be migrated"
+            assert (
+                "subcategory" in metadata
+            ), f"Test setup error: {case_id} should be migrated"
             assert "tags" in metadata, f"Test setup error: {case_id} should be migrated"
 
         # Execute: Run migration on already-migrated collection
@@ -333,13 +341,16 @@ class TestMetadataMigrationIntegration:
         migrated_count = migrator.migrate_collection(test_collection)
 
         # Verify: No cases were migrated
-        assert migrated_count == 0, f"Expected 0 cases migrated on idempotent run, got {migrated_count}"
+        assert (
+            migrated_count == 0
+        ), f"Expected 0 cases migrated on idempotent run, got {migrated_count}"
 
         # Verify: Metadata unchanged
         metadata_after = self._get_metadata(test_collection, case_ids)
         for case_id in case_ids:
-            assert metadata_before[case_id] == metadata_after[case_id], \
-                f"Metadata changed for already-migrated case {case_id}"
+            assert (
+                metadata_before[case_id] == metadata_after[case_id]
+            ), f"Metadata changed for already-migrated case {case_id}"
 
         # Verify: Embeddings unchanged (allow tiny floating-point precision differences)
         embeddings_after = self._get_embeddings(test_collection, case_ids)
@@ -349,10 +360,12 @@ class TestMetadataMigrationIntegration:
                 embeddings_after[case_id],
                 rtol=1e-6,
                 atol=1e-6,
-                err_msg=f"Embeddings significantly changed for case {case_id}"
+                err_msg=f"Embeddings significantly changed for case {case_id}",
             )
 
-    @pytest.mark.skipif(MetadataMigration is None, reason="MetadataMigration not yet implemented")
+    @pytest.mark.skipif(
+        MetadataMigration is None, reason="MetadataMigration not yet implemented"
+    )
     def test_partial_migration_completion(self, test_collection):
         """
         Test Subtask 4.3: Partial migration completion.
@@ -375,12 +388,16 @@ class TestMetadataMigrationIntegration:
         # Verify initial state
         for case_id in migrated_ids:
             metadata = migrated_metadata_before[case_id]
-            assert "category" in metadata, f"Test setup error: {case_id} should be migrated"
+            assert (
+                "category" in metadata
+            ), f"Test setup error: {case_id} should be migrated"
 
         unmigrated_metadata_before = self._get_metadata(test_collection, unmigrated_ids)
         for case_id in unmigrated_ids:
             metadata = unmigrated_metadata_before[case_id]
-            assert "category" not in metadata, f"Test setup error: {case_id} should be unmigrated"
+            assert (
+                "category" not in metadata
+            ), f"Test setup error: {case_id} should be unmigrated"
 
         # Execute: Run migration
         migrator = MetadataMigration()
@@ -392,15 +409,20 @@ class TestMetadataMigrationIntegration:
         # Verify: Previously migrated cases unchanged
         migrated_metadata_after = self._get_metadata(test_collection, migrated_ids)
         for case_id in migrated_ids:
-            assert migrated_metadata_before[case_id] == migrated_metadata_after[case_id], \
-                f"Already-migrated case {case_id} was modified"
+            assert (
+                migrated_metadata_before[case_id] == migrated_metadata_after[case_id]
+            ), f"Already-migrated case {case_id} was modified"
 
         # Verify: Previously unmigrated cases now have metadata
         unmigrated_metadata_after = self._get_metadata(test_collection, unmigrated_ids)
         for case_id in unmigrated_ids:
             metadata = unmigrated_metadata_after[case_id]
-            assert "category" in metadata, f"Case {case_id} missing category after migration"
-            assert "subcategory" in metadata, f"Case {case_id} missing subcategory after migration"
+            assert (
+                "category" in metadata
+            ), f"Case {case_id} missing category after migration"
+            assert (
+                "subcategory" in metadata
+            ), f"Case {case_id} missing subcategory after migration"
             assert "tags" in metadata, f"Case {case_id} missing tags after migration"
 
         # Verify: All 50 cases now have complete metadata
@@ -416,10 +438,12 @@ class TestMetadataMigrationIntegration:
             np.testing.assert_array_equal(
                 embeddings_before[case_id],
                 embeddings_after[case_id],
-                err_msg=f"Embeddings changed for case {case_id}"
+                err_msg=f"Embeddings changed for case {case_id}",
             )
 
-    @pytest.mark.skipif(MetadataMigration is None, reason="MetadataMigration not yet implemented")
+    @pytest.mark.skipif(
+        MetadataMigration is None, reason="MetadataMigration not yet implemented"
+    )
     def test_categorization_accuracy(self, test_collection):
         """
         Test categorization accuracy for specific content patterns.
@@ -431,28 +455,28 @@ class TestMetadataMigrationIntegration:
             {
                 "id": "firebase_auth_case",
                 "content": "Firebase authentication implementation with email and password sign-in",
-                "expected_category_keywords": ["firebase", "auth", "code"]
+                "expected_category_keywords": ["firebase", "auth", "code"],
             },
             {
                 "id": "remediation_case",
                 "content": "Remediation protocol for handling failed verification from karen agent",
-                "expected_category_keywords": ["orchestration", "remediation"]
+                "expected_category_keywords": ["orchestration", "remediation"],
             },
             {
                 "id": "completion_bias_case",
                 "content": "Completion bias anti-pattern where agent stops after feeling satisfied",
-                "expected_category_keywords": ["anti-pattern", "bias", "completion"]
+                "expected_category_keywords": ["anti-pattern", "bias", "completion"],
             },
             {
                 "id": "react_component_case",
                 "content": "React component for displaying user profile with TypeScript interfaces",
-                "expected_category_keywords": ["react", "frontend", "code"]
+                "expected_category_keywords": ["react", "frontend", "code"],
             },
             {
                 "id": "api_endpoint_case",
                 "content": "API endpoint implementation for user data retrieval with Express",
-                "expected_category_keywords": ["api", "backend", "code"]
-            }
+                "expected_category_keywords": ["api", "backend", "code"],
+            },
         ]
 
         ids = []
@@ -464,16 +488,10 @@ class TestMetadataMigrationIntegration:
             ids.append(case["id"])
             documents.append(case["content"])
             embeddings.append(np.random.randn(384).tolist())
-            metadatas.append({
-                "source": "test_case",
-                "created_at": "2025-10-27"
-            })
+            metadatas.append({"source": "test_case", "created_at": "2025-10-27"})
 
         test_collection.add(
-            ids=ids,
-            documents=documents,
-            embeddings=embeddings,
-            metadatas=metadatas
+            ids=ids, documents=documents, embeddings=embeddings, metadatas=metadatas
         )
 
         # Execute: Run migration
@@ -481,8 +499,9 @@ class TestMetadataMigrationIntegration:
         migrated_count = migrator.migrate_collection(test_collection)
 
         # Verify: All cases migrated
-        assert migrated_count == len(test_cases), \
-            f"Expected {len(test_cases)} cases migrated, got {migrated_count}"
+        assert migrated_count == len(
+            test_cases
+        ), f"Expected {len(test_cases)} cases migrated, got {migrated_count}"
 
         # Verify: Categorization accuracy
         metadata_after = self._get_metadata(test_collection, ids)
@@ -501,20 +520,25 @@ class TestMetadataMigrationIntegration:
 
             # Verify at least one expected keyword appears in metadata
             found_keywords = [
-                keyword for keyword in case["expected_category_keywords"]
+                keyword
+                for keyword in case["expected_category_keywords"]
                 if keyword.lower() in all_metadata_text
             ]
 
-            assert len(found_keywords) > 0, \
-                f"Case {case_id} with content '{case['content']}' " \
-                f"expected keywords {case['expected_category_keywords']} " \
+            assert len(found_keywords) > 0, (
+                f"Case {case_id} with content '{case['content']}' "
+                f"expected keywords {case['expected_category_keywords']} "
                 f"but got category='{category}', subcategory='{subcategory}', tags={tags}"
+            )
 
             # Verify tags is a string
-            assert isinstance(metadata["tags"], str), \
-                f"Case {case_id} tags should be a string"
+            assert isinstance(
+                metadata["tags"], str
+            ), f"Case {case_id} tags should be a string"
 
-    @pytest.mark.skipif(MetadataMigration is None, reason="MetadataMigration not yet implemented")
+    @pytest.mark.skipif(
+        MetadataMigration is None, reason="MetadataMigration not yet implemented"
+    )
     def test_empty_collection_handling(self, test_collection):
         """
         Test that migration handles empty collections gracefully.
@@ -526,13 +550,17 @@ class TestMetadataMigrationIntegration:
         migrated_count = migrator.migrate_collection(test_collection)
 
         # Verify: No errors and zero migrations
-        assert migrated_count == 0, f"Expected 0 cases migrated from empty collection, got {migrated_count}"
+        assert (
+            migrated_count == 0
+        ), f"Expected 0 cases migrated from empty collection, got {migrated_count}"
 
         # Verify: Collection is still empty
         results = test_collection.get()
         assert len(results["ids"]) == 0, "Collection should remain empty"
 
-    @pytest.mark.skipif(MetadataMigration is None, reason="MetadataMigration not yet implemented")
+    @pytest.mark.skipif(
+        MetadataMigration is None, reason="MetadataMigration not yet implemented"
+    )
     def test_embedding_preservation(self, test_collection):
         """
         Test that embeddings are never modified during migration.
@@ -559,7 +587,7 @@ class TestMetadataMigrationIntegration:
             ids=case_ids,
             documents=[f"Test case content {i}" for i in range(case_count)],
             embeddings=[original_embeddings[case_id] for case_id in case_ids],
-            metadatas=[{"source": "test"} for _ in range(case_count)]
+            metadatas=[{"source": "test"} for _ in range(case_count)],
         )
 
         # Execute: Run migration
@@ -583,7 +611,7 @@ class TestMetadataMigrationIntegration:
                 after,
                 rtol=1e-6,  # relative tolerance
                 atol=1e-6,  # absolute tolerance
-                err_msg=f"Embedding significantly changed for {case_id}"
+                err_msg=f"Embedding significantly changed for {case_id}",
             )
 
             # Check no NaN or Inf values introduced
@@ -592,6 +620,7 @@ class TestMetadataMigrationIntegration:
 
             # Verify distinctive marker still present (with tolerance)
             expected_marker = 100.0
-            actual_marker = after[int(case_id.split('_')[-1])]
-            assert abs(actual_marker - expected_marker) < 1e-5, \
-                f"Distinctive marker lost for {case_id}: expected {expected_marker}, got {actual_marker}"
+            actual_marker = after[int(case_id.split("_")[-1])]
+            assert (
+                abs(actual_marker - expected_marker) < 1e-5
+            ), f"Distinctive marker lost for {case_id}: expected {expected_marker}, got {actual_marker}"

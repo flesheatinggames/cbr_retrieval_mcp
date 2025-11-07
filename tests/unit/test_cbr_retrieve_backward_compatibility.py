@@ -17,13 +17,16 @@ SUCCESS = All tests pass, confirming cbr_retrieve is untouched.
 
 import asyncio
 import inspect
-import pytest
-from unittest.mock import AsyncMock, Mock, patch, MagicMock
 from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
+
 
 # Create a custom mock Context class for testing
 class MockContext:
     """Mock Context class for testing that doesn't require request context."""
+
     def __init__(self):
         self.session = Mock()
         # Create async mock methods that return awaitables
@@ -32,6 +35,7 @@ class MockContext:
         self.warning = AsyncMock(return_value=None)
         self.error = AsyncMock(return_value=None)
         self.request_context = Mock()  # Add request_context to avoid errors
+
 
 # Import the actual classes
 try:
@@ -43,11 +47,14 @@ try:
 
 except ImportError as e:
     print(f"Import error in backward compatibility tests: {e}")
+
     # Create minimal mocks for testing
     class CBRMCPServer:
         pass
+
     class ProductionCBRRetriever:
         pass
+
     Context = MockContext
 
 
@@ -56,6 +63,7 @@ def mock_server_config():
     """Fixture providing minimal mock server configuration."""
     config = Mock()
     config.database_path = "./test_db"
+    config.db_path = "./test_db"  # startup_configuration_validator uses db_path
     config.collection_name = "test_collection"
     config.embedding_model = "nomic-ai/nomic-embed-text-v1.5"
     config.max_results_default = 5
@@ -83,14 +91,16 @@ def mock_production_retriever():
     retriever.embedding_model_name = "nomic-ai/nomic-embed-text-v1.5"
 
     # Mock the retrieve_relevant_examples method - return actual data, not a coroutine
-    retriever.retrieve_relevant_examples = AsyncMock(return_value=[
-        {
-            "id": "example1",
-            "problem": "Sample problem",
-            "solution": "Sample solution",
-            "metadata": {"source": "test"}
-        }
-    ])
+    retriever.retrieve_relevant_examples = AsyncMock(
+        return_value=[
+            {
+                "id": "example1",
+                "problem": "Sample problem",
+                "solution": "Sample solution",
+                "metadata": {"source": "test"},
+            }
+        ]
+    )
 
     return retriever
 
@@ -98,15 +108,17 @@ def mock_production_retriever():
 @pytest.fixture
 async def mock_cbr_server(mock_server_config, mock_production_retriever):
     """Fixture providing a mock CBR MCP Server with minimal setup."""
-    with patch('cbr_mcp_server.ProductionCBRRetriever') as MockRetriever:
+    with patch("cbr_mcp_server.ProductionCBRRetriever") as MockRetriever:
         MockRetriever.return_value = mock_production_retriever
 
-        with patch('cbr_mcp_server.startup_configuration_validator') as mock_validator:
+        with patch(
+            "cbr_mcp_server.server.startup_configuration_validator"
+        ) as mock_validator:
             mock_validator.return_value = True
 
-            with patch('cbr_mcp_server.LogConfig'):
-                with patch('cbr_mcp_server.LoggerManager'):
-                    with patch('cbr_mcp_server.StructuredLogger'):
+            with patch("cbr_mcp_server.LogConfig"):
+                with patch("cbr_mcp_server.LoggerManager"):
+                    with patch("cbr_mcp_server.StructuredLogger"):
                         server = CBRMCPServer(config=mock_server_config)
 
                         # Mock middleware components
@@ -118,7 +130,9 @@ async def mock_cbr_server(mock_server_config, mock_production_retriever):
                         )
 
                         server.cache_manager = Mock()
-                        server.cache_manager.generate_cache_key = Mock(return_value="test_cache_key")
+                        server.cache_manager.generate_cache_key = Mock(
+                            return_value="test_cache_key"
+                        )
                         server.cache_manager.get_cache = AsyncMock(return_value=None)
                         server.cache_manager.set_cache = AsyncMock()
 
@@ -135,8 +149,12 @@ async def mock_cbr_server(mock_server_config, mock_production_retriever):
                             return await func(**kwargs)
 
                         circuit_breaker = Mock()
-                        circuit_breaker.call = AsyncMock(side_effect=mock_circuit_breaker_call)
-                        server.error_recovery.get_circuit_breaker = Mock(return_value=circuit_breaker)
+                        circuit_breaker.call = AsyncMock(
+                            side_effect=mock_circuit_breaker_call
+                        )
+                        server.error_recovery.get_circuit_breaker = Mock(
+                            return_value=circuit_breaker
+                        )
                         server.error_recovery.cbr_retrieve_degraded = AsyncMock(
                             return_value={"examples": []}
                         )
@@ -151,6 +169,7 @@ async def mock_cbr_server(mock_server_config, mock_production_retriever):
 # ============================================================================
 # TEST 1: cbr_retrieve Tool Signature Unchanged
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_cbr_retrieve_tool_signature_unchanged(mock_cbr_server):
@@ -172,7 +191,7 @@ async def test_cbr_retrieve_tool_signature_unchanged(mock_cbr_server):
     - Parameter order changes
     """
     # Get the cbr_retrieve method from the server instance
-    cbr_retrieve_method = getattr(mock_cbr_server, 'cbr_retrieve', None)
+    cbr_retrieve_method = getattr(mock_cbr_server, "cbr_retrieve", None)
     assert cbr_retrieve_method is not None, "cbr_retrieve method not found on server"
 
     # Inspect the signature
@@ -184,44 +203,62 @@ async def test_cbr_retrieve_tool_signature_unchanged(mock_cbr_server):
 
     # Verify parameter names in correct order
     param_names = list(params.keys())
-    assert param_names == ['query', 'max_results', 'similarity_threshold', 'ctx'], \
-        f"Parameter names don't match expected. Got: {param_names}"
+    assert param_names == [
+        "query",
+        "max_results",
+        "similarity_threshold",
+        "ctx",
+    ], f"Parameter names don't match expected. Got: {param_names}"
 
     # Verify query parameter (required)
-    query_param = params['query']
-    assert query_param.default == inspect.Parameter.empty, "query should not have a default value"
-    assert query_param.annotation == str, f"query should be type str, got {query_param.annotation}"
+    query_param = params["query"]
+    assert (
+        query_param.default == inspect.Parameter.empty
+    ), "query should not have a default value"
+    assert (
+        query_param.annotation == str
+    ), f"query should be type str, got {query_param.annotation}"
 
     # Verify max_results parameter (optional with default=5)
-    max_results_param = params['max_results']
-    assert max_results_param.default == 5, f"max_results default should be 5, got {max_results_param.default}"
-    assert max_results_param.annotation == int, f"max_results should be type int, got {max_results_param.annotation}"
+    max_results_param = params["max_results"]
+    assert (
+        max_results_param.default == 5
+    ), f"max_results default should be 5, got {max_results_param.default}"
+    assert (
+        max_results_param.annotation == int
+    ), f"max_results should be type int, got {max_results_param.annotation}"
 
     # Verify similarity_threshold parameter (optional with default=0.8)
-    similarity_threshold_param = params['similarity_threshold']
-    assert similarity_threshold_param.default == 0.8, \
-        f"similarity_threshold default should be 0.8, got {similarity_threshold_param.default}"
-    assert similarity_threshold_param.annotation == float, \
-        f"similarity_threshold should be type float, got {similarity_threshold_param.annotation}"
+    similarity_threshold_param = params["similarity_threshold"]
+    assert (
+        similarity_threshold_param.default == 0.8
+    ), f"similarity_threshold default should be 0.8, got {similarity_threshold_param.default}"
+    assert (
+        similarity_threshold_param.annotation == float
+    ), f"similarity_threshold should be type float, got {similarity_threshold_param.annotation}"
 
     # Verify ctx parameter (optional, no specific default required)
-    ctx_param = params['ctx']
+    ctx_param = params["ctx"]
     # ctx can be None or have a different default, but must exist
-    assert 'ctx' in params, "ctx parameter is missing"
+    assert "ctx" in params, "ctx parameter is missing"
 
     # Verify NO subcategory parameter exists
-    assert 'subcategory' not in params, \
-        "FAILURE: subcategory parameter found in cbr_retrieve! This violates backward compatibility."
+    assert (
+        "subcategory" not in params
+    ), "FAILURE: subcategory parameter found in cbr_retrieve! This violates backward compatibility."
 
     # Verify return type annotation
     return_annotation = sig.return_annotation
     # Return type should be Dict[str, Any] or similar
-    assert return_annotation != inspect.Signature.empty, "cbr_retrieve should have return type annotation"
+    assert (
+        return_annotation != inspect.Signature.empty
+    ), "cbr_retrieve should have return type annotation"
 
 
 # ============================================================================
 # TEST 2: cbr_retrieve Implementation Signature Unchanged
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_cbr_retrieve_implementation_signature_unchanged(mock_cbr_server):
@@ -236,14 +273,17 @@ async def test_cbr_retrieve_implementation_signature_unchanged(mock_cbr_server):
     params = sig.parameters
 
     # Core parameters must exist
-    assert 'query' in params, "query parameter missing from implementation"
-    assert 'max_results' in params, "max_results parameter missing from implementation"
-    assert 'similarity_threshold' in params, "similarity_threshold parameter missing from implementation"
-    assert 'ctx' in params, "ctx parameter missing from implementation"
+    assert "query" in params, "query parameter missing from implementation"
+    assert "max_results" in params, "max_results parameter missing from implementation"
+    assert (
+        "similarity_threshold" in params
+    ), "similarity_threshold parameter missing from implementation"
+    assert "ctx" in params, "ctx parameter missing from implementation"
 
     # CRITICAL: subcategory should NOT exist
-    assert 'subcategory' not in params, \
-        "FAILURE: subcategory parameter found in cbr_retrieve implementation! Backward compatibility broken."
+    assert (
+        "subcategory" not in params
+    ), "FAILURE: subcategory parameter found in cbr_retrieve implementation! Backward compatibility broken."
 
     # Note: 'limit' parameter may exist as an internal alias for max_results (legacy compatibility)
     # This is acceptable as long as it's not exposed through the tool interface
@@ -252,6 +292,7 @@ async def test_cbr_retrieve_implementation_signature_unchanged(mock_cbr_server):
 # ============================================================================
 # TEST 3: cbr_retrieve Rejects Unknown Parameters
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_cbr_retrieve_rejects_unknown_parameters(mock_cbr_server):
@@ -267,26 +308,29 @@ async def test_cbr_retrieve_rejects_unknown_parameters(mock_cbr_server):
             query="test query",
             max_results=5,
             similarity_threshold=0.8,
-            subcategory="remediation"  # This should be rejected
+            subcategory="remediation",  # This should be rejected
         )
 
-    assert "subcategory" in str(exc_info.value) or "unexpected" in str(exc_info.value).lower(), \
-        f"Error message should indicate unexpected parameter. Got: {exc_info.value}"
+    assert (
+        "subcategory" in str(exc_info.value)
+        or "unexpected" in str(exc_info.value).lower()
+    ), f"Error message should indicate unexpected parameter. Got: {exc_info.value}"
 
     # Attempt to call with other unknown parameter should also fail
     with pytest.raises(TypeError) as exc_info:
         await mock_cbr_server.cbr_retrieve(
-            query="test query",
-            category="orchestration"  # This should also be rejected
+            query="test query", category="orchestration"  # This should also be rejected
         )
 
-    assert "category" in str(exc_info.value) or "unexpected" in str(exc_info.value).lower(), \
-        f"Error message should indicate unexpected parameter. Got: {exc_info.value}"
+    assert (
+        "category" in str(exc_info.value) or "unexpected" in str(exc_info.value).lower()
+    ), f"Error message should indicate unexpected parameter. Got: {exc_info.value}"
 
 
 # ============================================================================
 # TEST 4: cbr_retrieve Required Parameter Validation
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_cbr_retrieve_required_parameter_validation(mock_cbr_server):
@@ -299,20 +343,23 @@ async def test_cbr_retrieve_required_parameter_validation(mock_cbr_server):
     with pytest.raises(TypeError) as exc_info:
         await mock_cbr_server.cbr_retrieve()
 
-    assert "query" in str(exc_info.value).lower(), \
-        f"Error should indicate missing query parameter. Got: {exc_info.value}"
+    assert (
+        "query" in str(exc_info.value).lower()
+    ), f"Error should indicate missing query parameter. Got: {exc_info.value}"
 
     # Test calling with query=None should raise ValueError
     with pytest.raises(ValueError) as exc_info:
         await mock_cbr_server.cbr_retrieve(query=None)
 
-    assert "query is required" in str(exc_info.value), \
-        f"Error message should indicate query is required. Got: {exc_info.value}"
+    assert "query is required" in str(
+        exc_info.value
+    ), f"Error message should indicate query is required. Got: {exc_info.value}"
 
 
 # ============================================================================
 # TEST 5: cbr_retrieve Optional Parameters Work Correctly
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_cbr_retrieve_optional_parameters_work_correctly(mock_cbr_server):
@@ -336,42 +383,41 @@ async def test_cbr_retrieve_optional_parameters_work_correctly(mock_cbr_server):
     # Verify the retriever was called with default values
     mock_cbr_server.retriever.retrieve_relevant_examples.assert_called()
     call_kwargs = mock_cbr_server.retriever.retrieve_relevant_examples.call_args.kwargs
-    assert call_kwargs.get('max_results') == 5, "Default max_results should be 5"
-    assert call_kwargs.get('similarity_threshold') == 0.8, "Default similarity_threshold should be 0.8"
+    assert call_kwargs.get("max_results") == 5, "Default max_results should be 5"
+    assert (
+        call_kwargs.get("similarity_threshold") == 0.8
+    ), "Default similarity_threshold should be 0.8"
 
     # Reset mock
     mock_cbr_server.retriever.retrieve_relevant_examples.reset_mock()
 
     # Test with custom max_results
-    result = await mock_cbr_server.cbr_retrieve(
-        query="test query",
-        max_results=10
-    )
+    result = await mock_cbr_server.cbr_retrieve(query="test query", max_results=10)
 
     call_kwargs = mock_cbr_server.retriever.retrieve_relevant_examples.call_args.kwargs
-    assert call_kwargs.get('max_results') == 10, "Custom max_results should be passed through"
+    assert (
+        call_kwargs.get("max_results") == 10
+    ), "Custom max_results should be passed through"
 
     # Reset mock
     mock_cbr_server.retriever.retrieve_relevant_examples.reset_mock()
 
     # Test with custom similarity_threshold
     result = await mock_cbr_server.cbr_retrieve(
-        query="test query",
-        similarity_threshold=0.9
+        query="test query", similarity_threshold=0.9
     )
 
     call_kwargs = mock_cbr_server.retriever.retrieve_relevant_examples.call_args.kwargs
-    assert call_kwargs.get('similarity_threshold') == 0.9, "Custom similarity_threshold should be passed through"
+    assert (
+        call_kwargs.get("similarity_threshold") == 0.9
+    ), "Custom similarity_threshold should be passed through"
 
     # Reset mock
     mock_cbr_server.retriever.retrieve_relevant_examples.reset_mock()
 
     # Test with ctx parameter
     mock_ctx = Context()
-    result = await mock_cbr_server.cbr_retrieve(
-        query="test query",
-        ctx=mock_ctx
-    )
+    result = await mock_cbr_server.cbr_retrieve(query="test query", ctx=mock_ctx)
 
     # Verify ctx was used (should have called ctx.info at some point)
     assert mock_ctx.info.called, "ctx.info should be called when ctx is provided"
@@ -384,6 +430,7 @@ async def test_cbr_retrieve_optional_parameters_work_correctly(mock_cbr_server):
 # ============================================================================
 # TEST 6: cbr_retrieve Response Format Unchanged
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_cbr_retrieve_response_format_unchanged(mock_cbr_server):
@@ -414,15 +461,18 @@ async def test_cbr_retrieve_response_format_unchanged(mock_cbr_server):
 
     # Verify response has exactly one key: "examples"
     assert "examples" in result, "Response must contain 'examples' key"
-    assert len(result.keys()) == 1, \
-        f"Response should have exactly 1 key ('examples'), got {len(result.keys())}: {list(result.keys())}"
+    assert (
+        len(result.keys()) == 1
+    ), f"Response should have exactly 1 key ('examples'), got {len(result.keys())}: {list(result.keys())}"
 
     # Verify examples is a list
     assert isinstance(result["examples"], list), "examples should be a list"
 
     # Verify no new fields were added
     assert "category" not in result, "Response should not contain 'category' field"
-    assert "subcategory" not in result, "Response should not contain 'subcategory' field"
+    assert (
+        "subcategory" not in result
+    ), "Response should not contain 'subcategory' field"
     assert "categories" not in result, "Response should not contain 'categories' field"
 
     # If there are examples, verify their structure hasn't changed
@@ -437,6 +487,7 @@ async def test_cbr_retrieve_response_format_unchanged(mock_cbr_server):
 # ============================================================================
 # TEST 7: cbr_retrieve Functionality Unchanged
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_cbr_retrieve_functionality_unchanged(mock_cbr_server):
@@ -459,7 +510,7 @@ async def test_cbr_retrieve_functionality_unchanged(mock_cbr_server):
     result = await mock_cbr_server.cbr_retrieve(
         query=query_text,
         max_results=max_results_val,
-        similarity_threshold=similarity_threshold_val
+        similarity_threshold=similarity_threshold_val,
     )
 
     # Verify input validation was called
@@ -468,7 +519,9 @@ async def test_cbr_retrieve_functionality_unchanged(mock_cbr_server):
 
     # Verify parameter validation was called
     mock_cbr_server.input_validator.validate_parameters.assert_called_once()
-    validate_params_call = mock_cbr_server.input_validator.validate_parameters.call_args[0][0]
+    validate_params_call = (
+        mock_cbr_server.input_validator.validate_parameters.call_args[0][0]
+    )
     assert validate_params_call["query"] == query_text
     assert validate_params_call["max_results"] == max_results_val
     assert validate_params_call["similarity_threshold"] == similarity_threshold_val
@@ -495,6 +548,7 @@ async def test_cbr_retrieve_functionality_unchanged(mock_cbr_server):
 # ============================================================================
 # TEST 8: cbr_retrieve Error Handling Unchanged
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_cbr_retrieve_error_handling_unchanged(mock_cbr_server):
@@ -524,8 +578,12 @@ async def test_cbr_retrieve_error_handling_unchanged(mock_cbr_server):
     mock_cbr_server.error_recovery.cbr_retrieve_degraded.assert_called_once()
 
     # Verify degraded mode response format
-    assert "examples" in result, "Degraded mode response should still have 'examples' key"
-    assert isinstance(result["examples"], list), "Degraded mode examples should be a list"
+    assert (
+        "examples" in result
+    ), "Degraded mode response should still have 'examples' key"
+    assert isinstance(
+        result["examples"], list
+    ), "Degraded mode examples should be a list"
 
     # Test with retry disabled (should raise exception)
     mock_cbr_server.config.retry_enabled = False
@@ -537,13 +595,15 @@ async def test_cbr_retrieve_error_handling_unchanged(mock_cbr_server):
         await mock_cbr_server.cbr_retrieve(query="test query")
 
     # Verify error message format is unchanged
-    assert "Failed to retrieve examples" in str(exc_info.value), \
-        f"Error message format should be unchanged. Got: {exc_info.value}"
+    assert "Failed to retrieve examples" in str(
+        exc_info.value
+    ), f"Error message format should be unchanged. Got: {exc_info.value}"
 
 
 # ============================================================================
 # TEST 9: cbr_retrieve Does Not Call Category Methods
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_cbr_retrieve_does_not_call_category_methods(mock_cbr_server):
@@ -559,33 +619,37 @@ async def test_cbr_retrieve_does_not_call_category_methods(mock_cbr_server):
     Only retrieve_relevant_examples should be called (existing method).
     """
     # Add spy methods to track calls
-    if hasattr(mock_cbr_server.retriever, 'search_by_category'):
+    if hasattr(mock_cbr_server.retriever, "search_by_category"):
         mock_cbr_server.retriever.search_by_category = AsyncMock()
 
-    if hasattr(mock_cbr_server.retriever, 'get_categories'):
+    if hasattr(mock_cbr_server.retriever, "get_categories"):
         mock_cbr_server.retriever.get_categories = AsyncMock()
 
     # Call cbr_retrieve
     result = await mock_cbr_server.cbr_retrieve(query="test query")
 
     # Verify retrieve_relevant_examples WAS called (original behavior)
-    assert mock_cbr_server.retriever.retrieve_relevant_examples.called, \
-        "retrieve_relevant_examples should be called"
+    assert (
+        mock_cbr_server.retriever.retrieve_relevant_examples.called
+    ), "retrieve_relevant_examples should be called"
 
     # Verify search_by_category was NOT called
-    if hasattr(mock_cbr_server.retriever, 'search_by_category'):
-        assert not mock_cbr_server.retriever.search_by_category.called, \
-            "FAILURE: search_by_category should NOT be called by cbr_retrieve"
+    if hasattr(mock_cbr_server.retriever, "search_by_category"):
+        assert (
+            not mock_cbr_server.retriever.search_by_category.called
+        ), "FAILURE: search_by_category should NOT be called by cbr_retrieve"
 
     # Verify get_categories was NOT called
-    if hasattr(mock_cbr_server.retriever, 'get_categories'):
-        assert not mock_cbr_server.retriever.get_categories.called, \
-            "FAILURE: get_categories should NOT be called by cbr_retrieve"
+    if hasattr(mock_cbr_server.retriever, "get_categories"):
+        assert (
+            not mock_cbr_server.retriever.get_categories.called
+        ), "FAILURE: get_categories should NOT be called by cbr_retrieve"
 
 
 # ============================================================================
 # TEST 10: cbr_retrieve Integration with Existing Tests
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_cbr_retrieve_integration_with_existing_tests(mock_cbr_server):
@@ -604,22 +668,17 @@ async def test_cbr_retrieve_integration_with_existing_tests(mock_cbr_server):
     assert "query is required" in str(exc_info.value)
 
     # Scenario 2: Very large max_results (should be accepted)
-    result = await mock_cbr_server.cbr_retrieve(
-        query="test",
-        max_results=1000
-    )
+    result = await mock_cbr_server.cbr_retrieve(query="test", max_results=1000)
     assert "examples" in result
 
     # Scenario 3: Edge case similarity thresholds
     result = await mock_cbr_server.cbr_retrieve(
-        query="test",
-        similarity_threshold=0.0  # Minimum
+        query="test", similarity_threshold=0.0  # Minimum
     )
     assert "examples" in result
 
     result = await mock_cbr_server.cbr_retrieve(
-        query="test",
-        similarity_threshold=1.0  # Maximum
+        query="test", similarity_threshold=1.0  # Maximum
     )
     assert "examples" in result
 
@@ -633,13 +692,15 @@ async def test_cbr_retrieve_integration_with_existing_tests(mock_cbr_server):
 
     # All results should have the same structure
     for result in results:
-        assert set(result.keys()) == {"examples"}, \
-            "All results should have identical structure"
+        assert set(result.keys()) == {
+            "examples"
+        }, "All results should have identical structure"
 
 
 # ============================================================================
 # TEST 11: cbr_retrieve Tool Wrapper in MCP Setup
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_cbr_retrieve_tool_wrapper_unchanged():
@@ -653,6 +714,7 @@ async def test_cbr_retrieve_tool_wrapper_unchanged():
     # Create a minimal server instance to inspect tool registration
     config = Mock()
     config.database_path = "./test_db"
+    config.db_path = "./test_db"  # startup_configuration_validator uses db_path
     config.collection_name = "test_collection"
     config.use_real_db = False
     config.api_keys = []  # Must be iterable for AuthenticationManager
@@ -661,36 +723,48 @@ async def test_cbr_retrieve_tool_wrapper_unchanged():
     config.cache_enabled = False
     config.retry_enabled = False
 
-    with patch('cbr_mcp_server.ProductionCBRRetriever'):
-        with patch('cbr_mcp_server.startup_configuration_validator') as mock_validator:
+    with patch("cbr_mcp_server.ProductionCBRRetriever"):
+        with patch(
+            "cbr_mcp_server.server.startup_configuration_validator"
+        ) as mock_validator:
             mock_validator.return_value = True
 
-            with patch('cbr_mcp_server.LogConfig'):
-                with patch('cbr_mcp_server.LoggerManager'):
-                    with patch('cbr_mcp_server.StructuredLogger'):
+            with patch("cbr_mcp_server.LogConfig"):
+                with patch("cbr_mcp_server.LoggerManager"):
+                    with patch("cbr_mcp_server.StructuredLogger"):
                         server = CBRMCPServer(config=config)
 
                         # The tool wrapper should be defined in _setup_tools
                         # Verify it exists and has the correct signature
-                        assert hasattr(server, 'cbr_retrieve'), "cbr_retrieve method must exist on server"
+                        assert hasattr(
+                            server, "cbr_retrieve"
+                        ), "cbr_retrieve method must exist on server"
 
                         cbr_retrieve_method = server.cbr_retrieve
                         sig = inspect.signature(cbr_retrieve_method)
                         params = list(sig.parameters.keys())
 
                         # Verify the wrapper maintains original parameters (no self - it's a nested function)
-                        expected_params = ['query', 'max_results', 'similarity_threshold', 'ctx']
-                        assert params == expected_params, \
-                            f"Tool wrapper parameters changed! Expected {expected_params}, got {params}"
+                        expected_params = [
+                            "query",
+                            "max_results",
+                            "similarity_threshold",
+                            "ctx",
+                        ]
+                        assert (
+                            params == expected_params
+                        ), f"Tool wrapper parameters changed! Expected {expected_params}, got {params}"
 
                         # Verify NO subcategory parameter in wrapper
-                        assert 'subcategory' not in params, \
-                            "CRITICAL FAILURE: subcategory parameter found in tool wrapper!"
+                        assert (
+                            "subcategory" not in params
+                        ), "CRITICAL FAILURE: subcategory parameter found in tool wrapper!"
 
 
 # ============================================================================
 # SUMMARY TEST: Complete Backward Compatibility Verification
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_complete_backward_compatibility_summary(mock_cbr_server):
@@ -711,8 +785,8 @@ async def test_complete_backward_compatibility_summary(mock_cbr_server):
     # 1. Signature verification
     sig = inspect.signature(mock_cbr_server.cbr_retrieve)
     params = list(sig.parameters.keys())
-    assert 'subcategory' not in params, "Signature must not include subcategory"
-    assert 'category' not in params, "Signature must not include category"
+    assert "subcategory" not in params, "Signature must not include subcategory"
+    assert "category" not in params, "Signature must not include category"
 
     # 2. Reject new parameters
     with pytest.raises(TypeError):
@@ -720,9 +794,7 @@ async def test_complete_backward_compatibility_summary(mock_cbr_server):
 
     # 3. Original parameters work
     result = await mock_cbr_server.cbr_retrieve(
-        query="test",
-        max_results=10,
-        similarity_threshold=0.9
+        query="test", max_results=10, similarity_threshold=0.9
     )
     assert result is not None
 
@@ -742,11 +814,12 @@ async def test_complete_backward_compatibility_summary(mock_cbr_server):
     assert "examples" in result, "Error handling should return same format"
 
     # 6. No interaction with category methods
-    if hasattr(mock_cbr_server.retriever, 'search_by_category'):
+    if hasattr(mock_cbr_server.retriever, "search_by_category"):
         mock_cbr_server.retriever.search_by_category = AsyncMock()
         result = await mock_cbr_server.cbr_retrieve(query="test")
-        assert not mock_cbr_server.retriever.search_by_category.called, \
-            "cbr_retrieve must not call search_by_category"
+        assert (
+            not mock_cbr_server.retriever.search_by_category.called
+        ), "cbr_retrieve must not call search_by_category"
 
     # If we reach here, complete backward compatibility is verified
     print("\n✅ COMPLETE BACKWARD COMPATIBILITY VERIFIED ✅")

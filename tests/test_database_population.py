@@ -31,7 +31,6 @@ sys.path.insert(0, scripts_utilities_path)
 # Import setup_vectordb functions after path is set
 from setup_vectordb import filter_cases, main, parse_arguments
 
-
 # ============================================================================
 # Fixtures
 # ============================================================================
@@ -60,6 +59,7 @@ def mock_embedding_model():
     Returns a mock that generates deterministic embeddings for testing.
     """
     mock_model = Mock(spec=SentenceTransformer)
+
     # Generate mock embeddings: simple list of floats for each case
     # Each case gets a unique but deterministic embedding
     def mock_encode(texts, normalize_embeddings=True):
@@ -159,16 +159,20 @@ def test_populate_empty_database_with_full_metadata(
 
     def persistent_client_with_temp_path(*args, **kwargs):
         # Replace any path argument with our temp directory
-        kwargs['path'] = temp_db_dir
+        kwargs["path"] = temp_db_dir
         return original_persistent_client(*args, **kwargs)
 
     # Patch at the module level where it's imported
-    with patch(
-        "setup_vectordb.load_all_cases", return_value=sample_cases_with_complete_metadata
-    ), patch(
-        "setup_vectordb.SentenceTransformer", return_value=mock_embedding_model
-    ), patch(
-        "setup_vectordb.chromadb.PersistentClient", side_effect=persistent_client_with_temp_path
+    with (
+        patch(
+            "setup_vectordb.load_all_cases",
+            return_value=sample_cases_with_complete_metadata,
+        ),
+        patch("setup_vectordb.SentenceTransformer", return_value=mock_embedding_model),
+        patch(
+            "setup_vectordb.chromadb.PersistentClient",
+            side_effect=persistent_client_with_temp_path,
+        ),
     ):
         # Run the main setup function
         main()
@@ -249,12 +253,13 @@ def test_force_rebuild_replaces_broken_metadata(
     monkeypatch.setattr(sys, "argv", ["setup_vectordb.py", "--force"])
 
     # Mock load_all_cases to return our sample cases
-    with patch(
-        "setup_vectordb.load_all_cases", return_value=sample_cases_with_complete_metadata
-    ), patch(
-        "setup_vectordb.SentenceTransformer", return_value=mock_embedding_model
-    ), patch(
-        "setup_vectordb.chromadb.PersistentClient", return_value=client
+    with (
+        patch(
+            "setup_vectordb.load_all_cases",
+            return_value=sample_cases_with_complete_metadata,
+        ),
+        patch("setup_vectordb.SentenceTransformer", return_value=mock_embedding_model),
+        patch("setup_vectordb.chromadb.PersistentClient", return_value=client),
     ):
 
         # Run the main setup function with --force
@@ -343,20 +348,27 @@ def test_metadata_preserved_during_filtered_load(
     ]
 
     # Set up command line arguments with --category orchestration
-    monkeypatch.setattr(sys, "argv", ["setup_vectordb.py", "--category", "orchestration"])
+    monkeypatch.setattr(
+        sys, "argv", ["setup_vectordb.py", "--category", "orchestration"]
+    )
 
     # Create a wrapper that intercepts PersistentClient calls and uses temp directory
     original_persistent_client = chromadb.PersistentClient
 
     def persistent_client_with_temp_path(*args, **kwargs):
         # Replace any path argument with our temp directory
-        kwargs['path'] = temp_db_dir
+        kwargs["path"] = temp_db_dir
         return original_persistent_client(*args, **kwargs)
 
     # Patch at the module level where it's imported
-    with patch("setup_vectordb.load_all_cases", return_value=all_cases), patch(
-        "setup_vectordb.SentenceTransformer", return_value=mock_embedding_model
-    ), patch("setup_vectordb.chromadb.PersistentClient", side_effect=persistent_client_with_temp_path):
+    with (
+        patch("setup_vectordb.load_all_cases", return_value=all_cases),
+        patch("setup_vectordb.SentenceTransformer", return_value=mock_embedding_model),
+        patch(
+            "setup_vectordb.chromadb.PersistentClient",
+            side_effect=persistent_client_with_temp_path,
+        ),
+    ):
         # Run the main setup function
         main()
 
@@ -415,16 +427,20 @@ def test_problem_field_backward_compatibility(
 
     def persistent_client_with_temp_path(*args, **kwargs):
         # Replace any path argument with our temp directory
-        kwargs['path'] = temp_db_dir
+        kwargs["path"] = temp_db_dir
         return original_persistent_client(*args, **kwargs)
 
     # Patch at the module level where it's imported
-    with patch(
-        "setup_vectordb.load_all_cases", return_value=sample_cases_with_complete_metadata
-    ), patch(
-        "setup_vectordb.SentenceTransformer", return_value=mock_embedding_model
-    ), patch(
-        "setup_vectordb.chromadb.PersistentClient", side_effect=persistent_client_with_temp_path
+    with (
+        patch(
+            "setup_vectordb.load_all_cases",
+            return_value=sample_cases_with_complete_metadata,
+        ),
+        patch("setup_vectordb.SentenceTransformer", return_value=mock_embedding_model),
+        patch(
+            "setup_vectordb.chromadb.PersistentClient",
+            side_effect=persistent_client_with_temp_path,
+        ),
     ):
         # Run the main setup function
         main()
@@ -444,9 +460,7 @@ def test_problem_field_backward_compatibility(
 
     # Assertion 2: Problem field is a string
     for metadata in all_results["metadatas"]:
-        assert isinstance(
-            metadata["problem"], str
-        ), "Problem field should be a string"
+        assert isinstance(metadata["problem"], str), "Problem field should be a string"
 
     # Assertion 3: Problem field matches original case data
     for i, metadata in enumerate(all_results["metadatas"]):
@@ -482,16 +496,20 @@ def test_solution_stored_as_document(
 
     def persistent_client_with_temp_path(*args, **kwargs):
         # Replace any path argument with our temp directory
-        kwargs['path'] = temp_db_dir
+        kwargs["path"] = temp_db_dir
         return original_persistent_client(*args, **kwargs)
 
     # Patch at the module level where it's imported
-    with patch(
-        "setup_vectordb.load_all_cases", return_value=sample_cases_with_complete_metadata
-    ), patch(
-        "setup_vectordb.SentenceTransformer", return_value=mock_embedding_model
-    ), patch(
-        "setup_vectordb.chromadb.PersistentClient", side_effect=persistent_client_with_temp_path
+    with (
+        patch(
+            "setup_vectordb.load_all_cases",
+            return_value=sample_cases_with_complete_metadata,
+        ),
+        patch("setup_vectordb.SentenceTransformer", return_value=mock_embedding_model),
+        patch(
+            "setup_vectordb.chromadb.PersistentClient",
+            side_effect=persistent_client_with_temp_path,
+        ),
     ):
         # Run the main setup function
         main()

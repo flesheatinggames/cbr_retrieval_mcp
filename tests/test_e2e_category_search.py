@@ -18,9 +18,9 @@ Test Group: End-to-End Category Search Integration (from tasks.md Task 9.1)
 
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
-import subprocess
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -32,22 +32,17 @@ from sentence_transformers import SentenceTransformer
 src_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "src")
 sys.path.insert(0, src_path)
 
-# Import by loading the cbr_mcp_server.py file directly (not the package)
-import importlib.util
-cbr_mcp_server_path = os.path.join(src_path, "cbr_mcp_server.py")
-spec = importlib.util.spec_from_file_location("cbr_mcp_server_module", cbr_mcp_server_path)
-cbr_mcp_server_module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(cbr_mcp_server_module)
-ProductionCBRRetriever = cbr_mcp_server_module.ProductionCBRRetriever
-CBRServerConfig = cbr_mcp_server_module.CBRServerConfig
+# Import from the cbr_mcp_server package
+from cbr_mcp_server import CBRServerConfig, ProductionCBRRetriever, StructuredLogger
 
 # Add scripts/utilities to path for importing setup_vectordb
-scripts_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "scripts", "utilities")
+scripts_path = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)), "scripts", "utilities"
+)
 sys.path.insert(0, scripts_path)
 
 # Import setup_vectordb functions
 import setup_vectordb
-
 
 # ============================================================================
 # Fixtures
@@ -126,7 +121,7 @@ async def test_e2e_populate_and_search_by_category(temp_db_dir, mock_embedding_m
 
     # Step 2: Populate database using setup_vectordb logic
     # Mock the embedding model to avoid actual model download
-    with patch('setup_vectordb.SentenceTransformer', return_value=mock_embedding_model):
+    with patch("setup_vectordb.SentenceTransformer", return_value=mock_embedding_model):
         # Import after patching
         from cases import load_all_cases
         from cbr_mcp_server.metadata_extraction import extract_metadata_list
@@ -143,7 +138,9 @@ async def test_e2e_populate_and_search_by_category(temp_db_dir, mock_embedding_m
         ids = [f"id{i}" for i in range(len(problems))]
 
         # Generate embeddings
-        problem_embeddings = mock_embedding_model.encode(problems, normalize_embeddings=True)
+        problem_embeddings = mock_embedding_model.encode(
+            problems, normalize_embeddings=True
+        )
 
         # Extract metadata (this is what we're testing was fixed)
         metadatas = extract_metadata_list(all_cases)
@@ -153,7 +150,7 @@ async def test_e2e_populate_and_search_by_category(temp_db_dir, mock_embedding_m
             embeddings=problem_embeddings,
             documents=solutions,
             metadatas=metadatas,
-            ids=ids
+            ids=ids,
         )
 
     # Step 3: Verify 103 cases were loaded
@@ -164,11 +161,10 @@ async def test_e2e_populate_and_search_by_category(temp_db_dir, mock_embedding_m
     config = CBRServerConfig(
         database_path=temp_db_dir,
         collection_name="code_solutions_case_base",
-        use_real_db=True
+        use_real_db=True,
     )
 
-    # Create mock logger (use StructuredLogger from module we loaded earlier)
-    StructuredLogger = cbr_mcp_server_module.StructuredLogger
+    # Create mock logger (use StructuredLogger imported at top)
     mock_logger = Mock(spec=StructuredLogger)
 
     # Create retriever and override embedding model (no patch needed)
@@ -184,21 +180,27 @@ async def test_e2e_populate_and_search_by_category(temp_db_dir, mock_embedding_m
     # Verify all results have category="orchestration"
     for result in results:
         metadata = result.get("metadata", {})
-        assert metadata.get("category") == "orchestration", \
-            f"Expected category='orchestration', got {metadata.get('category')}"
+        assert (
+            metadata.get("category") == "orchestration"
+        ), f"Expected category='orchestration', got {metadata.get('category')}"
 
     # Verify metadata completeness - all required fields present
     required_fields = {"problem", "category", "subcategory", "tags"}
     for i, result in enumerate(results):
         metadata = result.get("metadata", {})
         missing_fields = required_fields - set(metadata.keys())
-        assert not missing_fields, \
-            f"Result {i} missing metadata fields: {missing_fields}. Got: {metadata.keys()}"
+        assert (
+            not missing_fields
+        ), f"Result {i} missing metadata fields: {missing_fields}. Got: {metadata.keys()}"
 
         # Verify fields are not "unknown" defaults
         assert metadata["category"] != "unknown", "Category should not be 'unknown'"
-        assert metadata["subcategory"] != "unknown", "Subcategory should not be 'unknown'"
-        assert isinstance(metadata["tags"], str), "Tags should be a comma-separated string"
+        assert (
+            metadata["subcategory"] != "unknown"
+        ), "Subcategory should not be 'unknown'"
+        assert isinstance(
+            metadata["tags"], str
+        ), "Tags should be a comma-separated string"
         assert len(metadata["tags"]) > 0, "Tags should not be empty"
 
 
@@ -229,14 +231,14 @@ def test_e2e_force_rebuild_and_verify_metadata(temp_db_dir, mock_embedding_model
     broken_metadatas = [
         {"problem": "Test problem 1"},
         {"problem": "Test problem 2"},
-        {"problem": "Test problem 3"}
+        {"problem": "Test problem 3"},
     ]
 
     collection.add(
         embeddings=[[0.1] * 384, [0.2] * 384, [0.3] * 384],
         documents=["solution1", "solution2", "solution3"],
         metadatas=broken_metadatas,
-        ids=["id0", "id1", "id2"]
+        ids=["id0", "id1", "id2"],
     )
 
     # Step 2: Verify broken state
@@ -250,7 +252,7 @@ def test_e2e_force_rebuild_and_verify_metadata(temp_db_dir, mock_embedding_model
     assert "problem" in broken_metadata, "Broken metadata should have problem field"
 
     # Step 3: Force rebuild with complete metadata
-    with patch('setup_vectordb.SentenceTransformer', return_value=mock_embedding_model):
+    with patch("setup_vectordb.SentenceTransformer", return_value=mock_embedding_model):
         from cases import load_all_cases
         from cbr_mcp_server.metadata_extraction import extract_metadata_list
 
@@ -267,7 +269,9 @@ def test_e2e_force_rebuild_and_verify_metadata(temp_db_dir, mock_embedding_model
         ids = [f"id{i}" for i in range(len(problems))]
 
         # Generate embeddings
-        problem_embeddings = mock_embedding_model.encode(problems, normalize_embeddings=True)
+        problem_embeddings = mock_embedding_model.encode(
+            problems, normalize_embeddings=True
+        )
 
         # Extract metadata (fixed version)
         metadatas = extract_metadata_list(all_cases)
@@ -277,7 +281,7 @@ def test_e2e_force_rebuild_and_verify_metadata(temp_db_dir, mock_embedding_model
             embeddings=problem_embeddings,
             documents=solutions,
             metadatas=metadatas,
-            ids=ids
+            ids=ids,
         )
 
     # Step 4: Verify 103 cases loaded after rebuild
@@ -294,14 +298,16 @@ def test_e2e_force_rebuild_and_verify_metadata(temp_db_dir, mock_embedding_model
     assert not missing_fields, f"Sample case missing fields: {missing_fields}"
 
     # Verify metadata values are correct (not "unknown" defaults)
-    assert sample_metadata["category"] != "unknown", \
-        f"Category should not be 'unknown', got: {sample_metadata['category']}"
-    assert sample_metadata["subcategory"] != "unknown", \
-        f"Subcategory should not be 'unknown', got: {sample_metadata['subcategory']}"
-    assert isinstance(sample_metadata["tags"], str), \
-        f"Tags should be a comma-separated string, got: {type(sample_metadata['tags'])}"
-    assert len(sample_metadata["tags"]) > 0, \
-        "Tags should not be empty"
+    assert (
+        sample_metadata["category"] != "unknown"
+    ), f"Category should not be 'unknown', got: {sample_metadata['category']}"
+    assert (
+        sample_metadata["subcategory"] != "unknown"
+    ), f"Subcategory should not be 'unknown', got: {sample_metadata['subcategory']}"
+    assert isinstance(
+        sample_metadata["tags"], str
+    ), f"Tags should be a comma-separated string, got: {type(sample_metadata['tags'])}"
+    assert len(sample_metadata["tags"]) > 0, "Tags should not be empty"
 
     # Verify category field has actual value (not empty or unknown)
     assert sample_metadata["category"], "Category should have a value"
@@ -335,7 +341,7 @@ async def test_e2e_filtered_load_and_category_search(temp_db_dir, mock_embedding
     assert len(collections) == 0, "Database should start empty"
 
     # Step 2: Populate database with filtered categories
-    with patch('setup_vectordb.SentenceTransformer', return_value=mock_embedding_model):
+    with patch("setup_vectordb.SentenceTransformer", return_value=mock_embedding_model):
         from cases import load_all_cases
         from cbr_mcp_server.metadata_extraction import extract_metadata_list
 
@@ -345,8 +351,7 @@ async def test_e2e_filtered_load_and_category_search(temp_db_dir, mock_embedding
         # Filter to only orchestration and firebase categories
         filter_categories = ["orchestration", "firebase"]
         filtered_cases = [
-            case for case in all_cases
-            if case.get("category") in filter_categories
+            case for case in all_cases if case.get("category") in filter_categories
         ]
 
         # Create collection
@@ -358,7 +363,9 @@ async def test_e2e_filtered_load_and_category_search(temp_db_dir, mock_embedding
         ids = [f"id{i}" for i in range(len(problems))]
 
         # Generate embeddings
-        problem_embeddings = mock_embedding_model.encode(problems, normalize_embeddings=True)
+        problem_embeddings = mock_embedding_model.encode(
+            problems, normalize_embeddings=True
+        )
 
         # Extract metadata
         metadatas = extract_metadata_list(filtered_cases)
@@ -368,29 +375,31 @@ async def test_e2e_filtered_load_and_category_search(temp_db_dir, mock_embedding
             embeddings=problem_embeddings,
             documents=solutions,
             metadatas=metadatas,
-            ids=ids
+            ids=ids,
         )
 
     # Step 3: Verify only filtered categories loaded
     filtered_count = collection.count()
-    assert filtered_count < 103, f"Filtered database should have < 103 cases, got {filtered_count}"
+    assert (
+        filtered_count < 103
+    ), f"Filtered database should have < 103 cases, got {filtered_count}"
     assert filtered_count > 0, "Filtered database should have some cases"
 
     # Verify all cases have category in filter list
     all_results = collection.get(include=["metadatas"])
     for metadata in all_results["metadatas"]:
-        assert metadata.get("category") in filter_categories, \
-            f"Case has wrong category: {metadata.get('category')}"
+        assert (
+            metadata.get("category") in filter_categories
+        ), f"Case has wrong category: {metadata.get('category')}"
 
     # Step 4: Initialize CBR retriever
     config = CBRServerConfig(
         database_path=temp_db_dir,
         collection_name="code_solutions_case_base",
-        use_real_db=True
+        use_real_db=True,
     )
 
-    # Create mock logger (use StructuredLogger from module we loaded earlier)
-    StructuredLogger = cbr_mcp_server_module.StructuredLogger
+    # Create mock logger (use StructuredLogger imported at top)
     mock_logger = Mock(spec=StructuredLogger)
 
     # Create retriever and override embedding model

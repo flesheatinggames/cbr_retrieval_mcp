@@ -14,9 +14,10 @@ Test Coverage:
 - Content quality and topic coverage
 """
 
-import pytest
 import os
 from pathlib import Path
+
+import pytest
 
 
 class TestOrchestrationRemediationCasesModuleStructure:
@@ -39,14 +40,16 @@ class TestOrchestrationRemediationCasesModuleStructure:
 
     def test_orchestration_remediation_cases_list_exists(self):
         """Verify ORCHESTRATION_REMEDIATION_CASES list exists in module."""
-        from cases.orchestration.orchestration_remediation_cases import ORCHESTRATION_REMEDIATION_CASES
+        from cases.orchestration.orchestration_remediation_cases import (
+            ORCHESTRATION_REMEDIATION_CASES,
+        )
 
-        assert ORCHESTRATION_REMEDIATION_CASES is not None, (
-            "ORCHESTRATION_REMEDIATION_CASES should be defined in module"
-        )
-        assert isinstance(ORCHESTRATION_REMEDIATION_CASES, list), (
-            f"ORCHESTRATION_REMEDIATION_CASES should be a list, got {type(ORCHESTRATION_REMEDIATION_CASES)}"
-        )
+        assert (
+            ORCHESTRATION_REMEDIATION_CASES is not None
+        ), "ORCHESTRATION_REMEDIATION_CASES should be defined in module"
+        assert isinstance(
+            ORCHESTRATION_REMEDIATION_CASES, list
+        ), f"ORCHESTRATION_REMEDIATION_CASES should be a list, got {type(ORCHESTRATION_REMEDIATION_CASES)}"
 
 
 class TestOrchestrationRemediationCaseCount:
@@ -54,7 +57,9 @@ class TestOrchestrationRemediationCaseCount:
 
     def test_case_count_is_exactly_one(self):
         """Verify there are exactly 2 orchestration remediation cases."""
-        from cases.orchestration.orchestration_remediation_cases import ORCHESTRATION_REMEDIATION_CASES
+        from cases.orchestration.orchestration_remediation_cases import (
+            ORCHESTRATION_REMEDIATION_CASES,
+        )
 
         assert len(ORCHESTRATION_REMEDIATION_CASES) == 2, (
             f"Expected exactly 2 orchestration remediation cases, "
@@ -69,15 +74,18 @@ class TestOrchestrationRemediationCaseStructure:
     @pytest.fixture
     def cases(self):
         """Fixture providing the ORCHESTRATION_REMEDIATION_CASES list."""
-        from cases.orchestration.orchestration_remediation_cases import ORCHESTRATION_REMEDIATION_CASES
+        from cases.orchestration.orchestration_remediation_cases import (
+            ORCHESTRATION_REMEDIATION_CASES,
+        )
+
         return ORCHESTRATION_REMEDIATION_CASES
 
     def test_all_cases_are_dictionaries(self, cases):
         """Verify each case is a dictionary."""
         for idx, case in enumerate(cases):
-            assert isinstance(case, dict), (
-                f"Case at index {idx} should be a dictionary, got {type(case)}"
-            )
+            assert isinstance(
+                case, dict
+            ), f"Case at index {idx} should be a dictionary, got {type(case)}"
 
     def test_all_cases_have_required_fields(self, cases):
         """Verify each case has all required fields."""
@@ -93,52 +101,52 @@ class TestOrchestrationRemediationCaseStructure:
     def test_problem_field_is_non_empty_string(self, cases):
         """Verify 'problem' field is a non-empty string in all cases."""
         for idx, case in enumerate(cases):
-            assert isinstance(case.get("problem"), str), (
-                f"Case {idx}: 'problem' should be a string, got {type(case.get('problem'))}"
-            )
-            assert len(case.get("problem", "").strip()) > 0, (
-                f"Case {idx}: 'problem' should be a non-empty string"
-            )
+            assert isinstance(
+                case.get("problem"), str
+            ), f"Case {idx}: 'problem' should be a string, got {type(case.get('problem'))}"
+            assert (
+                len(case.get("problem", "").strip()) > 0
+            ), f"Case {idx}: 'problem' should be a non-empty string"
 
     def test_solution_field_is_non_empty_string(self, cases):
         """Verify 'solution' field is a non-empty string in all cases."""
         for idx, case in enumerate(cases):
-            assert isinstance(case.get("solution"), str), (
-                f"Case {idx}: 'solution' should be a string, got {type(case.get('solution'))}"
-            )
-            assert len(case.get("solution", "").strip()) > 0, (
-                f"Case {idx}: 'solution' should be a non-empty string"
-            )
+            assert isinstance(
+                case.get("solution"), str
+            ), f"Case {idx}: 'solution' should be a string, got {type(case.get('solution'))}"
+            assert (
+                len(case.get("solution", "").strip()) > 0
+            ), f"Case {idx}: 'solution' should be a non-empty string"
 
     def test_category_field_is_non_empty_string(self, cases):
         """Verify 'category' field is a non-empty string in all cases."""
         for idx, case in enumerate(cases):
-            assert isinstance(case.get("category"), str), (
-                f"Case {idx}: 'category' should be a string, got {type(case.get('category'))}"
-            )
-            assert len(case.get("category", "").strip()) > 0, (
-                f"Case {idx}: 'category' should be a non-empty string"
-            )
+            assert isinstance(
+                case.get("category"), str
+            ), f"Case {idx}: 'category' should be a string, got {type(case.get('category'))}"
+            assert (
+                len(case.get("category", "").strip()) > 0
+            ), f"Case {idx}: 'category' should be a non-empty string"
 
     def test_subcategory_field_is_non_empty_string(self, cases):
         """Verify 'subcategory' field is a non-empty string in all cases."""
         for idx, case in enumerate(cases):
-            assert isinstance(case.get("subcategory"), str), (
-                f"Case {idx}: 'subcategory' should be a string, got {type(case.get('subcategory'))}"
-            )
-            assert len(case.get("subcategory", "").strip()) > 0, (
-                f"Case {idx}: 'subcategory' should be a non-empty string"
-            )
+            assert isinstance(
+                case.get("subcategory"), str
+            ), f"Case {idx}: 'subcategory' should be a string, got {type(case.get('subcategory'))}"
+            assert (
+                len(case.get("subcategory", "").strip()) > 0
+            ), f"Case {idx}: 'subcategory' should be a non-empty string"
 
     def test_tags_field_is_non_empty_list(self, cases):
         """Verify 'tags' field is a non-empty list in all cases."""
         for idx, case in enumerate(cases):
-            assert isinstance(case.get("tags"), list), (
-                f"Case {idx}: 'tags' should be a list, got {type(case.get('tags'))}"
-            )
-            assert len(case.get("tags", [])) > 0, (
-                f"Case {idx}: 'tags' should be a non-empty list"
-            )
+            assert isinstance(
+                case.get("tags"), list
+            ), f"Case {idx}: 'tags' should be a list, got {type(case.get('tags'))}"
+            assert (
+                len(case.get("tags", [])) > 0
+            ), f"Case {idx}: 'tags' should be a non-empty list"
 
 
 class TestOrchestrationRemediationCaseMetadata:
@@ -147,7 +155,10 @@ class TestOrchestrationRemediationCaseMetadata:
     @pytest.fixture
     def cases(self):
         """Fixture providing the ORCHESTRATION_REMEDIATION_CASES list."""
-        from cases.orchestration.orchestration_remediation_cases import ORCHESTRATION_REMEDIATION_CASES
+        from cases.orchestration.orchestration_remediation_cases import (
+            ORCHESTRATION_REMEDIATION_CASES,
+        )
+
         return ORCHESTRATION_REMEDIATION_CASES
 
     def test_all_cases_have_orchestration_category(self, cases):
@@ -171,9 +182,9 @@ class TestOrchestrationRemediationCaseMetadata:
         for idx, case in enumerate(cases):
             tags = case.get("tags", [])
             for tag_idx, tag in enumerate(tags):
-                assert isinstance(tag, str), (
-                    f"Case {idx}, tag {tag_idx}: Expected string, got {type(tag)}"
-                )
+                assert isinstance(
+                    tag, str
+                ), f"Case {idx}, tag {tag_idx}: Expected string, got {type(tag)}"
 
     def test_tags_contain_remediation_specific_keywords(self, cases):
         """Verify tags contain at least one remediation-specific keyword."""
@@ -182,7 +193,7 @@ class TestOrchestrationRemediationCaseMetadata:
             "verification",
             "failure",
             "recovery",
-            "karen"
+            "karen",
         }
 
         for idx, case in enumerate(cases):
@@ -199,9 +210,7 @@ class TestOrchestrationRemediationCaseMetadata:
         """Verify tags list contains at least one tag."""
         for idx, case in enumerate(cases):
             tags = case.get("tags", [])
-            assert len(tags) > 0, (
-                f"Case {idx}: Tags list should not be empty"
-            )
+            assert len(tags) > 0, f"Case {idx}: Tags list should not be empty"
 
 
 class TestOrchestrationRemediationCaseContent:
@@ -210,7 +219,10 @@ class TestOrchestrationRemediationCaseContent:
     @pytest.fixture
     def cases(self):
         """Fixture providing the ORCHESTRATION_REMEDIATION_CASES list."""
-        from cases.orchestration.orchestration_remediation_cases import ORCHESTRATION_REMEDIATION_CASES
+        from cases.orchestration.orchestration_remediation_cases import (
+            ORCHESTRATION_REMEDIATION_CASES,
+        )
+
         return ORCHESTRATION_REMEDIATION_CASES
 
     def test_problem_has_meaningful_length(self, cases):
@@ -243,7 +255,7 @@ class TestOrchestrationRemediationCaseContent:
             "recovery",
             "reject",
             "issue",
-            "fix"
+            "fix",
         ]
 
         for idx, case in enumerate(cases):
@@ -252,7 +264,8 @@ class TestOrchestrationRemediationCaseContent:
             combined_text = problem_lower + " " + solution_lower
 
             found_keywords = [
-                keyword for keyword in remediation_topic_keywords
+                keyword
+                for keyword in remediation_topic_keywords
                 if keyword in combined_text
             ]
 
@@ -293,7 +306,10 @@ class TestOrchestrationRemediationCaseCompleteness:
     @pytest.fixture
     def cases(self):
         """Fixture providing the ORCHESTRATION_REMEDIATION_CASES list."""
-        from cases.orchestration.orchestration_remediation_cases import ORCHESTRATION_REMEDIATION_CASES
+        from cases.orchestration.orchestration_remediation_cases import (
+            ORCHESTRATION_REMEDIATION_CASES,
+        )
+
         return ORCHESTRATION_REMEDIATION_CASES
 
     def test_no_duplicate_cases(self, cases):
@@ -301,9 +317,9 @@ class TestOrchestrationRemediationCaseCompleteness:
         problems = [case.get("problem") for case in cases]
         unique_problems = set(problems)
 
-        assert len(problems) == len(unique_problems), (
-            f"Found duplicate cases. Total: {len(problems)}, Unique: {len(unique_problems)}"
-        )
+        assert len(problems) == len(
+            unique_problems
+        ), f"Found duplicate cases. Total: {len(problems)}, Unique: {len(unique_problems)}"
 
     def test_all_cases_are_complete(self, cases):
         """Verify each case has all required fields with non-trivial content."""
@@ -319,13 +335,21 @@ class TestOrchestrationRemediationCaseCompleteness:
             assert len(case["problem"]) > 0, f"Case {idx}: Empty 'problem' field"
             assert len(case["solution"]) > 0, f"Case {idx}: Empty 'solution' field"
             assert len(case["category"]) > 0, f"Case {idx}: Empty 'category' field"
-            assert len(case["subcategory"]) > 0, f"Case {idx}: Empty 'subcategory' field"
+            assert (
+                len(case["subcategory"]) > 0
+            ), f"Case {idx}: Empty 'subcategory' field"
             assert len(case["tags"]) > 0, f"Case {idx}: Empty 'tags' list"
 
     def test_expected_tag_coverage(self, cases):
         """Verify expected tags are present across all cases."""
         # For remediation cases, we expect these core tags
-        expected_core_tags = {"remediation", "verification", "karen", "workflow", "agents"}
+        expected_core_tags = {
+            "remediation",
+            "verification",
+            "karen",
+            "workflow",
+            "agents",
+        }
 
         # Collect all tags from all cases
         all_tags = set()
