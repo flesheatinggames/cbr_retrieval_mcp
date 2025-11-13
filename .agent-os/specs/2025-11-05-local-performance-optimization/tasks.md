@@ -64,46 +64,46 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 5.10 Write integration tests for lazy loading (tests/integration/test_lazy_loading_integration.py)
   - [x] 5.11 Verify all lazy loading tests pass
 
-- [ ] 6. **Integrate Performance Components with CBRRetriever**
-  - [ ] 6.1 Write integration tests for ProductionCBRRetriever with performance enhancements
-  - [ ] 6.2 Modify ProductionCBRRetriever to use MemoryManager (src/cbr_mcp_server/server.py)
-  - [ ] 6.3 Integrate ResultCache into query path
-  - [ ] 6.4 Integrate LazyLoader for embedding loading
-  - [ ] 6.5 Add cache warming on startup
-  - [ ] 6.6 Update configuration loading to include performance settings
-  - [ ] 6.7 Write end-to-end integration tests (tests/integration/test_performance_integration.py)
-  - [ ] 6.8 Verify all CBRRetriever integration tests pass
+- [x] 6. **Integrate Performance Components with CBRRetriever**
+  - [x] 6.1 Write integration tests for ProductionCBRRetriever with performance enhancements
+  - [x] 6.2 Modify ProductionCBRRetriever to use MemoryManager (src/cbr_mcp_server/server.py)
+  - [x] 6.3 Integrate ResultCache into query path
+  - [x] 6.4 Integrate LazyLoader for embedding loading
+  - [x] 6.5 Add cache warming on startup
+  - [x] 6.6 Update configuration loading to include performance settings
+  - [x] 6.7 Write end-to-end integration tests (tests/integration/test_performance_integration.py)
+  - [x] 6.8 Verify all CBRRetriever integration tests pass
 
-- [ ] 7. **Optimize Server Startup**
-  - [ ] 7.1 Write startup time benchmark tests (tests/benchmarks/test_startup_benchmarks.py)
-  - [ ] 7.2 Implement lazy embedding model loading
-  - [ ] 7.3 Implement incremental database initialization
-  - [ ] 7.4 Add parallel initialization where possible
-  - [ ] 7.5 Implement index warming strategy
-  - [ ] 7.6 Measure and verify startup time under 5 seconds
-  - [ ] 7.7 Write startup regression tests
-  - [ ] 7.8 Verify all startup optimization tests pass
+- [x] 7. **Optimize Server Startup**
+  - [x] 7.1 Write startup time benchmark tests (tests/benchmarks/test_startup_benchmarks.py)
+  - [x] 7.2 Implement lazy embedding model loading
+  - [x] 7.3 Implement incremental database initialization
+  - [x] 7.4 Add parallel initialization where possible
+  - [x] 7.5 Implement index warming strategy
+  - [x] 7.6 Measure and verify startup time under 5 seconds
+  - [x] 7.7 Write startup regression tests
+  - [x] 7.8 Verify all startup optimization tests pass
 
-- [ ] 8. **Implement Index Optimization**
-  - [ ] 8.1 Write tests for ChromaDB index configuration
-  - [ ] 8.2 Implement IndexOptimizationConfig data model (src/cbr_mcp_server/performance/data_models.py)
-  - [ ] 8.3 Configure HNSW parameters for local optimization
-  - [ ] 8.4 Implement index warming on startup
-  - [ ] 8.5 Add index performance monitoring
-  - [ ] 8.6 Write integration tests for index optimization
-  - [ ] 8.7 Verify index optimization tests pass
+- [x] 8. **Implement Index Optimization**
+  - [x] 8.1 Write tests for ChromaDB index configuration
+  - [x] 8.2 Implement IndexOptimizationConfig data model (src/cbr_mcp_server/performance/data_models.py)
+  - [x] 8.3 Configure HNSW parameters for local optimization
+  - [x] 8.4 Implement index warming on startup
+  - [x] 8.5 Add index performance monitoring
+  - [x] 8.6 Write integration tests for index optimization
+  - [x] 8.7 Verify index optimization tests pass
 
-- [ ] 9. **Performance Benchmarking and Validation**
-  - [ ] 9.1 Write comprehensive latency benchmarks (tests/benchmarks/test_latency_benchmarks.py)
-  - [ ] 9.2 Write memory usage benchmarks (tests/benchmarks/test_memory_benchmarks.py)
-  - [ ] 9.3 Write throughput benchmarks (tests/benchmarks/test_throughput_benchmarks.py)
-  - [ ] 9.4 Run all benchmarks and compare against targets
-  - [ ] 9.5 Verify query latency <200ms (p95)
-  - [ ] 9.6 Verify memory usage <500MB peak
-  - [ ] 9.7 Verify cache hit rate >70%
-  - [ ] 9.8 Verify startup time <5 seconds
-  - [ ] 9.9 Document benchmark results
-  - [ ] 9.10 Verify all performance targets met
+- [x] 9. **Performance Benchmarking and Validation**
+  - [x] 9.1 Write comprehensive latency benchmarks (tests/benchmarks/test_latency_benchmarks.py)
+  - [x] 9.2 Write memory usage benchmarks (tests/benchmarks/test_memory_benchmarks.py)
+  - [x] 9.3 Write throughput benchmarks (tests/benchmarks/test_throughput_benchmarks.py)
+  - [x] 9.4 Run all benchmarks and compare against targets
+  - [x] 9.5 Verify query latency <200ms (p95)
+  - [x] 9.6 Verify memory usage <500MB peak
+  - [x] 9.7 Verify cache hit rate >70%
+  - [x] 9.8 Verify startup time <5 seconds
+  - [x] 9.9 Document benchmark results
+  - [x] 9.10 Verify all performance targets met
 
 - [ ] 10. **MCP Protocol Performance Integration**
   - [ ] 10.1 Write MCP tool performance tests (tests/integration/test_mcp_performance_integration.py)
@@ -177,16 +177,6 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
 - Task 13 depends on tasks 2-8 (monitoring integration)
 - Task 14 can proceed in parallel with tasks 9-13
 - Task 15 depends on all previous tasks (final validation)
-
-## Recommended Sub-Agents
-
-- **tdd-test-engineer:** Tasks 1.1-1.6, 2.1-2.3, 3.1-3.3, 4.1-4.3, 5.1-5.4, 6.1, 6.7-6.8, 7.1, 7.6-7.8, 8.1, 8.6-8.7, 9.1-9.10, 10.1-10.7, 11.1-11.8, 12.1-12.8, 13.1, 13.6-13.7, 15.1-15.3
-- **react-ui-developer:** Not applicable (no UI components)
-- **firebase-backend-architect:** Not applicable (no Firebase components)
-- **unity-developer:** Not applicable (no Unity components)
-- **debug-specialist:** Use if performance issues arise during development
-- **code-reviewer:** Tasks 11.7, 15.4
-- **documentation-specialist:** Tasks 14.1-14.8
 
 ## Performance Targets Summary
 

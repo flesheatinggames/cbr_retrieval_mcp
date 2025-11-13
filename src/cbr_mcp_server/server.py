@@ -7251,6 +7251,12 @@ class CBRMCPServer:
         config: Optional[CBRServerConfig] = None,
     ):
         """Initialize CBR MCP Server with production configuration and validation."""
+        import time
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        # Track initialization timing
+        init_start = time.perf_counter()
+
         # Load configuration with new validation system
         if config is None:
             config = CBRServerConfig.from_environment()
@@ -7267,6 +7273,7 @@ class CBRMCPServer:
         self._lock = threading.Lock()
 
         # Initialize single structured logger to avoid duplicates
+        # (must be first - needed by all parallel components)
         self.structured_logger = StructuredLogger(self.config)
         self.logger = self.structured_logger.logger
 
@@ -7277,15 +7284,86 @@ class CBRMCPServer:
         initial_correlation_id = self.structured_logger.generate_correlation_id()
         self.structured_logger.set_correlation_id(initial_correlation_id)
 
-        self.auth_manager = AuthenticationManager(self.config, self.structured_logger)
-        self.rate_limiter = RateLimitingManager(self.config, self.structured_logger)
-        self.health_monitor = HealthMonitor(self.config, self.structured_logger)
-        self.input_validator = InputValidator(self.config, self.structured_logger)
-        self.cache_manager = CacheManager(self.config, self.structured_logger)
-        self.error_recovery = ErrorRecoveryManager(self.config, self.structured_logger)
+        # Parallel initialization of independent components
+        # Group 1: Security and validation components
+        # Group 2: Request tracking components
+        # Group 3: Management components
+        # Group 4: Database integrity components
 
-        # Initialize request logging and tracing components
-        self.request_tracker = RequestTracker()
+        parallel_init_start = time.perf_counter()
+
+        # Define initialization tasks as (name, callable) tuples
+        init_tasks = [
+            # Group 1: Security and validation (independent)
+            (
+                "auth_manager",
+                lambda: AuthenticationManager(self.config, self.structured_logger),
+            ),
+            (
+                "rate_limiter",
+                lambda: RateLimitingManager(self.config, self.structured_logger),
+            ),
+            (
+                "input_validator",
+                lambda: InputValidator(self.config, self.structured_logger),
+            ),
+            (
+                "health_monitor",
+                lambda: HealthMonitor(self.config, self.structured_logger),
+            ),
+            # Group 2: Request tracking (request_tracker must be first in this group)
+            ("request_tracker", lambda: RequestTracker()),
+            # Group 3: Management components (independent)
+            (
+                "cache_manager",
+                lambda: CacheManager(self.config, self.structured_logger),
+            ),
+            (
+                "error_recovery",
+                lambda: ErrorRecoveryManager(self.config, self.structured_logger),
+            ),
+        ]
+
+        # Execute parallel initialization with error handling
+        component_results = {}
+        max_workers = min(
+            4, len(init_tasks)
+        )  # Limit to 4 threads for local performance
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all initialization tasks
+            future_to_name = {
+                executor.submit(init_func): name for name, init_func in init_tasks
+            }
+
+            # Collect results as they complete
+            for future in as_completed(future_to_name):
+                component_name = future_to_name[future]
+                try:
+                    component_results[component_name] = future.result()
+                    self.logger.debug(f"Parallel init: {component_name} completed")
+                except Exception as e:
+                    self.logger.error(
+                        f"Parallel init failed for {component_name}: {str(e)}"
+                    )
+                    # Re-raise to maintain error handling behavior
+                    raise
+
+        # Assign initialized components to instance attributes
+        self.auth_manager = component_results["auth_manager"]
+        self.rate_limiter = component_results["rate_limiter"]
+        self.input_validator = component_results["input_validator"]
+        self.health_monitor = component_results["health_monitor"]
+        self.request_tracker = component_results["request_tracker"]
+        self.cache_manager = component_results["cache_manager"]
+        self.error_recovery = component_results["error_recovery"]
+
+        parallel_init_time = time.perf_counter() - parallel_init_start
+        self.logger.debug(
+            f"Parallel initialization completed in {parallel_init_time:.3f}s"
+        )
+
+        # Initialize components that depend on request_tracker (must be sequential)
         self.trace_manager = TraceManager(self.request_tracker)
         self.request_interceptor = EnhancedRequestInterceptor(
             self.logger_manager, self.trace_manager
@@ -7320,6 +7398,9 @@ class CBRMCPServer:
         self.startup_validation_completed = False
         self.startup_validation_results = None
 
+        # Calculate total initialization time
+        total_init_time = time.perf_counter() - init_start
+
         # Log server initialization with structured logger
         self.structured_logger.info(
             "CBR MCP Server initialized",
@@ -7337,6 +7418,8 @@ class CBRMCPServer:
                     if self.resource_monitor
                     else False
                 ),
+                "parallel_init_time_seconds": round(parallel_init_time, 3),
+                "total_init_time_seconds": round(total_init_time, 3),
             },
         )
 

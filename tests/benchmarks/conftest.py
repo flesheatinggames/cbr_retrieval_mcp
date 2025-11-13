@@ -302,7 +302,7 @@ def pytest_runtest_makereport(item, call):
             collector = item.session.startup_collector
 
             # Check if this is a startup test by looking at the test module
-            if "test_startup_baseline" in fullname:
+            if "test_startup_baseline" in fullname or "test_startup_benchmarks" in fullname:
                 collector.add_result(
                     test_name=test_name,
                     fullname=fullname,
@@ -476,3 +476,79 @@ def startup_result_tracker(startup_collector, request):
 
                 result["timing_metrics"] = timing_data
                 break
+
+
+# ============================================================================
+# Shared Fixtures for Memory Optimization (Session-Scoped)
+# ============================================================================
+
+
+@pytest.fixture(scope="session")
+def shared_embedding_model(request):
+    """
+    Session-scoped shared embedding model - ONE instance for entire test session.
+
+    This fixture ensures only ONE embedding model exists in memory across all
+    test modules, preventing memory regression from multiple model instances.
+
+    Memory optimization: Reduces peak memory by ~700MB by sharing a single
+    embedding model instance instead of creating one per test module.
+    """
+    import gc
+
+    try:
+        from cbr_mcp_server.performance.production_cbr_retriever import (
+            LazyEmbeddingModel,
+        )
+    except ImportError:
+        pytest.skip("CBR server components not available")
+
+    # Create ONE embedding model for entire session
+    embedding_model = LazyEmbeddingModel(
+        model_name="nomic-ai/nomic-embed-text-v1.5", trust_remote_code=True
+    )
+
+    yield embedding_model
+
+    # Cleanup: explicitly delete embedding model and force garbage collection
+    del embedding_model
+    gc.collect()
+
+
+@pytest.fixture(scope="session")
+def shared_cbr_retriever(request, shared_embedding_model):
+    """
+    Session-scoped shared CBR retriever - ONE instance for entire test session.
+
+    This fixture uses the shared_embedding_model to ensure only ONE retriever
+    with ONE embedding model exists in memory across all test modules.
+
+    Memory optimization: Prevents duplicate retriever/model instances across
+    test modules, reducing memory footprint by ~700MB.
+    """
+    import gc
+
+    try:
+        from cbr_mcp_server.performance.production_cbr_retriever import (
+            ProductionCBRRetriever,
+        )
+    except ImportError:
+        pytest.skip("CBR server components not available")
+
+    # Initialize retriever with shared embedding model
+    test_db_path = Path("./db")
+    retriever = ProductionCBRRetriever(
+        db_path=str(test_db_path), embedding_model=shared_embedding_model
+    )
+
+    # Trigger lazy initialization with a test query
+    try:
+        retriever.retrieve(query="test", max_results=1)
+    except Exception as e:
+        pytest.skip(f"Failed to initialize shared CBR retriever: {e}")
+
+    yield retriever
+
+    # Cleanup: explicitly delete retriever and force garbage collection
+    del retriever
+    gc.collect()

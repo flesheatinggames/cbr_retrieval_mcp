@@ -6,6 +6,7 @@ This module contains components for performance optimization including:
 - Caching mechanisms
 - Query optimization
 - Resource monitoring
+- Lazy loading
 """
 
 from cbr_mcp_server.performance.data_models import (
@@ -20,6 +21,10 @@ from cbr_mcp_server.performance.memory_manager import (
     MemoryManager,
     MemoryPressureDetector,
 )
+from cbr_mcp_server.performance.production_cbr_retriever import (
+    LazyEmbeddingModel,
+    ProductionCBRRetriever,
+)
 
 __all__ = [
     # Data models
@@ -32,4 +37,7 @@ __all__ = [
     "EmbeddingCacheManager",
     "MemoryManager",
     "MemoryPressureDetector",
+    # Lazy loading components
+    "LazyEmbeddingModel",
+    "ProductionCBRRetriever",
 ]

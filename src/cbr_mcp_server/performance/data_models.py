@@ -8,12 +8,13 @@ This module contains Pydantic models for:
 - Cache configuration (CachePolicy)
 - Query optimization configuration (QueryOptimizationConfig)
 - Lazy loading configuration (LazyLoadingConfig)
+- Index optimization configuration (IndexOptimizationConfig)
 """
 
 import logging
-from typing import Literal, Optional
+from typing import Any, Literal, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 logger = logging.getLogger(__name__)
 
@@ -364,3 +365,119 @@ class LazyLoadingConfig(BaseModel):
         if v < 1:
             raise ValueError("max_cache_size must be at least 1")
         return v
+
+
+class IndexOptimizationConfig(BaseModel):
+    """
+    Configuration for ChromaDB HNSW index optimization.
+
+    This configuration controls the HNSW (Hierarchical Navigable Small World)
+    index parameters used by ChromaDB for approximate nearest neighbor search.
+
+    Attributes:
+        space: Distance metric for similarity search ("l2", "ip", or "cosine")
+        ef_construction: Build-time search parameter (4-1000, default: 100)
+        ef_search: Query-time search parameter (1+, default: 10, must be <= ef_construction)
+        M: Number of bi-directional links per node (4-64, default: 16)
+    """
+
+    space: Literal["l2", "ip", "cosine"] = Field(
+        default="l2",
+        description="Distance metric (l2=Euclidean, ip=Inner Product, cosine=Cosine Similarity)",
+    )
+
+    ef_construction: int = Field(
+        default=100,
+        description="Build-time search parameter (higher = better accuracy, slower build)",
+    )
+
+    ef_search: int = Field(
+        default=10,
+        description="Query-time search parameter (higher = better accuracy, slower queries)",
+    )
+
+    M: int = Field(
+        default=16,
+        description="Number of bi-directional links per node (higher = more memory, better accuracy)",
+    )
+
+    @field_validator("ef_construction", mode="before")
+    @classmethod
+    def validate_ef_construction(cls, v: int) -> int:
+        """Validate ef_construction is in valid range [4, 1000] and is an integer."""
+        # Ensure type is int, not string
+        if not isinstance(v, int):
+            raise ValueError("ef_construction must be an integer")
+        if v < 4 or v > 1000:
+            raise ValueError("ef_construction must be between 4 and 1000")
+        return v
+
+    @field_validator("ef_search", mode="before")
+    @classmethod
+    def validate_ef_search(cls, v: int) -> int:
+        """Validate ef_search is positive and is an integer."""
+        # Ensure type is int, not string
+        if not isinstance(v, int):
+            raise ValueError("ef_search must be an integer")
+        if v < 1:
+            raise ValueError("ef_search must be at least 1")
+        return v
+
+    @field_validator("M", mode="before")
+    @classmethod
+    def validate_m(cls, v: int) -> int:
+        """Validate M is in valid range [4, 64] and is an integer."""
+        # Ensure type is int, not string
+        if not isinstance(v, int):
+            raise ValueError("M must be an integer")
+        if v < 4 or v > 64:
+            raise ValueError("M must be between 4 and 64")
+        return v
+
+    @model_validator(mode="after")
+    def validate_ef_search_vs_ef_construction(self) -> "IndexOptimizationConfig":
+        """
+        Validate business rule: ef_search must be <= ef_construction.
+
+        When only one parameter is set, auto-adjust the other to maintain the constraint.
+        When both are explicitly set, enforce the constraint strictly.
+        """
+        # Get fields that were explicitly set during initialization
+        fields_set = (
+            self.model_fields_set if hasattr(self, "model_fields_set") else set()
+        )
+
+        # If both ef_search and ef_construction were explicitly provided, enforce strictly
+        if "ef_search" in fields_set and "ef_construction" in fields_set:
+            if self.ef_search > self.ef_construction:
+                raise ValueError(
+                    f"ef_search ({self.ef_search}) must be <= ef_construction ({self.ef_construction})"
+                )
+        # If only ef_construction was set and it's less than default ef_search
+        elif "ef_construction" in fields_set and "ef_search" not in fields_set:
+            if self.ef_search > self.ef_construction:
+                self.ef_search = self.ef_construction
+        # If only ef_search was set and it's greater than default ef_construction
+        elif "ef_search" in fields_set and "ef_construction" not in fields_set:
+            if self.ef_search > self.ef_construction:
+                self.ef_construction = self.ef_search
+
+        return self
+
+    def to_chroma_metadata(self) -> dict[str, Any]:
+        """
+        Convert configuration to ChromaDB-compatible HNSW metadata format.
+
+        Returns:
+            dict: Metadata dictionary with ChromaDB HNSW parameter keys
+                - hnsw:space: Distance metric
+                - hnsw:construction_ef: Build-time search parameter
+                - hnsw:search_ef: Query-time search parameter
+                - hnsw:M: Bi-directional links per node
+        """
+        return {
+            "hnsw:space": self.space,
+            "hnsw:construction_ef": self.ef_construction,
+            "hnsw:search_ef": self.ef_search,
+            "hnsw:M": self.M,
+        }

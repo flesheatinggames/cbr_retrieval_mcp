@@ -22,7 +22,7 @@ import signal
 import tempfile
 import threading
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union
 from unittest.mock import AsyncMock, MagicMock, Mock, call, patch
@@ -437,7 +437,7 @@ class TestSessionStateManager:
                 "user_id": "user_456",
                 "active_query": "brewing techniques",
                 "partial_results": [{"id": "result1"}],
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(timezone.utc),
             }
 
             # Capture state
@@ -461,7 +461,7 @@ class TestSessionStateManager:
             session_data = {
                 "query": "fermentation process",
                 "results": [{"id": "ferment1", "score": 0.95}],
-                "created_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
             }
 
             # Save state
@@ -536,7 +536,7 @@ class TestSessionStateManager:
             session_id = "expiring_session"
             session_data = {
                 "query": "old query",
-                "created_at": datetime.utcnow() - timedelta(seconds=2),
+                "created_at": datetime.now(timezone.utc) - timedelta(seconds=2),
             }
 
             await manager.capture_session_state(session_id, session_data)

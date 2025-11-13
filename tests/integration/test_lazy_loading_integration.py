@@ -517,3 +517,740 @@ class TestLazyLoadingIntegration:
         assert result is not None, "Expected preloaded case to be available"
         assert result["case_id"] == "case_1", "Expected correct case data"
         assert access_time < 0.005, "Expected fast access to preloaded case (from cache)"
+
+
+class TestLazyLoadingOfEmbeddings:
+    """Test suite verifying LazyLoader integration with ProductionCBRRetriever."""
+
+    @pytest.fixture
+    def mock_case_data(self):
+        """Create mock case data with embeddings."""
+        return {
+            "case_1": {
+                "case_id": "case_1",
+                "content": "Content 1",
+                "category": "code",
+                "embedding": [0.1] * 100,  # Mock embedding vector
+            },
+            "case_2": {
+                "case_id": "case_2",
+                "content": "Content 2",
+                "category": "orchestration",
+                "embedding": [0.2] * 100,
+            },
+            "case_3": {
+                "case_id": "case_3",
+                "content": "Content 3",
+                "category": "best-practice",
+                "embedding": [0.3] * 100,
+            },
+        }
+
+    @pytest.fixture
+    def mock_case_loader(self, mock_case_data):
+        """Create a mock case loader that simulates storage delay."""
+
+        def loader(case_id: str) -> Dict[str, Any]:
+            # Simulate loading delay (10ms)
+            time.sleep(0.01)
+            if case_id in mock_case_data:
+                return mock_case_data[case_id]
+            raise ValueError(f"Case not found: {case_id}")
+
+        return loader
+
+    def test_embeddings_not_loaded_on_initialization(self, mock_case_loader, mock_case_data):
+        """
+        Test that ProductionCBRRetriever does NOT load embeddings during initialization.
+
+        This test verifies:
+        1. Initialization completes quickly (< 100ms)
+        2. No cases are loaded into LazyLoader cache during init
+        3. System is ready for on-demand loading
+        """
+        from cbr_mcp_server.performance.production_cbr_retriever import (
+            ProductionCBRRetriever,
+        )
+
+        case_ids = list(mock_case_data.keys())
+
+        # Measure initialization time
+        start_time = time.time()
+
+        # Create retriever with lazy loading enabled
+        retriever = ProductionCBRRetriever(
+            db_path="./test_db",
+            case_loader=mock_case_loader,
+            enable_lazy_loading=True,
+        )
+
+        init_time = time.time() - start_time
+
+        # Verify fast initialization (no upfront loading)
+        assert init_time < 0.1, f"Initialization took too long: {init_time}s"
+
+        # Verify no cases are loaded in LazyLoader cache
+        assert retriever.lazy_loader is not None, "LazyLoader should be initialized"
+        for case_id in case_ids:
+            assert not retriever.lazy_loader.is_loaded(
+                case_id
+            ), f"Case {case_id} should not be loaded during init"
+
+    def test_embeddings_loaded_on_first_access(self, mock_case_loader, mock_case_data):
+        """
+        Test that embeddings are loaded on-demand during first access.
+
+        This test verifies:
+        1. First access triggers loading (case not in cache)
+        2. Case is loaded into LazyLoader cache
+        3. Loading takes measurable time (due to storage access)
+        """
+        from cbr_mcp_server.performance.production_cbr_retriever import (
+            ProductionCBRRetriever,
+        )
+
+        retriever = ProductionCBRRetriever(
+            db_path="./test_db",
+            case_loader=mock_case_loader,
+            enable_lazy_loading=True,
+        )
+
+        case_id = "case_1"
+
+        # Verify case is not loaded initially
+        assert not retriever.lazy_loader.is_loaded(case_id)
+
+        # First access should trigger loading
+        start_time = time.time()
+        result = retriever.lazy_loader.load_on_demand(case_id)
+        access_time = time.time() - start_time
+
+        # Verify case was loaded
+        assert result is not None, "Case should be loaded"
+        assert result["case_id"] == case_id, "Correct case should be loaded"
+
+        # Verify loading took measurable time (storage access)
+        assert access_time > 0.008, f"First access should take time (storage): {access_time}s"
+
+        # Verify case is now in cache
+        assert retriever.lazy_loader.is_loaded(case_id), "Case should be cached after first access"
+
+    def test_cached_embeddings_fast_access(self, mock_case_loader, mock_case_data):
+        """
+        Test that cached embeddings provide fast subsequent access.
+
+        This test verifies:
+        1. Second access uses cache (no storage access)
+        2. Cached access is significantly faster than first access
+        3. Same data is returned from cache
+        """
+        from cbr_mcp_server.performance.production_cbr_retriever import (
+            ProductionCBRRetriever,
+        )
+
+        retriever = ProductionCBRRetriever(
+            db_path="./test_db",
+            case_loader=mock_case_loader,
+            enable_lazy_loading=True,
+        )
+
+        case_id = "case_1"
+
+        # First access - should load from storage
+        start_first = time.time()
+        first_result = retriever.lazy_loader.load_on_demand(case_id)
+        first_access_time = time.time() - start_first
+
+        # Second access - should use cache
+        start_second = time.time()
+        second_result = retriever.lazy_loader.load_on_demand(case_id)
+        second_access_time = time.time() - start_second
+
+        # Verify same data returned
+        assert first_result == second_result, "Same data should be returned"
+
+        # Verify second access is significantly faster (cache hit)
+        assert second_access_time < (first_access_time / 5), (
+            f"Cached access should be 5x faster: "
+            f"first={first_access_time}s, second={second_access_time}s"
+        )
+        assert second_access_time < 0.002, f"Cache hit should be < 2ms: {second_access_time}s"
+
+    def test_multiple_cases_independent_loading(self, mock_case_loader, mock_case_data):
+        """
+        Test that multiple cases are loaded independently on-demand.
+
+        This test verifies:
+        1. Each case is loaded only when accessed
+        2. Cases remain independent in cache
+        3. Loading one case doesn't affect others
+        """
+        from cbr_mcp_server.performance.production_cbr_retriever import (
+            ProductionCBRRetriever,
+        )
+
+        retriever = ProductionCBRRetriever(
+            db_path="./test_db",
+            case_loader=mock_case_loader,
+            enable_lazy_loading=True,
+        )
+
+        case_ids = ["case_1", "case_2", "case_3"]
+
+        # Initially, no cases should be loaded
+        for case_id in case_ids:
+            assert not retriever.lazy_loader.is_loaded(case_id)
+
+        # Load cases one by one
+        for i, case_id in enumerate(case_ids):
+            result = retriever.lazy_loader.load_on_demand(case_id)
+            assert result is not None
+            assert result["case_id"] == case_id
+
+            # Verify only accessed cases are loaded
+            for j, other_case_id in enumerate(case_ids):
+                if j <= i:
+                    # This case and previous should be loaded
+                    assert retriever.lazy_loader.is_loaded(other_case_id)
+                else:
+                    # Future cases should not be loaded yet
+                    assert not retriever.lazy_loader.is_loaded(other_case_id)
+
+    def test_lazy_loading_performance_benefit(self, mock_case_loader, mock_case_data):
+        """
+        Test that lazy loading provides measurable performance benefits.
+
+        This test verifies:
+        1. Lazy loading initialization is faster than eager loading
+        2. Memory usage is lower with lazy loading
+        3. Only accessed cases consume resources
+        """
+        from cbr_mcp_server.performance.production_cbr_retriever import (
+            ProductionCBRRetriever,
+        )
+
+        case_ids = list(mock_case_data.keys())
+
+        # Measure lazy loading initialization
+        start_lazy = time.time()
+        lazy_retriever = ProductionCBRRetriever(
+            db_path="./test_db",
+            case_loader=mock_case_loader,
+            enable_lazy_loading=True,
+        )
+        lazy_init_time = time.time() - start_lazy
+
+        # Simulate eager loading (load all cases upfront)
+        start_eager = time.time()
+        for case_id in case_ids:
+            mock_case_loader(case_id)
+        eager_init_time = time.time() - start_eager
+
+        # Verify lazy loading is significantly faster
+        assert lazy_init_time < 0.01, "Lazy init should be nearly instant"
+        assert eager_init_time > 0.025, "Eager loading should take measurable time"
+        assert lazy_init_time < (eager_init_time / 5), (
+            f"Lazy loading should be 5x faster than eager: "
+            f"lazy={lazy_init_time}s, eager={eager_init_time}s"
+        )
+
+    def test_lazy_loader_configuration_respected(self, mock_case_loader):
+        """
+        Test that LazyLoader respects configuration from ProductionCBRRetriever.
+
+        This test verifies:
+        1. LazyLoader is configured with settings from config dict
+        2. Configuration affects behavior (cache size, etc.)
+        """
+        from cbr_mcp_server.performance.production_cbr_retriever import (
+            ProductionCBRRetriever,
+        )
+
+        config = {
+            "lazy_loading": {
+                "batch_size": 25,  # Custom batch size
+            }
+        }
+
+        retriever = ProductionCBRRetriever(
+            db_path="./test_db",
+            case_loader=mock_case_loader,
+            enable_lazy_loading=True,
+            config=config,
+        )
+
+        # Verify LazyLoader was initialized with config
+        assert retriever.lazy_loader is not None
+        assert hasattr(retriever.lazy_loader, "config")
+
+
+class TestIncrementalDatabaseInitialization:
+    """Test suite for incremental ChromaDB initialization."""
+
+    @pytest.fixture
+    def mock_chromadb_client(self):
+        """Create a mock ChromaDB client for testing initialization phases."""
+        from unittest.mock import Mock, MagicMock
+
+        client = Mock()
+        collection = Mock()
+        collection.query.return_value = {
+            'ids': [['case1']],
+            'documents': [['doc1']],
+            'metadatas': [[{'category': 'code'}]],
+            'distances': [[0.1]]
+        }
+        client.get_or_create_collection = MagicMock(return_value=collection)
+        return client
+
+    def test_phase_1_client_created_collection_not_created(self, mock_chromadb_client):
+        """
+        Test Phase 1: ChromaDB client is created at startup, but collection is NOT.
+
+        This test verifies:
+        1. ProductionCBRRetriever initializes client during __init__
+        2. Collection is NOT created during __init__ (deferred to first query)
+        3. Startup time is reduced by deferring collection creation
+        """
+        from cbr_mcp_server.performance.production_cbr_retriever import (
+            ProductionCBRRetriever,
+        )
+        from unittest.mock import patch
+
+        with patch('chromadb.Client', return_value=mock_chromadb_client):
+            # Initialize retriever
+            retriever = ProductionCBRRetriever(
+                db_path="./test_db",
+                enable_lazy_loading=False
+            )
+
+            # Verify client was created
+            assert retriever.client is not None
+
+            # Verify collection was NOT created during __init__
+            # (get_or_create_collection should not have been called yet)
+            assert retriever.collection is None
+            mock_chromadb_client.get_or_create_collection.assert_not_called()
+
+    def test_phase_2_collection_created_on_first_query(self, mock_chromadb_client):
+        """
+        Test Phase 2: Collection is created when first query arrives.
+
+        This test verifies:
+        1. Collection is None after initialization
+        2. First query triggers collection creation
+        3. Collection is available for query execution
+        4. Subsequent queries reuse the same collection
+        """
+        from cbr_mcp_server.performance.production_cbr_retriever import (
+            ProductionCBRRetriever,
+        )
+        from unittest.mock import patch, Mock
+
+        # Create mock embedding model
+        mock_model = Mock()
+        mock_model.encode.return_value = [[0.1, 0.2, 0.3]]
+
+        with patch('chromadb.Client', return_value=mock_chromadb_client):
+            retriever = ProductionCBRRetriever(
+                db_path="./test_db",
+                embedding_model=mock_model,
+                enable_lazy_loading=False
+            )
+
+            # Verify collection is None before first query
+            assert retriever.collection is None
+
+            # Execute first query - should trigger collection creation
+            results = retriever.retrieve("test query", max_results=5)
+
+            # Verify collection was created
+            assert retriever.collection is not None
+            mock_chromadb_client.get_or_create_collection.assert_called_once()
+
+            # Verify query completed successfully
+            assert results is not None
+            assert len(results) > 0
+
+            # Execute second query - should reuse existing collection
+            retriever.retrieve("second query", max_results=5)
+
+            # Verify get_or_create_collection was still only called once
+            assert mock_chromadb_client.get_or_create_collection.call_count == 1
+
+    def test_thread_safety_concurrent_first_queries(self, mock_chromadb_client):
+        """
+        Test thread safety: Multiple concurrent first queries initialize collection once.
+
+        This test verifies:
+        1. Multiple threads racing to execute first query
+        2. Collection is initialized exactly once (not multiple times)
+        3. All threads successfully complete their queries
+        4. Thread-safe implementation using locking
+        """
+        from cbr_mcp_server.performance.production_cbr_retriever import (
+            ProductionCBRRetriever,
+        )
+        from unittest.mock import patch, Mock
+        import threading
+
+        # Create mock embedding model
+        mock_model = Mock()
+        mock_model.encode.return_value = [[0.1, 0.2, 0.3]]
+
+        with patch('chromadb.Client', return_value=mock_chromadb_client):
+            retriever = ProductionCBRRetriever(
+                db_path="./test_db",
+                embedding_model=mock_model,
+                enable_lazy_loading=False
+            )
+
+            # Storage for thread results
+            results = {}
+            errors = {}
+
+            def query_in_thread(thread_id: int):
+                """Execute query in thread."""
+                try:
+                    result = retriever.retrieve(f"query {thread_id}", max_results=5)
+                    results[thread_id] = result
+                except Exception as e:
+                    errors[thread_id] = e
+
+            # Create 5 threads that will race to initialize collection
+            threads = [
+                threading.Thread(target=query_in_thread, args=(i,))
+                for i in range(5)
+            ]
+
+            # Start all threads simultaneously
+            for thread in threads:
+                thread.start()
+
+            # Wait for all threads to complete
+            for thread in threads:
+                thread.join()
+
+            # Verify no errors occurred
+            assert len(errors) == 0, f"Errors occurred: {errors}"
+
+            # Verify all queries succeeded
+            assert len(results) == 5
+
+            # Verify collection was initialized exactly once
+            assert mock_chromadb_client.get_or_create_collection.call_count == 1
+
+    def test_graceful_degradation_db_unavailable(self):
+        """
+        Test graceful degradation when database is unavailable at startup.
+
+        This test verifies:
+        1. Retriever can initialize even if ChromaDB is unavailable
+        2. Helpful error message when query attempts to use unavailable DB
+        3. System doesn't crash during initialization
+        """
+        from cbr_mcp_server.performance.production_cbr_retriever import (
+            ProductionCBRRetriever,
+        )
+        from unittest.mock import patch, Mock
+
+        # Mock ChromaDB to raise error during client creation
+        with patch('chromadb.Client', side_effect=RuntimeError("ChromaDB not available")):
+            # Should not raise during initialization
+            retriever = ProductionCBRRetriever(
+                db_path="./test_db",
+                enable_lazy_loading=False
+            )
+
+            # Verify client creation failed but retriever was created
+            assert retriever.client is None
+            assert retriever.collection is None
+
+        # Attempting query should provide helpful error
+        mock_model = Mock()
+        mock_model.encode.return_value = [[0.1, 0.2, 0.3]]
+        retriever.embedding_model = mock_model
+
+        with pytest.raises(RuntimeError, match="ChromaDB.*not available|collection.*not available"):
+            retriever.retrieve("test query", max_results=5)
+
+    def test_existing_functionality_preserved(self, mock_chromadb_client):
+        """
+        Test that existing functionality is preserved after incremental init changes.
+
+        This test verifies:
+        1. Queries still work correctly
+        2. Results are properly formatted
+        3. Caching still functions
+        4. Memory tracking still works
+        """
+        from cbr_mcp_server.performance.production_cbr_retriever import (
+            ProductionCBRRetriever,
+        )
+        from unittest.mock import patch, Mock
+
+        # Create mock embedding model
+        mock_model = Mock()
+        mock_model.encode.return_value = [[0.1, 0.2, 0.3]]
+
+        with patch('chromadb.Client', return_value=mock_chromadb_client):
+            retriever = ProductionCBRRetriever(
+                db_path="./test_db",
+                embedding_model=mock_model,
+                enable_lazy_loading=False
+            )
+
+            # Execute query
+            results = retriever.retrieve("test query", max_results=5)
+
+            # Verify results format is correct
+            assert isinstance(results, list)
+            assert len(results) > 0
+            assert 'id' in results[0]
+            assert 'content' in results[0]
+            assert 'metadata' in results[0]
+
+            # Verify caching works (second query should be cached)
+            cached_results = retriever.retrieve("test query", max_results=5)
+            assert cached_results == results
+
+            # Verify memory manager is working
+            memory_usage = retriever.memory_manager.check_memory_usage()
+            assert memory_usage >= 0
+
+
+class TestLazyLoaderErrorHandling:
+    """Test suite verifying error handling in LazyLoader integration."""
+
+    @pytest.fixture
+    def failing_case_loader(self):
+        """Create a case loader that fails for certain cases."""
+
+        def loader(case_id: str) -> Dict[str, Any]:
+            if case_id == "error_case":
+                raise RuntimeError("Simulated storage error")
+            elif case_id == "not_found":
+                raise ValueError("Case not found")
+            return {"case_id": case_id, "content": f"Content for {case_id}"}
+
+        return loader
+
+    def test_handle_missing_case_gracefully(self, failing_case_loader):
+        """
+        Test that LazyLoader handles missing cases gracefully.
+
+        This test verifies:
+        1. Loading non-existent case returns None (not exception)
+        2. Error is logged but doesn't crash system
+        3. System remains operational after error
+        """
+        from cbr_mcp_server.performance.production_cbr_retriever import (
+            ProductionCBRRetriever,
+        )
+
+        retriever = ProductionCBRRetriever(
+            db_path="./test_db",
+            case_loader=failing_case_loader,
+            enable_lazy_loading=True,
+        )
+
+        # Attempt to load non-existent case
+        result = retriever.lazy_loader.load_on_demand("not_found")
+
+        # Should return None, not raise exception
+        assert result is None, "Missing case should return None"
+
+        # Verify case is not marked as loaded
+        assert not retriever.lazy_loader.is_loaded("not_found")
+
+        # Verify system still works for valid cases
+        valid_result = retriever.lazy_loader.load_on_demand("valid_case")
+        assert valid_result is not None
+
+    def test_handle_storage_error_gracefully(self, failing_case_loader):
+        """
+        Test that LazyLoader handles storage errors gracefully.
+
+        This test verifies:
+        1. Storage error returns None (not exception)
+        2. Error is logged appropriately
+        3. Subsequent access attempts are possible
+        """
+        from cbr_mcp_server.performance.production_cbr_retriever import (
+            ProductionCBRRetriever,
+        )
+
+        retriever = ProductionCBRRetriever(
+            db_path="./test_db",
+            case_loader=failing_case_loader,
+            enable_lazy_loading=True,
+        )
+
+        # Attempt to load case that causes storage error
+        result = retriever.lazy_loader.load_on_demand("error_case")
+
+        # Should return None, not raise exception
+        assert result is None, "Storage error should return None"
+
+        # Verify case is not marked as loaded
+        assert not retriever.lazy_loader.is_loaded("error_case")
+
+    def test_concurrent_error_handling(self, failing_case_loader):
+        """
+        Test that concurrent access handles errors correctly.
+
+        This test verifies:
+        1. Multiple threads can safely handle errors
+        2. Error in one thread doesn't affect others
+        3. Thread-safe error handling
+        """
+        import threading
+
+        from cbr_mcp_server.performance.production_cbr_retriever import (
+            ProductionCBRRetriever,
+        )
+
+        retriever = ProductionCBRRetriever(
+            db_path="./test_db",
+            case_loader=failing_case_loader,
+            enable_lazy_loading=True,
+        )
+
+        results = {}
+
+        def load_case(case_id: str):
+            """Load case in thread."""
+            results[case_id] = retriever.lazy_loader.load_on_demand(case_id)
+
+        # Create threads for concurrent access (mix of valid and error cases)
+        threads = [
+            threading.Thread(target=load_case, args=("valid_1",)),
+            threading.Thread(target=load_case, args=("error_case",)),
+            threading.Thread(target=load_case, args=("valid_2",)),
+            threading.Thread(target=load_case, args=("not_found",)),
+        ]
+
+        # Start all threads
+        for thread in threads:
+            thread.start()
+
+        # Wait for all threads to complete
+        for thread in threads:
+            thread.join()
+
+        # Verify results
+        assert results["valid_1"] is not None, "Valid case should load successfully"
+        assert results["valid_2"] is not None, "Valid case should load successfully"
+        assert results["error_case"] is None, "Error case should return None"
+        assert results["not_found"] is None, "Missing case should return None"
+
+    def test_retry_after_error(self, failing_case_loader):
+        """
+        Test that failed loads can be retried.
+
+        This test verifies:
+        1. Failed load doesn't permanently mark case as unavailable
+        2. Subsequent retry attempts are possible
+        3. System recovers from transient errors
+        """
+        from cbr_mcp_server.performance.production_cbr_retriever import (
+            ProductionCBRRetriever,
+        )
+
+        retriever = ProductionCBRRetriever(
+            db_path="./test_db",
+            case_loader=failing_case_loader,
+            enable_lazy_loading=True,
+        )
+
+        # First attempt - will fail
+        first_result = retriever.lazy_loader.load_on_demand("error_case")
+        assert first_result is None
+
+        # Case should not be marked as loaded
+        assert not retriever.lazy_loader.is_loaded("error_case")
+
+        # Second attempt should also be possible (not permanently blocked)
+        second_result = retriever.lazy_loader.load_on_demand("error_case")
+        assert second_result is None
+
+    def test_partial_batch_failure(self):
+        """
+        Test that partial batch failures are handled correctly.
+
+        This test verifies:
+        1. Batch loading continues despite individual failures
+        2. Successful loads are cached
+        3. Failed loads don't corrupt cache
+        """
+        from cbr_mcp_server.performance.production_cbr_retriever import (
+            ProductionCBRRetriever,
+        )
+
+        load_count = {"count": 0}
+
+        def partially_failing_loader(case_id: str) -> Dict[str, Any]:
+            load_count["count"] += 1
+            if case_id in ["error_1", "error_2"]:
+                raise RuntimeError(f"Simulated error for {case_id}")
+            return {"case_id": case_id, "content": f"Content for {case_id}"}
+
+        retriever = ProductionCBRRetriever(
+            db_path="./test_db",
+            case_loader=partially_failing_loader,
+            enable_lazy_loading=True,
+        )
+
+        # Load mix of valid and error cases
+        case_ids = ["valid_1", "error_1", "valid_2", "error_2", "valid_3"]
+        results = []
+
+        for case_id in case_ids:
+            result = retriever.lazy_loader.load_on_demand(case_id)
+            results.append((case_id, result))
+
+        # Verify successful loads
+        assert results[0][1] is not None, "valid_1 should load successfully"
+        assert results[2][1] is not None, "valid_2 should load successfully"
+        assert results[4][1] is not None, "valid_3 should load successfully"
+
+        # Verify failed loads
+        assert results[1][1] is None, "error_1 should return None"
+        assert results[3][1] is None, "error_2 should return None"
+
+        # Verify successful cases are cached
+        assert retriever.lazy_loader.is_loaded("valid_1")
+        assert retriever.lazy_loader.is_loaded("valid_2")
+        assert retriever.lazy_loader.is_loaded("valid_3")
+
+        # Verify failed cases are not cached
+        assert not retriever.lazy_loader.is_loaded("error_1")
+        assert not retriever.lazy_loader.is_loaded("error_2")
+
+    def test_null_case_loader_fallback(self):
+        """
+        Test that system handles null case_loader gracefully.
+
+        This test verifies:
+        1. ProductionCBRRetriever can initialize without case_loader
+        2. Default fallback loader is used
+        3. System remains operational with fallback
+        """
+        from cbr_mcp_server.performance.production_cbr_retriever import (
+            ProductionCBRRetriever,
+        )
+
+        # Initialize without case_loader
+        retriever = ProductionCBRRetriever(
+            db_path="./test_db",
+            case_loader=None,  # No loader provided
+            enable_lazy_loading=True,
+        )
+
+        # Verify LazyLoader was initialized with fallback
+        assert retriever.lazy_loader is not None
+
+        # Verify fallback loader works (returns default data)
+        result = retriever.lazy_loader.load_on_demand("any_case")
+        assert result is not None
+        assert "case_id" in result

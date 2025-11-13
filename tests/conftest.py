@@ -17,9 +17,22 @@ warnings.filterwarnings(
 
 
 # Mock the SentenceTransformer at module level to prevent downloads
+# NOTE: This mock is skipped for benchmark tests that need real embeddings
 @pytest.fixture(scope="session", autouse=True)
-def mock_sentence_transformer():
-    """Mock SentenceTransformer to prevent model downloads during tests."""
+def mock_sentence_transformer(request):
+    """Mock SentenceTransformer to prevent model downloads during tests.
+
+    Automatically skips mocking for test files containing 'benchmark' in their path,
+    as these are integration tests that need real embeddings.
+    """
+    # Skip mocking for benchmark integration tests
+    # Check if any test items are from benchmark directory
+    session = request.session
+    test_paths = [str(item.path) for item in session.items]
+    if any("benchmark" in path for path in test_paths):
+        yield None
+        return
+
     with patch("sentence_transformers.SentenceTransformer") as mock_st:
         # Create a mock instance that returns mock embeddings
         mock_instance = Mock()

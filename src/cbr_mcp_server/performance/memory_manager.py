@@ -6,7 +6,7 @@ from threading import Event, RLock, Thread
 from typing import Any, Callable, Dict, List, Optional
 
 import numpy as np
-import psutil
+import psutil  # type: ignore[import-untyped]
 
 
 class MemoryManager:
@@ -116,8 +116,12 @@ class MemoryManager:
         else:
             # Moderate overage - scale eviction proportionally
             # Use configured eviction percentage as maximum, scale down for smaller overages
-            base_eviction = self.emergency_eviction_percentage * 0.2  # 20% of emergency for base
-            additional = (overage_ratio - 1.0) * (self.emergency_eviction_percentage * 1.6)
+            base_eviction = (
+                self.emergency_eviction_percentage * 0.2
+            )  # 20% of emergency for base
+            additional = (overage_ratio - 1.0) * (
+                self.emergency_eviction_percentage * 1.6
+            )
             eviction_percentage = base_eviction + additional
 
         # Trigger eviction if callback is set
@@ -219,7 +223,7 @@ class EmbeddingCacheManager:
                 evicted += 1
             return evicted
 
-    def warm_cache(self, collection, case_ids: List[str]) -> None:
+    def warm_cache(self, collection: Any, case_ids: List[str]) -> None:
         """
         Warm cache with embeddings from ChromaDB collection.
 
@@ -341,13 +345,14 @@ class MemoryPressureDetector:
 
         # Create stop event for thread coordination
         self._stop_event = Event()
+        stop_event = self._stop_event  # Capture for closure
 
-        def monitor_loop():
+        def monitor_loop() -> None:
             """Background monitoring loop."""
-            while not self._stop_event.is_set():
+            while not stop_event.is_set():
                 self.check_pressure()
                 # Use wait instead of sleep for responsive shutdown
-                self._stop_event.wait(interval_seconds)
+                stop_event.wait(interval_seconds)
 
         # Create and start daemon thread
         self._monitoring_thread = Thread(target=monitor_loop, daemon=True)
@@ -367,10 +372,9 @@ class MemoryPressureDetector:
         """Context manager entry."""
         return self
 
-    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> bool:
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Context manager exit - cleanup resources."""
         self.stop_monitoring()
-        return False
 
     def __del__(self) -> None:
         """Cleanup on deletion."""
