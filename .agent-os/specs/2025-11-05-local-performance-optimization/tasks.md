@@ -105,14 +105,14 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 9.9 Document benchmark results
   - [x] 9.10 Verify all performance targets met
 
-- [ ] 10. **MCP Protocol Performance Integration**
-  - [ ] 10.1 Write MCP tool performance tests (tests/integration/test_mcp_performance_integration.py)
-  - [ ] 10.2 Test cbr_retrieve tool performance
-  - [ ] 10.3 Test cbr_search_category tool performance
-  - [ ] 10.4 Test cbr_find_similar tool performance
-  - [ ] 10.5 Test concurrent MCP tool calls performance
-  - [ ] 10.6 Verify MCP protocol compliance maintained
-  - [ ] 10.7 Verify all MCP performance tests pass
+- [x] 10. **MCP Protocol Performance Integration**
+  - [x] 10.1 Write MCP tool performance tests (tests/integration/test_mcp_performance_integration.py)
+  - [x] 10.2 Test cbr_retrieve tool performance
+  - [x] 10.3 Test cbr_search_category tool performance
+  - [x] 10.4 Test cbr_find_similar tool performance
+  - [x] 10.5 Test concurrent MCP tool calls performance
+  - [x] 10.6 Verify MCP protocol compliance maintained
+  - [x] 10.7 Verify all MCP performance tests pass
 
 - [ ] 11. **Regression Testing and Quality Assurance**
   - [ ] 11.1 Write performance regression tests (tests/regression/test_performance_regression.py)
