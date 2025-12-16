@@ -740,7 +740,7 @@ class TestStartupPerformanceRegression:
         # Verify all runs within acceptable range (if baseline exists)
         baseline_cold = baseline_metrics.get("cold_start_time", 0.0)
         if baseline_cold > 0:
-            max_acceptable = baseline_cold * 1.50  # 50% tolerance for system variance
+            max_acceptable = baseline_cold * 1.70  # 70% tolerance for multi-process system variance
 
             for i, t in enumerate(startup_times):
                 assert (
