@@ -28,6 +28,10 @@ import chromadb
 import pytest
 from sentence_transformers import SentenceTransformer
 
+# Mark all tests in this module to run serially (not in parallel)
+# This prevents race conditions during database operations
+pytestmark = pytest.mark.xdist_group("serial")
+
 # Add the src directory to path for importing cbr_mcp_server
 src_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "src")
 sys.path.insert(0, src_path)
@@ -35,14 +39,8 @@ sys.path.insert(0, src_path)
 # Import from the cbr_mcp_server package
 from cbr_mcp_server import CBRServerConfig, ProductionCBRRetriever, StructuredLogger
 
-# Add scripts/utilities to path for importing setup_vectordb
-scripts_path = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "scripts", "utilities"
-)
-sys.path.insert(0, scripts_path)
-
 # Import setup_vectordb functions
-import setup_vectordb
+from cbr_mcp_server.utilities import setup_vectordb
 
 # ============================================================================
 # Fixtures
@@ -121,7 +119,10 @@ async def test_e2e_populate_and_search_by_category(temp_db_dir, mock_embedding_m
 
     # Step 2: Populate database using setup_vectordb logic
     # Mock the embedding model to avoid actual model download
-    with patch("setup_vectordb.SentenceTransformer", return_value=mock_embedding_model):
+    with patch(
+        "cbr_mcp_server.utilities.setup_vectordb.SentenceTransformer",
+        return_value=mock_embedding_model,
+    ):
         # Import after patching
         from cases import load_all_cases
         from cbr_mcp_server.metadata_extraction import extract_metadata_list
@@ -153,9 +154,9 @@ async def test_e2e_populate_and_search_by_category(temp_db_dir, mock_embedding_m
             ids=ids,
         )
 
-    # Step 3: Verify 103 cases were loaded
+    # Step 3: Verify 134 cases were loaded
     final_count = collection.count()
-    assert final_count == 103, f"Expected 103 cases, got {final_count}"
+    assert final_count == 134, f"Expected 134 cases, got {final_count}"
 
     # Step 4: Initialize CBR retriever with populated database
     config = CBRServerConfig(
@@ -252,7 +253,10 @@ def test_e2e_force_rebuild_and_verify_metadata(temp_db_dir, mock_embedding_model
     assert "problem" in broken_metadata, "Broken metadata should have problem field"
 
     # Step 3: Force rebuild with complete metadata
-    with patch("setup_vectordb.SentenceTransformer", return_value=mock_embedding_model):
+    with patch(
+        "cbr_mcp_server.utilities.setup_vectordb.SentenceTransformer",
+        return_value=mock_embedding_model,
+    ):
         from cases import load_all_cases
         from cbr_mcp_server.metadata_extraction import extract_metadata_list
 
@@ -284,9 +288,9 @@ def test_e2e_force_rebuild_and_verify_metadata(temp_db_dir, mock_embedding_model
             ids=ids,
         )
 
-    # Step 4: Verify 103 cases loaded after rebuild
+    # Step 4: Verify 134 cases loaded after rebuild
     final_count = collection.count()
-    assert final_count == 103, f"Expected 103 cases after rebuild, got {final_count}"
+    assert final_count == 134, f"Expected 134 cases after rebuild, got {final_count}"
 
     # Step 5: Retrieve sample case and verify complete metadata
     sample_result = collection.get(ids=["id0"], include=["metadatas"])
@@ -341,7 +345,10 @@ async def test_e2e_filtered_load_and_category_search(temp_db_dir, mock_embedding
     assert len(collections) == 0, "Database should start empty"
 
     # Step 2: Populate database with filtered categories
-    with patch("setup_vectordb.SentenceTransformer", return_value=mock_embedding_model):
+    with patch(
+        "cbr_mcp_server.utilities.setup_vectordb.SentenceTransformer",
+        return_value=mock_embedding_model,
+    ):
         from cases import load_all_cases
         from cbr_mcp_server.metadata_extraction import extract_metadata_list
 

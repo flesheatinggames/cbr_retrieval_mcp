@@ -21,10 +21,10 @@ import pytest
 
 # These imports will fail initially - this is expected in TDD
 from cbr_mcp_server.performance.lazy_loader import (
-    LazyLoader,
     AccessPatternTracker,
-    PreloadStrategy,
+    LazyLoader,
     LoadScheduler,
+    PreloadStrategy,
 )
 
 
@@ -300,9 +300,7 @@ class TestAccessPatternTracker:
         assert frequency > 0
 
         # Test frequency is 0 for never-accessed cases
-        frequency_unaccessed = pattern_tracker.get_access_frequency(
-            "never_accessed"
-        )
+        frequency_unaccessed = pattern_tracker.get_access_frequency("never_accessed")
         assert frequency_unaccessed == 0
 
         # Test frequency only counts accesses within window
@@ -367,7 +365,9 @@ class TestPreloadStrategy:
         return loader
 
     @pytest.fixture
-    def preload_strategy(self, mock_access_tracker, mock_load_scheduler, mock_lazy_loader):
+    def preload_strategy(
+        self, mock_access_tracker, mock_load_scheduler, mock_lazy_loader
+    ):
         """Create PreloadStrategy instance with mocked dependencies."""
         return PreloadStrategy(
             access_tracker=mock_access_tracker,
@@ -569,7 +569,9 @@ class TestPreloadStrategy:
 
         # Should not exceed batch size
         assert scheduled_count <= preload_strategy.batch_size
-        assert mock_load_scheduler.schedule_task.call_count <= preload_strategy.batch_size
+        assert (
+            mock_load_scheduler.schedule_task.call_count <= preload_strategy.batch_size
+        )
 
     def test_preload_batch_size_edge_case_size_one(
         self, mock_access_tracker, mock_load_scheduler, mock_lazy_loader
@@ -665,6 +667,7 @@ class TestLoadScheduler:
     @pytest.fixture
     def mock_task(self):
         """Create mock task function."""
+
         async def task_func(task_id):
             await asyncio.sleep(0.01)
             return f"Task {task_id} completed"

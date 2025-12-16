@@ -1,0 +1,259 @@
+{
+  "metadata": {
+    "timestamp": "2025-12-15T11:14:44.463347",
+    "duration_seconds": 30,
+    "elapsed_seconds": 31.181078040972352,
+    "baseline_memory_mb": 1211.94,
+    "final_memory_mb": 980.84,
+    "delta_memory_mb": -231.09
+  },
+  "load_metrics": {
+    "total_queries": 6623,
+    "successful_queries": 4839,
+    "failed_queries": 1784,
+    "error_rate": 0.2694,
+    "queries_per_second": 155.21,
+    "latency": {
+      "p50_ms": 8.2,
+      "p95_ms": 115.64,
+      "p99_ms": 249.5,
+      "mean_ms": 30.49,
+      "max_ms": 401.36
+    },
+    "memory": {
+      "peak_mb": 1231.8,
+      "mean_mb": 1180.04,
+      "final_mb": 979.7,
+      "samples_count": 30
+    },
+    "cache": {
+      "hit_rate": 0.0,
+      "hits": 0,
+      "misses": 0
+    }
+  },
+  "memory_top_consumers": [
+    {
+      "size_mb": 0.55,
+      "count": 85,
+      "location": "  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/chromadb/api/rust.py\", line 520"
+    },
+    {
+      "size_mb": 0.11,
+      "count": 4839,
+      "location": "  File \"/Users/traviswilliams/Projects/cbr_retrieval_mcp/tests/load/test_performance_load.py\", line 192"
+    },
+    {
+      "size_mb": 0.05,
+      "count": 2,
+      "location": "  File \"/Users/traviswilliams/Projects/cbr_retrieval_mcp/tests/load/test_performance_load.py\", line 232"
+    },
+    {
+      "size_mb": 0.05,
+      "count": 765,
+      "location": "  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/chromadb/api/rust.py\", line 524"
+    },
+    {
+      "size_mb": 0.04,
+      "count": 1782,
+      "location": "  File \"/Users/traviswilliams/Projects/cbr_retrieval_mcp/tests/load/test_performance_load.py\", line 198"
+    },
+    {
+      "size_mb": 0.03,
+      "count": 597,
+      "location": "  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/transformers/tokenization_utils_base.py\", line 729"
+    },
+    {
+      "size_mb": 0.02,
+      "count": 204,
+      "location": "  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/nn/modules/module.py\", line 1784"
+    },
+    {
+      "size_mb": 0.02,
+      "count": 216,
+      "location": "  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/nn/modules/module.py\", line 1773"
+    },
+    {
+      "size_mb": 0.01,
+      "count": 117,
+      "location": "  File \"/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/nn/functional.py\", line 2905"
+    },
+    {
+      "size_mb": 0.01,
+      "count": 166,
+      "location": "  File \"/Users/traviswilliams/.cache/huggingface/modules/transformers_modules/nomic-ai/nomic-bert-2048/7710840340a098cfb869c4f65e87cf2b1b70caca/modeling_hf_nomic_bert.py\", line 1395"
+    }
+  ],
+  "cprofile_file": "karen_verification_results/production_profile_1765815284.prof",
+  "top_functions": [
+    {
+      "function": "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/nn/modules/module.py:2889(eval)",
+      "ncalls": 1913,
+      "tottime": 0.002,
+      "cumtime": 9.238,
+      "percall_tot": 1e-06,
+      "percall_cum": 0.004829
+    },
+    {
+      "function": "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/nn/modules/module.py:2867(train)",
+      "ncalls": 365383,
+      "tottime": 0.531,
+      "cumtime": 9.204,
+      "percall_tot": 1e-06,
+      "percall_cum": 2.5e-05
+    },
+    {
+      "function": "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/nn/modules/module.py:1242(to)",
+      "ncalls": 1913,
+      "tottime": 0.01,
+      "cumtime": 9.15,
+      "percall_tot": 5e-06,
+      "percall_cum": 0.004783
+    },
+    {
+      "function": "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/einops/einops.py:230(_apply_recipe)",
+      "ncalls": 25325,
+      "tottime": 0.161,
+      "cumtime": 9.09,
+      "percall_tot": 6e-06,
+      "percall_cum": 0.000359
+    },
+    {
+      "function": "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/einops/einops.py:603(repeat)",
+      "ncalls": 16882,
+      "tottime": 0.094,
+      "cumtime": 9.023,
+      "percall_tot": 6e-06,
+      "percall_cum": 0.000534
+    },
+    {
+      "function": "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/nn/modules/module.py:1966(__setattr__)",
+      "ncalls": 365422,
+      "tottime": 5.028,
+      "cumtime": 7.69,
+      "percall_tot": 1.4e-05,
+      "percall_cum": 2.1e-05
+    },
+    {
+      "function": "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/nn/modules/module.py:925(_apply)",
+      "ncalls": 365380,
+      "tottime": 3.873,
+      "cumtime": 7.563,
+      "percall_tot": 1.1e-05,
+      "percall_cum": 2.1e-05
+    },
+    {
+      "function": "~:0(<method 'reshape' of 'torch._C.TensorBase' objects>)",
+      "ncalls": 25326,
+      "tottime": 0.224,
+      "cumtime": 7.209,
+      "percall_tot": 9e-06,
+      "percall_cum": 0.000285
+    },
+    {
+      "function": "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/einops/_backends.py:92(reshape)",
+      "ncalls": 25325,
+      "tottime": 0.121,
+      "cumtime": 6.838,
+      "percall_tot": 5e-06,
+      "percall_cum": 0.00027
+    },
+    {
+      "function": "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/sentence_transformers/models/Transformer.py:262(tokenize)",
+      "ncalls": 1913,
+      "tottime": 0.024,
+      "cumtime": 6.819,
+      "percall_tot": 1.2e-05,
+      "percall_cum": 0.003564
+    },
+    {
+      "function": "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/transformers/tokenization_utils_base.py:2828(__call__)",
+      "ncalls": 1913,
+      "tottime": 0.019,
+      "cumtime": 5.681,
+      "percall_tot": 1e-05,
+      "percall_cum": 0.00297
+    },
+    {
+      "function": "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/einops/einops.py:460(reduce)",
+      "ncalls": 25323,
+      "tottime": 0.196,
+      "cumtime": 4.981,
+      "percall_tot": 8e-06,
+      "percall_cum": 0.000197
+    },
+    {
+      "function": "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/transformers/tokenization_utils_base.py:2926(_call_one)",
+      "ncalls": 1913,
+      "tottime": 0.014,
+      "cumtime": 4.737,
+      "percall_tot": 7e-06,
+      "percall_cum": 0.002476
+    },
+    {
+      "function": "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/nn/functional.py:2353(silu)",
+      "ncalls": 3328,
+      "tottime": 0.02,
+      "cumtime": 4.595,
+      "percall_tot": 6e-06,
+      "percall_cum": 0.001381
+    },
+    {
+      "function": "~:0(<method 'control' of 'select.kqueue' objects>)",
+      "ncalls": 10183,
+      "tottime": 3.108,
+      "cumtime": 4.496,
+      "percall_tot": 0.000305,
+      "percall_cum": 0.000442
+    },
+    {
+      "function": "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/asyncio/base_events.py:1962(_run_once)",
+      "ncalls": 9883,
+      "tottime": 0.275,
+      "cumtime": 4.254,
+      "percall_tot": 2.8e-05,
+      "percall_cum": 0.00043
+    },
+    {
+      "function": "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/nn/modules/linear.py:124(forward)",
+      "ncalls": 18428,
+      "tottime": 0.103,
+      "cumtime": 4.123,
+      "percall_tot": 6e-06,
+      "percall_cum": 0.000224
+    },
+    {
+      "function": "/Users/traviswilliams/.cache/huggingface/modules/transformers_modules/nomic-ai/nomic-bert-2048/7710840340a098cfb869c4f65e87cf2b1b70caca/modeling_hf_nomic_bert.py:1257(rotate_half)",
+      "ncalls": 6659,
+      "tottime": 0.074,
+      "cumtime": 3.871,
+      "percall_tot": 1.1e-05,
+      "percall_cum": 0.000581
+    },
+    {
+      "function": "/Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/torch/nn/modules/normalization.py:216(forward)",
+      "ncalls": 8568,
+      "tottime": 0.026,
+      "cumtime": 3.702,
+      "percall_tot": 3e-06,
+      "percall_cum": 0.000432
+    },
+    {
+      "function": "~:0(<built-in method torch.cat>)",
+      "ncalls": 13445,
+      "tottime": 0.186,
+      "cumtime": 3.64,
+      "percall_tot": 1.4e-05,
+      "percall_cum": 0.000271
+    }
+  ],
+  "validation": {
+    "p95_latency": true,
+    "p50_latency": true,
+    "peak_memory": false,
+    "cache_hit_rate": false,
+    "throughput": true,
+    "error_rate": false,
+    "overall": false
+  }
+}

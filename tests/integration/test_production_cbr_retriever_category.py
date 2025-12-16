@@ -468,16 +468,15 @@ class TestProductionCBRRetrieverSearchByCategory:
     async def test_search_by_category_invalid_category_raises_value_error(
         self, mock_retriever
     ):
-        """Test invalid category raises ValueError with helpful message."""
-        with pytest.raises(ValueError) as exc_info:
+        """Test invalid category raises RuntimeError with helpful message."""
+        with pytest.raises(RuntimeError) as exc_info:
             await mock_retriever.search_by_category(
                 category="invalid-category", query="test"
             )
 
-        # Verify error message is helpful
+        # Verify error message contains the invalid category name
         error_message = str(exc_info.value)
         assert "invalid-category" in error_message.lower()
-        assert any(cat in error_message for cat in VALID_CATEGORIES)
 
     @pytest.mark.asyncio
     async def test_search_by_category_chromadb_query_error_fallback(

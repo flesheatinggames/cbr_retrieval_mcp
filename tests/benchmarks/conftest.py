@@ -302,7 +302,10 @@ def pytest_runtest_makereport(item, call):
             collector = item.session.startup_collector
 
             # Check if this is a startup test by looking at the test module
-            if "test_startup_baseline" in fullname or "test_startup_benchmarks" in fullname:
+            if (
+                "test_startup_baseline" in fullname
+                or "test_startup_benchmarks" in fullname
+            ):
                 collector.add_result(
                     test_name=test_name,
                     fullname=fullname,
@@ -318,6 +321,7 @@ def export_memory_results(request, memory_collector):
     Session-scoped fixture to export memory results at end of test session.
 
     This fixture runs automatically and exports results after all tests complete.
+    Only exports if there are actual test results to avoid overwriting baseline.
     """
     # Store collector in session for hook access
     request.session.memory_collector = memory_collector
@@ -325,11 +329,12 @@ def export_memory_results(request, memory_collector):
     # Yield to run tests
     yield
 
-    # After all tests complete, export results
-    project_root = Path(__file__).parent.parent.parent
-    output_file = project_root / "baseline_memory_usage.json"
-
-    memory_collector.export_to_json(output_file)
+    # After all tests complete, export results ONLY if we have data
+    # This prevents other tests from overwriting baseline with empty data
+    if len(memory_collector.results) > 0:
+        project_root = Path(__file__).parent.parent.parent
+        output_file = project_root / "baseline_memory_usage.json"
+        memory_collector.export_to_json(output_file)
 
 
 @pytest.fixture
@@ -392,6 +397,7 @@ def export_startup_results(request, startup_collector):
     Session-scoped fixture to export startup results at end of test session.
 
     This fixture runs automatically and exports results after all tests complete.
+    Only exports if there are actual test results to avoid overwriting baseline.
     """
     # Store collector in session for hook access
     request.session.startup_collector = startup_collector
@@ -399,11 +405,12 @@ def export_startup_results(request, startup_collector):
     # Yield to run tests
     yield
 
-    # After all tests complete, export results
-    project_root = Path(__file__).parent.parent.parent
-    output_file = project_root / "baseline_startup_time.json"
-
-    startup_collector.export_to_json(output_file)
+    # After all tests complete, export results ONLY if we have data
+    # This prevents regression tests from overwriting baseline with empty data
+    if len(startup_collector.results) > 0:
+        project_root = Path(__file__).parent.parent.parent
+        output_file = project_root / "baseline_startup_time.json"
+        startup_collector.export_to_json(output_file)
 
 
 @pytest.fixture

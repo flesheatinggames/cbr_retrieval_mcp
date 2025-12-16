@@ -33,12 +33,17 @@ class TestMemoryManager:
     def mock_psutil(self):
         """Mock psutil for memory testing."""
         with patch("cbr_mcp_server.performance.memory_manager.psutil") as mock:
+            # Ensure virtual_memory always returns a mock with percent attribute
+            mock_mem = Mock()
+            mock_mem.percent = 50.0  # Default safe value
+            mock_mem.total = 8 * 1024 * 1024 * 1024  # 8GB default
+            mock.virtual_memory.return_value = mock_mem
             yield mock
 
     @pytest.fixture
     def memory_manager(self, mock_psutil):
         """Create MemoryManager instance with mocked psutil."""
-        mock_psutil.virtual_memory.return_value.total = 8 * 1024 * 1024 * 1024  # 8GB
+        # Total already set in mock_psutil fixture
         return MemoryManager(max_memory_mb=500)
 
     def test_memory_manager_initialization(self, memory_manager, mock_psutil):
@@ -143,6 +148,111 @@ class TestMemoryManager:
         # Emergency eviction should use at least 50% eviction
         call_args = mock_eviction_callback.call_args[0][0]
         assert call_args >= 0.5
+
+    def test_clear_eviction_callback_when_set(self, memory_manager):
+        """Verify clear_eviction_callback returns True when callback is set."""
+        mock_callback = Mock()
+        memory_manager.set_eviction_callback(mock_callback)
+
+        result = memory_manager.clear_eviction_callback()
+
+        assert result is True
+        assert memory_manager._eviction_callback is None
+
+    def test_clear_eviction_callback_when_not_set(self, memory_manager):
+        """Verify clear_eviction_callback returns False when no callback set."""
+        result = memory_manager.clear_eviction_callback()
+
+        assert result is False
+        assert memory_manager._eviction_callback is None
+
+    def test_clear_eviction_callback_prevents_execution(self, memory_manager):
+        """Verify cleared callback is not executed."""
+        mock_callback = Mock()
+        memory_manager.set_eviction_callback(mock_callback)
+        memory_manager.clear_eviction_callback()
+
+        # Attempt to trigger eviction
+        memory_manager.trigger_cache_eviction(0.5)
+
+        # Callback should not be called
+        mock_callback.assert_not_called()
+
+    def test_callback_lifecycle_multiple_sets_and_clears(self, memory_manager):
+        """Verify callback can be set, cleared, and reset multiple times."""
+        mock_callback1 = Mock()
+        mock_callback2 = Mock()
+
+        # Set first callback
+        memory_manager.set_eviction_callback(mock_callback1)
+        memory_manager.trigger_cache_eviction(0.3)
+        assert mock_callback1.call_count == 1
+
+        # Clear first callback
+        assert memory_manager.clear_eviction_callback() is True
+        memory_manager.trigger_cache_eviction(0.3)
+        assert mock_callback1.call_count == 1  # No additional calls
+
+        # Set second callback
+        memory_manager.set_eviction_callback(mock_callback2)
+        memory_manager.trigger_cache_eviction(0.4)
+        assert mock_callback2.call_count == 1
+        assert mock_callback1.call_count == 1  # Still no additional calls
+
+        # Clear second callback
+        assert memory_manager.clear_eviction_callback() is True
+
+    def test_callback_cleanup_prevents_memory_leak(self, memory_manager):
+        """Verify callback cleanup releases references to prevent memory leaks."""
+
+        class LargeObject:
+            """Object with large memory footprint."""
+
+            def __init__(self):
+                self.data = [0] * 1000000  # Large list
+
+        large_obj = LargeObject()
+        callback_executed = []
+
+        def callback_with_closure(percentage):
+            """Callback that captures large object in closure."""
+            callback_executed.append(percentage)
+            _ = large_obj  # Reference to large object
+
+        # Set callback with closure
+        memory_manager.set_eviction_callback(callback_with_closure)
+
+        # Trigger callback to verify it works
+        memory_manager.trigger_cache_eviction(0.2)
+        assert len(callback_executed) == 1
+
+        # Clear callback - this should break the closure reference
+        assert memory_manager.clear_eviction_callback() is True
+
+        # Callback should no longer be executed
+        memory_manager.trigger_cache_eviction(0.3)
+        assert len(callback_executed) == 1  # No additional execution
+
+    def test_circular_reference_warning(self, memory_manager):
+        """Verify callback system handles circular references correctly."""
+
+        # Create a callback that references the manager (circular reference)
+        def circular_callback(percentage):
+            """Callback that creates circular reference."""
+            # This would normally create a circular reference
+            _ = memory_manager.max_memory_mb
+
+        # Set circular callback
+        memory_manager.set_eviction_callback(circular_callback)
+
+        # Verify callback works
+        memory_manager.trigger_cache_eviction(0.1)
+
+        # Clear callback to break circular reference
+        assert memory_manager.clear_eviction_callback() is True
+
+        # Manager should be cleanable now (no lingering references)
+        assert memory_manager._eviction_callback is None
 
 
 class TestEmbeddingCacheManager:
@@ -280,13 +390,24 @@ class TestMemoryPressureDetector:
     def mock_psutil(self):
         """Mock psutil for pressure detection testing."""
         with patch("cbr_mcp_server.performance.memory_manager.psutil") as mock:
+            # Ensure virtual_memory always returns a mock with percent attribute
+            mock_mem = Mock()
+            mock_mem.percent = 50.0  # Default safe value
+            mock.virtual_memory.return_value = mock_mem
             yield mock
 
     @pytest.fixture
     def pressure_detector(self, mock_psutil):
         """Create MemoryPressureDetector instance."""
+        # Ensure mock has both total and percent attributes
         mock_psutil.virtual_memory.return_value.total = 8 * 1024 * 1024 * 1024  # 8GB
-        return MemoryPressureDetector(threshold_percent=80.0)
+        detector = MemoryPressureDetector(threshold_percent=80.0)
+        yield detector
+        # Cleanup: ensure monitoring is stopped
+        try:
+            detector.stop_monitoring()
+        except:
+            pass  # Ignore if already stopped
 
     def test_detect_pressure_under_threshold(self, pressure_detector, mock_psutil):
         """Verify no pressure detected under threshold."""
@@ -337,14 +458,18 @@ class TestMemoryPressureDetector:
         mock_mem.percent = 85.0  # Over threshold
         mock_psutil.virtual_memory.return_value = mock_mem
 
-        # Start monitoring with short interval
-        pressure_detector.start_monitoring(interval_seconds=0.1)
+        try:
+            # Start monitoring with short interval
+            pressure_detector.start_monitoring(interval_seconds=0.1)
 
-        # Wait for at least one monitoring cycle
-        time.sleep(0.3)
+            # Wait for at least one monitoring cycle
+            time.sleep(0.3)
 
-        # Stop monitoring
-        pressure_detector.stop_monitoring()
+        finally:
+            # Always stop monitoring to prevent thread leakage
+            pressure_detector.stop_monitoring()
+            # Give thread time to fully terminate
+            time.sleep(0.1)
 
         # Callback should have been called at least once
         assert mock_callback.call_count >= 1

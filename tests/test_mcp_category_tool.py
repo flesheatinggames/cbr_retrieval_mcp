@@ -70,6 +70,7 @@ def mock_server_config():
     mock_config.cache_ttl = 300
     mock_config.cache_max_size = 100
     mock_config.retry_enabled = False  # Disable retry/degraded mode for tests
+    mock_config.minimal_init = True  # Use minimal initialization for tests
 
     return mock_config
 

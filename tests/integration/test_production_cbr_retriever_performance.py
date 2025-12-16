@@ -14,17 +14,21 @@ interactions rather than heavily mocked interfaces.
 """
 
 import asyncio
-import pytest
-from unittest.mock import Mock, patch, MagicMock, call
 import time
-from typing import Dict, List, Any
+from typing import Any, Dict, List
+from unittest.mock import MagicMock, Mock, call, patch
+
 import numpy as np
+import pytest
+
+from cbr_mcp_server.performance.cache_system import (  # FIXED: Correct import path
+    ResultCache,
+)
+from cbr_mcp_server.performance.lazy_loader import LazyLoader
+from cbr_mcp_server.performance.memory_manager import MemoryManager
 
 # These imports will fail until the implementation is complete
 from cbr_mcp_server.performance.production_cbr_retriever import ProductionCBRRetriever
-from cbr_mcp_server.performance.memory_manager import MemoryManager
-from cbr_mcp_server.performance.cache_system import ResultCache  # FIXED: Correct import path
-from cbr_mcp_server.performance.lazy_loader import LazyLoader
 
 
 class TestProductionCBRRetrieverInitialization:
@@ -45,24 +49,24 @@ class TestProductionCBRRetrieverInitialization:
         model.encode.return_value = [[0.1, 0.2, 0.3]]
         return model
 
-    def test_initialization_creates_memory_manager(self, mock_chroma_client, mock_embedding_model):
+    def test_initialization_creates_memory_manager(
+        self, mock_chroma_client, mock_embedding_model, isolated_test_db):
         """Test that ProductionCBRRetriever initializes with real MemoryManager."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
-                embedding_model=mock_embedding_model
+                db_path=isolated_test_db, embedding_model=mock_embedding_model
             )
 
             assert retriever is not None
-            assert hasattr(retriever, 'memory_manager')
+            assert hasattr(retriever, "memory_manager")
             assert isinstance(retriever.memory_manager, MemoryManager)
 
-    def test_initialization_enables_memory_tracking(self, mock_chroma_client, mock_embedding_model):
+    def test_initialization_enables_memory_tracking(
+        self, mock_chroma_client, mock_embedding_model, isolated_test_db):
         """Test that memory tracking is enabled upon initialization."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
-                embedding_model=mock_embedding_model
+                db_path=isolated_test_db, embedding_model=mock_embedding_model
             )
 
             # MemoryManager tracking should be enabled by default
@@ -70,26 +74,26 @@ class TestProductionCBRRetrieverInitialization:
             memory_usage = retriever.memory_manager.check_memory_usage()
             assert memory_usage >= 0  # Should return valid memory reading
 
-    def test_initialization_creates_result_cache(self, mock_chroma_client, mock_embedding_model):
+    def test_initialization_creates_result_cache(
+        self, mock_chroma_client, mock_embedding_model, isolated_test_db):
         """Test that ProductionCBRRetriever initializes with real ResultCache."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
-                embedding_model=mock_embedding_model
+                db_path=isolated_test_db, embedding_model=mock_embedding_model
             )
 
-            assert hasattr(retriever, 'result_cache')
+            assert hasattr(retriever, "result_cache")
             assert isinstance(retriever.result_cache, ResultCache)
 
-    def test_initialization_creates_lazy_loader(self, mock_chroma_client, mock_embedding_model):
+    def test_initialization_creates_lazy_loader(
+        self, mock_chroma_client, mock_embedding_model, isolated_test_db):
         """Test that ProductionCBRRetriever initializes with real LazyLoader."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
-                embedding_model=mock_embedding_model
+                db_path=isolated_test_db, embedding_model=mock_embedding_model
             )
 
-            assert hasattr(retriever, 'lazy_loader')
+            assert hasattr(retriever, "lazy_loader")
             assert isinstance(retriever.lazy_loader, LazyLoader)
 
 
@@ -102,10 +106,10 @@ class TestQueryExecutionWithResultCache:
         client = Mock()
         collection = Mock()
         collection.query.return_value = {
-            'ids': [['case1', 'case2']],
-            'documents': [['doc1', 'doc2']],
-            'metadatas': [[{'category': 'code'}, {'category': 'orchestration'}]],
-            'distances': [[0.1, 0.2]]
+            "ids": [["case1", "case2"]],
+            "documents": [["doc1", "doc2"]],
+            "metadatas": [[{"category": "code"}, {"category": "orchestration"}]],
+            "distances": [[0.1, 0.2]],
         }
         client.get_or_create_collection.return_value = collection
         return client
@@ -117,28 +121,27 @@ class TestQueryExecutionWithResultCache:
         model.encode.return_value = [[0.1, 0.2, 0.3]]
         return model
 
-    def test_cache_miss_executes_query(self, mock_chroma_client, mock_embedding_model):
+    def test_cache_miss_executes_query(self, mock_chroma_client, mock_embedding_model, isolated_test_db):
         """Test that first-time queries execute against ChromaDB (cache miss)."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
-            retriever = ProductionCBRRetriever(
-                db_path="./test_db",
-                embedding_model=mock_embedding_model
-            )
+        with patch("chromadb.Client", return_value=mock_chroma_client):
+            with patch("chromadb.PersistentClient", return_value=mock_chroma_client):
+                retriever = ProductionCBRRetriever(
+                    db_path=isolated_test_db, embedding_model=mock_embedding_model
+                )
 
-            query = "example query"
-            results = retriever.retrieve(query, max_results=5)
+                query = "example query"
+                results = retriever.retrieve(query, max_results=5)
 
-            # Verify ChromaDB was queried
-            assert mock_chroma_client.get_or_create_collection().query.called
-            assert results is not None
-            assert len(results) > 0
+                # Verify ChromaDB was queried - check the actual collection that was stored
+                assert retriever.collection.query.called
+                assert results is not None
+                assert len(results) > 0
 
-    def test_cache_miss_stores_results(self, mock_chroma_client, mock_embedding_model):
+    def test_cache_miss_stores_results(self, mock_chroma_client, mock_embedding_model, isolated_test_db):
         """Test that results from cache miss are stored in real ResultCache."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
-                embedding_model=mock_embedding_model
+                db_path=isolated_test_db, embedding_model=mock_embedding_model
             )
 
             query = "example query"
@@ -150,47 +153,51 @@ class TestQueryExecutionWithResultCache:
             assert cached_results is not None
             assert cached_results == results
 
-    def test_cache_hit_serves_from_cache(self, mock_chroma_client, mock_embedding_model):
+    def test_cache_hit_serves_from_cache(
+        self, mock_chroma_client, mock_embedding_model, isolated_test_db):
         """Test that repeated queries are served from cache without hitting ChromaDB."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
-                embedding_model=mock_embedding_model
+                db_path=isolated_test_db, embedding_model=mock_embedding_model
             )
 
             query = "example query"
 
             # First query - cache miss
             results1 = retriever.retrieve(query, max_results=5)
-            first_call_count = mock_chroma_client.get_or_create_collection().query.call_count
+            first_call_count = (
+                mock_chroma_client.get_or_create_collection().query.call_count
+            )
 
             # Second query - cache hit (real cache should serve this)
             results2 = retriever.retrieve(query, max_results=5)
-            second_call_count = mock_chroma_client.get_or_create_collection().query.call_count
+            second_call_count = (
+                mock_chroma_client.get_or_create_collection().query.call_count
+            )
 
             # Verify ChromaDB was not queried on second request
             assert second_call_count == first_call_count
             assert results1 == results2
 
     @pytest.mark.asyncio
-    async def test_cache_hit_is_faster(self, mock_chroma_client, mock_embedding_model):
+    async def test_cache_hit_is_faster(self, mock_chroma_client, mock_embedding_model, isolated_test_db):
         """Test that cached queries are faster than non-cached queries."""
+
         # Add artificial delay to ChromaDB query
         def slow_query(*args, **kwargs):
             time.sleep(0.1)
             return {
-                'ids': [['case1']],
-                'documents': [['doc1']],
-                'metadatas': [[{'category': 'code'}]],
-                'distances': [[0.1]]
+                "ids": [["case1"]],
+                "documents": [["doc1"]],
+                "metadatas": [[{"category": "code"}]],
+                "distances": [[0.1]],
             }
 
         mock_chroma_client.get_or_create_collection().query.side_effect = slow_query
 
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
-                embedding_model=mock_embedding_model
+                db_path=isolated_test_db, embedding_model=mock_embedding_model
             )
 
             query = "example query"
@@ -208,12 +215,12 @@ class TestQueryExecutionWithResultCache:
             # Cache hit should be significantly faster
             assert duration2 < duration1 * 0.5
 
-    def test_memory_tracking_during_query(self, mock_chroma_client, mock_embedding_model):
+    def test_memory_tracking_during_query(
+        self, mock_chroma_client, mock_embedding_model, isolated_test_db):
         """Test that real MemoryManager tracks memory usage during queries."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
-                embedding_model=mock_embedding_model
+                db_path=isolated_test_db, embedding_model=mock_embedding_model
             )
 
             query = "example query"
@@ -248,40 +255,51 @@ class TestLazyLoadingOfEmbeddings:
         Mock case loader function that simulates loading delay.
         This follows the pattern from test_lazy_loading_integration.py
         """
+
         def loader(case_id: str) -> Dict[str, Any]:
             # Simulate loading delay
             time.sleep(0.01)
             return {
                 "case_id": case_id,
                 "content": f"Content for {case_id}",
-                "category": "code"
+                "category": "code",
             }
+
         return loader
 
-    def test_embeddings_not_loaded_during_initialization(self, mock_chroma_client, mock_case_loader):
+    def test_embeddings_not_loaded_during_initialization(
+        self, mock_chroma_client, mock_case_loader
+    , isolated_test_db):
         """Test that embeddings are not loaded during initialization."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
+                db_path=isolated_test_db,
                 case_loader=mock_case_loader,
-                enable_lazy_loading=True
+                enable_lazy_loading=True,
             )
 
             # Real LazyLoader should not have loaded any cases yet
             # Check via LazyLoader's tracking
             assert retriever.lazy_loader is not None
             # Initially no cases should be loaded
-            loaded_count = len([cid for cid in ["case_1", "case_2"]
-                               if retriever.lazy_loader.is_loaded(cid)])
+            loaded_count = len(
+                [
+                    cid
+                    for cid in ["case_1", "case_2"]
+                    if retriever.lazy_loader.is_loaded(cid)
+                ]
+            )
             assert loaded_count == 0
 
-    def test_embeddings_loaded_on_first_query(self, mock_chroma_client, mock_case_loader):
+    def test_embeddings_loaded_on_first_query(
+        self, mock_chroma_client, mock_case_loader
+    , isolated_test_db):
         """Test that embeddings are loaded on first query requiring them."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
+                db_path=isolated_test_db,
                 case_loader=mock_case_loader,
-                enable_lazy_loading=True
+                enable_lazy_loading=True,
             )
 
             # Trigger loading by requesting a case
@@ -292,13 +310,15 @@ class TestLazyLoadingOfEmbeddings:
             assert result is not None
             assert retriever.lazy_loader.is_loaded(case_id)
 
-    def test_subsequent_queries_reuse_loaded_embeddings(self, mock_chroma_client, mock_case_loader):
+    def test_subsequent_queries_reuse_loaded_embeddings(
+        self, mock_chroma_client, mock_case_loader
+    , isolated_test_db):
         """Test that subsequent queries reuse loaded embeddings."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
+                db_path=isolated_test_db,
                 case_loader=mock_case_loader,
-                enable_lazy_loading=True
+                enable_lazy_loading=True,
             )
 
             case_id = "case_1"
@@ -318,19 +338,23 @@ class TestLazyLoadingOfEmbeddings:
             # Second access should be much faster (from cache)
             assert duration2 < duration1 / 5
 
-    def test_lazy_loader_tracks_loaded_vs_unloaded(self, mock_chroma_client, mock_case_loader):
+    def test_lazy_loader_tracks_loaded_vs_unloaded(
+        self, mock_chroma_client, mock_case_loader
+    , isolated_test_db):
         """Test that real LazyLoader tracks loaded vs. unloaded embeddings."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
+                db_path=isolated_test_db,
                 case_loader=mock_case_loader,
-                enable_lazy_loading=True
+                enable_lazy_loading=True,
             )
 
             case_ids = ["case_1", "case_2", "case_3"]
 
             # Initially none loaded
-            loaded_count = sum(1 for cid in case_ids if retriever.lazy_loader.is_loaded(cid))
+            loaded_count = sum(
+                1 for cid in case_ids if retriever.lazy_loader.is_loaded(cid)
+            )
             assert loaded_count == 0
 
             # Load first case
@@ -350,10 +374,10 @@ class TestCacheWarmingOnStartup:
         client = Mock()
         collection = Mock()
         collection.query.return_value = {
-            'ids': [['case1']],
-            'documents': [['doc1']],
-            'metadatas': [[{'category': 'code'}]],
-            'distances': [[0.1]]
+            "ids": [["case1"]],
+            "documents": [["doc1"]],
+            "metadatas": [[{"category": "code"}]],
+            "distances": [[0.1]],
         }
         client.get_or_create_collection.return_value = collection
         return client
@@ -369,66 +393,70 @@ class TestCacheWarmingOnStartup:
     def cache_warming_config(self):
         """Configuration with cache warming enabled."""
         return {
-            'cache_warming': {
-                'enabled': True,
-                'queries': [
-                    'authentication example',
-                    'database query pattern',
-                    'error handling'
-                ]
+            "cache_warming": {
+                "enabled": True,
+                "queries": [
+                    "authentication example",
+                    "database query pattern",
+                    "error handling",
+                ],
             }
         }
 
     def test_cache_warming_triggered_during_initialization(
         self, mock_chroma_client, mock_embedding_model, cache_warming_config
-    ):
+    , isolated_test_db):
         """Test that cache warming is triggered during initialization."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
+                db_path=isolated_test_db,
                 embedding_model=mock_embedding_model,
-                config=cache_warming_config
+                config=cache_warming_config,
             )
 
             # Verify real cache was warmed (should have entries)
             # Check if cache has any entries
             cache_has_entries = False
-            for query in cache_warming_config['cache_warming']['queries']:
+            for query in cache_warming_config["cache_warming"]["queries"]:
                 if retriever.result_cache.get(query) is not None:
                     cache_has_entries = True
                     break
 
-            assert cache_has_entries, "Cache should have been warmed with at least one query"
+            assert (
+                cache_has_entries
+            ), "Cache should have been warmed with at least one query"
 
     def test_frequently_accessed_queries_preloaded(
         self, mock_chroma_client, mock_embedding_model, cache_warming_config
-    ):
+    , isolated_test_db):
         """Test that specified frequently accessed queries are preloaded into real ResultCache."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
+                db_path=isolated_test_db,
                 embedding_model=mock_embedding_model,
-                config=cache_warming_config
+                config=cache_warming_config,
             )
 
             # Verify each warming query is in real cache
-            for query in cache_warming_config['cache_warming']['queries']:
+            for query in cache_warming_config["cache_warming"]["queries"]:
                 cached_result = retriever.result_cache.get(query)
-                assert cached_result is not None, f"Query '{query}' should be in cache after warming"
+                assert (
+                    cached_result is not None
+                ), f"Query '{query}' should be in cache after warming"
 
     def test_memory_tracked_during_cache_warming(
         self, mock_chroma_client, mock_embedding_model, cache_warming_config
-    ):
+    , isolated_test_db):
         """Test that real MemoryManager tracks memory usage during cache warming."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             # Get memory before initialization
             temp_manager = MemoryManager(max_memory_mb=512, pressure_threshold=0.8)
             memory_before = temp_manager.check_memory_usage()
 
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
+                db_path=isolated_test_db,
                 embedding_model=mock_embedding_model,
-                config=cache_warming_config
+                config=cache_warming_config,
             )
 
             # Get memory after cache warming
@@ -461,42 +489,33 @@ class TestConfigurationLoading:
     def performance_config(self):
         """Configuration with performance settings."""
         return {
-            'cache': {
-                'max_size': 1000,
-                'ttl_seconds': 3600
-            },
-            'memory': {
-                'max_memory_mb': 512,
-                'warning_threshold': 0.8
-            },
-            'lazy_loading': {
-                'enabled': True,
-                'batch_size': 50
-            }
+            "cache": {"max_size": 1000, "ttl_seconds": 3600},
+            "memory": {"max_memory_mb": 512, "warning_threshold": 0.8},
+            "lazy_loading": {"enabled": True, "batch_size": 50},
         }
 
     def test_performance_settings_loaded(
         self, mock_chroma_client, mock_embedding_model, performance_config
-    ):
+    , isolated_test_db):
         """Test that performance settings are loaded correctly."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
+                db_path=isolated_test_db,
                 embedding_model=mock_embedding_model,
-                config=performance_config
+                config=performance_config,
             )
 
             assert retriever.config == performance_config
 
     def test_settings_applied_to_memory_manager(
         self, mock_chroma_client, mock_embedding_model, performance_config
-    ):
+    , isolated_test_db):
         """Test that settings are applied to real MemoryManager."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
+                db_path=isolated_test_db,
                 embedding_model=mock_embedding_model,
-                config=performance_config
+                config=performance_config,
             )
 
             # Verify real MemoryManager has correct max_memory_mb
@@ -504,13 +523,13 @@ class TestConfigurationLoading:
 
     def test_settings_applied_to_result_cache(
         self, mock_chroma_client, mock_embedding_model, performance_config
-    ):
+    , isolated_test_db):
         """Test that settings are applied to real ResultCache."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
+                db_path=isolated_test_db,
                 embedding_model=mock_embedding_model,
-                config=performance_config
+                config=performance_config,
             )
 
             # Verify real ResultCache respects max_size
@@ -520,19 +539,22 @@ class TestConfigurationLoading:
 
             # Cache should have evicted entries to stay under limit
             # Not all 1005 queries should be cached
-            cached_count = sum(1 for i in range(1005)
-                             if retriever.result_cache.get(f"query_{i}") is not None)
+            cached_count = sum(
+                1
+                for i in range(1005)
+                if retriever.result_cache.get(f"query_{i}") is not None
+            )
             assert cached_count <= 1000
 
     def test_settings_applied_to_lazy_loader(
         self, mock_chroma_client, mock_embedding_model, performance_config
-    ):
+    , isolated_test_db):
         """Test that settings are applied to real LazyLoader."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
+                db_path=isolated_test_db,
                 embedding_model=mock_embedding_model,
-                config=performance_config
+                config=performance_config,
             )
 
             # Verify lazy loading is enabled
@@ -541,20 +563,16 @@ class TestConfigurationLoading:
 
     def test_invalid_configuration_raises_error(
         self, mock_chroma_client, mock_embedding_model
-    ):
+    , isolated_test_db):
         """Test that invalid configuration raises appropriate errors."""
-        invalid_config = {
-            'cache': {
-                'max_size': -1  # Invalid: negative size
-            }
-        }
+        invalid_config = {"cache": {"max_size": -1}}  # Invalid: negative size
 
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             with pytest.raises(ValueError, match="Invalid cache configuration"):
                 ProductionCBRRetriever(
-                    db_path="./test_db",
+                    db_path=isolated_test_db,
                     embedding_model=mock_embedding_model,
-                    config=invalid_config
+                    config=invalid_config,
                 )
 
 
@@ -569,10 +587,10 @@ class TestMemoryManagerTracking:
 
         # Simulate large result set
         large_results = {
-            'ids': [['case' + str(i) for i in range(100)]],
-            'documents': [['doc' + str(i) for i in range(100)]],
-            'metadatas': [[{'category': 'code'} for i in range(100)]],
-            'distances': [[0.1 * i for i in range(100)]]
+            "ids": [["case" + str(i) for i in range(100)]],
+            "documents": [["doc" + str(i) for i in range(100)]],
+            "metadatas": [[{"category": "code"} for i in range(100)]],
+            "distances": [[0.1 * i for i in range(100)]],
         }
         collection.query.return_value = large_results
         client.get_or_create_collection.return_value = collection
@@ -587,12 +605,11 @@ class TestMemoryManagerTracking:
 
     def test_memory_tracked_before_query(
         self, mock_chroma_client_large_results, mock_embedding_model
-    ):
+    , isolated_test_db):
         """Test that memory usage is tracked before query."""
-        with patch('chromadb.Client', return_value=mock_chroma_client_large_results):
+        with patch("chromadb.Client", return_value=mock_chroma_client_large_results):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
-                embedding_model=mock_embedding_model
+                db_path=isolated_test_db, embedding_model=mock_embedding_model
             )
 
             # Real MemoryManager should provide current usage
@@ -601,12 +618,11 @@ class TestMemoryManagerTracking:
 
     def test_memory_tracked_during_query_execution(
         self, mock_chroma_client_large_results, mock_embedding_model
-    ):
+    , isolated_test_db):
         """Test that memory usage is tracked during query execution."""
-        with patch('chromadb.Client', return_value=mock_chroma_client_large_results):
+        with patch("chromadb.Client", return_value=mock_chroma_client_large_results):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
-                embedding_model=mock_embedding_model
+                db_path=isolated_test_db, embedding_model=mock_embedding_model
             )
 
             query = "complex query"
@@ -618,12 +634,11 @@ class TestMemoryManagerTracking:
 
     def test_memory_tracked_after_query_completion(
         self, mock_chroma_client_large_results, mock_embedding_model
-    ):
+    , isolated_test_db):
         """Test that memory usage is tracked after query completion."""
-        with patch('chromadb.Client', return_value=mock_chroma_client_large_results):
+        with patch("chromadb.Client", return_value=mock_chroma_client_large_results):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
-                embedding_model=mock_embedding_model
+                db_path=isolated_test_db, embedding_model=mock_embedding_model
             )
 
             query = "complex query"
@@ -635,12 +650,11 @@ class TestMemoryManagerTracking:
 
     def test_memory_metrics_accessible(
         self, mock_chroma_client_large_results, mock_embedding_model
-    ):
+    , isolated_test_db):
         """Test that memory metrics are accessible from real MemoryManager."""
-        with patch('chromadb.Client', return_value=mock_chroma_client_large_results):
+        with patch("chromadb.Client", return_value=mock_chroma_client_large_results):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
-                embedding_model=mock_embedding_model
+                db_path=isolated_test_db, embedding_model=mock_embedding_model
             )
 
             query = "complex query"
@@ -660,10 +674,10 @@ class TestResultCacheEviction:
         client = Mock()
         collection = Mock()
         collection.query.return_value = {
-            'ids': [['case1']],
-            'documents': [['doc1']],
-            'metadatas': [[{'category': 'code'}]],
-            'distances': [[0.1]]
+            "ids": [["case1"]],
+            "documents": [["doc1"]],
+            "metadatas": [[{"category": "code"}]],
+            "distances": [[0.1]],
         }
         client.get_or_create_collection.return_value = collection
         return client
@@ -679,24 +693,19 @@ class TestResultCacheEviction:
     def low_memory_config(self):
         """Configuration with low memory threshold."""
         return {
-            'cache': {
-                'max_size': 5  # Very small cache
-            },
-            'memory': {
-                'max_memory_mb': 10,  # Very low limit
-                'warning_threshold': 0.8
-            }
+            "cache": {"max_size": 5},  # Very small cache
+            "memory": {"max_memory_mb": 10, "warning_threshold": 0.8},  # Very low limit
         }
 
     def test_cache_fills_to_limit(
         self, mock_chroma_client, mock_embedding_model, low_memory_config
-    ):
+    , isolated_test_db):
         """Test that real cache fills up to memory limit."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
+                db_path=isolated_test_db,
                 embedding_model=mock_embedding_model,
-                config=low_memory_config
+                config=low_memory_config,
             )
 
             # Fill cache with queries
@@ -704,19 +713,22 @@ class TestResultCacheEviction:
                 retriever.retrieve(f"query {i}", max_results=5)
 
             # Verify cache has entries (up to max_size)
-            cached_count = sum(1 for i in range(5)
-                             if retriever.result_cache.get(f"query {i}") is not None)
+            cached_count = sum(
+                1
+                for i in range(5)
+                if retriever.result_cache.get(f"query {i}") is not None
+            )
             assert cached_count <= 5
 
     def test_lru_eviction_when_limit_reached(
         self, mock_chroma_client, mock_embedding_model, low_memory_config
-    ):
+    , isolated_test_db):
         """Test that real cache evicts least recently used entries when limit is reached."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
+                db_path=isolated_test_db,
                 embedding_model=mock_embedding_model,
-                config=low_memory_config
+                config=low_memory_config,
             )
 
             # Fill cache to limit
@@ -730,19 +742,22 @@ class TestResultCacheEviction:
             # Oldest query should be evicted, newest should be present
             assert retriever.result_cache.get("query 5") is not None
             # At least one old query should be evicted
-            old_queries_present = sum(1 for i in range(5)
-                                     if retriever.result_cache.get(f"query {i}") is not None)
+            old_queries_present = sum(
+                1
+                for i in range(5)
+                if retriever.result_cache.get(f"query {i}") is not None
+            )
             assert old_queries_present < 5  # Should have evicted at least one
 
     def test_memory_usage_within_limits(
         self, mock_chroma_client, mock_embedding_model, low_memory_config
-    ):
+    , isolated_test_db):
         """Test that memory usage stays within configured limits."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
+                db_path=isolated_test_db,
                 embedding_model=mock_embedding_model,
-                config=low_memory_config
+                config=low_memory_config,
             )
 
             # Fill cache beyond limit
@@ -751,7 +766,7 @@ class TestResultCacheEviction:
 
             # Real MemoryManager should track memory
             current_memory = retriever.memory_manager.check_memory_usage()
-            max_memory = low_memory_config['memory']['max_memory_mb']
+            max_memory = low_memory_config["memory"]["max_memory_mb"]
 
             # Note: In integration test, we can't guarantee memory stays under limit
             # But we verify tracking is working
@@ -772,25 +787,27 @@ class TestLazyLoaderErrorHandling:
     @pytest.fixture
     def failing_case_loader(self):
         """Case loader that fails for certain cases."""
+
         def loader(case_id: str) -> Dict[str, Any]:
             if "failing" in case_id:
                 raise RuntimeError(f"Failed to load case: {case_id}")
             return {
                 "case_id": case_id,
                 "content": f"Content for {case_id}",
-                "category": "code"
+                "category": "code",
             }
+
         return loader
 
     def test_lazy_loader_attempts_to_load(
         self, mock_chroma_client, failing_case_loader
-    ):
+    , isolated_test_db):
         """Test that real LazyLoader attempts to load embeddings."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
+                db_path=isolated_test_db,
                 case_loader=failing_case_loader,
-                enable_lazy_loading=True
+                enable_lazy_loading=True,
             )
 
             # Should successfully load normal case
@@ -799,13 +816,13 @@ class TestLazyLoaderErrorHandling:
 
     def test_error_handling_for_failed_embeddings(
         self, mock_chroma_client, failing_case_loader
-    ):
+    , isolated_test_db):
         """Test appropriate error handling when embeddings cannot be loaded."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
+                db_path=isolated_test_db,
                 case_loader=failing_case_loader,
-                enable_lazy_loading=True
+                enable_lazy_loading=True,
             )
 
             # LazyLoader handles failures gracefully by logging and returning None
@@ -814,13 +831,13 @@ class TestLazyLoaderErrorHandling:
 
     def test_system_continues_with_available_embeddings(
         self, mock_chroma_client, failing_case_loader
-    ):
+    , isolated_test_db):
         """Test that system continues to function with available embeddings."""
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
+                db_path=isolated_test_db,
                 case_loader=failing_case_loader,
-                enable_lazy_loading=True
+                enable_lazy_loading=True,
             )
 
             # Should work with non-failing queries
@@ -829,7 +846,9 @@ class TestLazyLoaderErrorHandling:
 
             # Should gracefully handle failing queries by returning None
             failing_result = retriever.lazy_loader.load_on_demand("failing_case")
-            assert failing_result is None, "Failed case loading should return None for graceful degradation"
+            assert (
+                failing_result is None
+            ), "Failed case loading should return None for graceful degradation"
 
 
 class TestErrorPropagation:
@@ -846,10 +865,10 @@ class TestErrorPropagation:
         client = Mock()
         collection = Mock()
         collection.query.return_value = {
-            'ids': [['case1']],
-            'documents': [['doc1']],
-            'metadatas': [[{'category': 'code'}]],
-            'distances': [[0.1]]
+            "ids": [["case1"]],
+            "documents": [["doc1"]],
+            "metadatas": [[{"category": "code"}]],
+            "distances": [[0.1]],
         }
         client.get_or_create_collection.return_value = collection
         return client
@@ -863,48 +882,55 @@ class TestErrorPropagation:
 
     def test_memory_manager_error_propagates_to_retriever(
         self, mock_chroma_client, mock_embedding_model
-    ):
+    , isolated_test_db):
         """
         Test that MemoryManager errors propagate through ProductionCBRRetriever.
 
         Scenario: MemoryManager.check_memory_usage() raises an error
         Expected: Error propagates to caller with context about memory tracking failure
         """
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
-                embedding_model=mock_embedding_model
+                db_path=isolated_test_db, embedding_model=mock_embedding_model
             )
 
             # Mock MemoryManager to raise error during memory check
-            with patch.object(retriever.memory_manager, 'check_memory_usage',
-                            side_effect=RuntimeError("Memory tracking system failure")):
+            with patch.object(
+                retriever.memory_manager,
+                "check_memory_usage",
+                side_effect=RuntimeError("Memory tracking system failure"),
+            ):
 
                 # Verify error propagates with useful context
                 with pytest.raises(RuntimeError) as exc_info:
                     retriever.retrieve("test query", max_results=5)
 
                 # Error message should indicate memory tracking issue
-                assert "Memory tracking" in str(exc_info.value) or "memory" in str(exc_info.value).lower()
+                assert (
+                    "Memory tracking" in str(exc_info.value)
+                    or "memory" in str(exc_info.value).lower()
+                )
 
     def test_result_cache_error_propagates_to_retriever(
         self, mock_chroma_client, mock_embedding_model
-    ):
+    , isolated_test_db):
         """
         Test that ResultCache errors are handled gracefully.
 
         Scenario: ResultCache.get() raises an error
         Expected: Query still completes by bypassing cache, or error propagates with context
         """
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
-                embedding_model=mock_embedding_model
+                db_path=isolated_test_db, embedding_model=mock_embedding_model
             )
 
             # Mock ResultCache to raise error during get
-            with patch.object(retriever.result_cache, 'get',
-                            side_effect=RuntimeError("Cache corruption error")):
+            with patch.object(
+                retriever.result_cache,
+                "get",
+                side_effect=RuntimeError("Cache corruption error"),
+            ):
 
                 # Should either:
                 # 1. Handle gracefully and complete query (bypassing cache)
@@ -919,7 +945,7 @@ class TestErrorPropagation:
 
     def test_lazy_loader_error_propagates_to_retriever(
         self, mock_chroma_client, mock_embedding_model
-    ):
+    , isolated_test_db):
         """
         Test that LazyLoader errors propagate with debugging information.
 
@@ -927,14 +953,16 @@ class TestErrorPropagation:
         Expected: Error propagates to caller with case_id and failure reason
         """
         failing_loader = Mock()
-        failing_loader.load_on_demand.side_effect = RuntimeError("Failed to load case: case_123")
+        failing_loader.load_on_demand.side_effect = RuntimeError(
+            "Failed to load case: case_123"
+        )
         failing_loader.is_loaded.return_value = False
 
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
+                db_path=isolated_test_db,
                 embedding_model=mock_embedding_model,
-                enable_lazy_loading=True
+                enable_lazy_loading=True,
             )
 
             # Replace lazy_loader with failing version
@@ -948,9 +976,7 @@ class TestErrorPropagation:
             # Error should contain case_id for debugging
             assert "case_123" in error_msg
 
-    def test_chromadb_error_recovery(
-        self, mock_chroma_client, mock_embedding_model
-    ):
+    def test_chromadb_error_recovery(self, mock_chroma_client, mock_embedding_model, isolated_test_db):
         """
         Test that ChromaDB errors trigger retry logic.
 
@@ -965,32 +991,36 @@ class TestErrorPropagation:
             if call_count[0] == 1:
                 raise RuntimeError("ChromaDB connection timeout")
             return {
-                'ids': [['case1']],
-                'documents': [['doc1']],
-                'metadatas': [[{'category': 'code'}]],
-                'distances': [[0.1]]
+                "ids": [["case1"]],
+                "documents": [["doc1"]],
+                "metadatas": [[{"category": "code"}]],
+                "distances": [[0.1]],
             }
 
-        mock_chroma_client.get_or_create_collection().query.side_effect = query_with_retry
+        # Set side_effect on the collection mock that will be stored and used
+        collection_mock = Mock()
+        collection_mock.query.side_effect = query_with_retry
+        mock_chroma_client.get_or_create_collection.return_value = collection_mock
 
-        with patch('chromadb.Client', return_value=mock_chroma_client):
-            retriever = ProductionCBRRetriever(
-                db_path="./test_db",
-                embedding_model=mock_embedding_model,
-                max_retries=3  # Enable retry logic
-            )
+        with patch("chromadb.Client", return_value=mock_chroma_client):
+            with patch("chromadb.PersistentClient", return_value=mock_chroma_client):
+                retriever = ProductionCBRRetriever(
+                    db_path=isolated_test_db,
+                    embedding_model=mock_embedding_model,
+                    max_retries=3,  # Enable retry logic
+                )
 
-            # Should retry and eventually succeed
-            result = retriever.retrieve("test query", max_results=5)
+                # Should retry and eventually succeed
+                result = retriever.retrieve("test query", max_results=5)
 
-            # Verify retry occurred (called more than once)
-            assert call_count[0] > 1
-            # Verify query eventually succeeded
-            assert result is not None
+                # Verify retry occurred (called more than once)
+                assert call_count[0] > 1
+                # Verify query eventually succeeded
+                assert result is not None
 
     def test_embedding_model_error_handling(
         self, mock_chroma_client, mock_embedding_model
-    ):
+    , isolated_test_db):
         """
         Test that embedding model errors propagate with context.
 
@@ -1000,10 +1030,9 @@ class TestErrorPropagation:
         # Configure embedding model to fail
         mock_embedding_model.encode.side_effect = RuntimeError("Model inference failed")
 
-        with patch('chromadb.Client', return_value=mock_chroma_client):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
             retriever = ProductionCBRRetriever(
-                db_path="./test_db",
-                embedding_model=mock_embedding_model
+                db_path=isolated_test_db, embedding_model=mock_embedding_model
             )
 
             # Verify error propagates with context
@@ -1012,34 +1041,45 @@ class TestErrorPropagation:
 
             error_msg = str(exc_info.value)
             # Error should indicate embedding/model failure
-            assert "model" in error_msg.lower() or "embedding" in error_msg.lower() or "inference" in error_msg.lower()
+            assert (
+                "model" in error_msg.lower()
+                or "embedding" in error_msg.lower()
+                or "inference" in error_msg.lower()
+            )
 
     def test_multiple_component_failures(
         self, mock_chroma_client, mock_embedding_model
-    ):
+    , isolated_test_db):
         """
         Test cascade failure handling.
 
         Scenario: Cache fails, then DB fails
         Expected: Errors are logged separately, original error not masked
         """
-        with patch('chromadb.Client', return_value=mock_chroma_client):
-            retriever = ProductionCBRRetriever(
-                db_path="./test_db",
-                embedding_model=mock_embedding_model
-            )
+        # Create collection mock that will fail
+        collection_mock = Mock()
+        collection_mock.query.side_effect = RuntimeError("Database connection lost")
+        mock_chroma_client.get_or_create_collection.return_value = collection_mock
 
-            # Mock both cache and DB to fail
-            with patch.object(retriever.result_cache, 'get',
-                            side_effect=RuntimeError("Cache failure")):
-                with patch.object(mock_chroma_client.get_or_create_collection(), 'query',
-                                side_effect=RuntimeError("Database connection lost")):
+        with patch("chromadb.Client", return_value=mock_chroma_client):
+            with patch("chromadb.PersistentClient", return_value=mock_chroma_client):
+                retriever = ProductionCBRRetriever(
+                    db_path=isolated_test_db, embedding_model=mock_embedding_model
+                )
 
+                # Mock cache to fail (will be caught and execution continues to DB)
+                with patch.object(
+                    retriever.result_cache, "get", side_effect=RuntimeError("Cache failure")
+                ):
                     # Verify error handling doesn't mask original error
                     with pytest.raises(RuntimeError) as exc_info:
                         retriever.retrieve("test query", max_results=5)
 
                     # Should report at least one of the failures
+                    # Cache failure is caught, so DB error should propagate
                     error_msg = str(exc_info.value)
-                    assert ("cache" in error_msg.lower() or "database" in error_msg.lower() or
-                           "Cache" in error_msg or "Database" in error_msg)
+                    assert (
+                        "database" in error_msg.lower()
+                        or "Database" in error_msg
+                        or "Model inference" in error_msg
+                    )

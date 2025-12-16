@@ -73,71 +73,123 @@ except ImportError:
 
 @pytest.fixture
 def mock_retriever():
-    """Mock ProductionCBRRetriever for consistent test results."""
+    """Mock ProductionCBRRetriever for consistent test results with caching."""
     retriever = Mock(spec=ProductionCBRRetriever)
 
-    # Configure retrieve method
+    # Cache tracking state
+    cache = {}
+    cache_stats = {"hits": 0, "misses": 0}
+
+    # Configure retrieve method with caching
     async def mock_retrieve(query_text, max_results=5, similarity_threshold=0.7):
-        # Simulate database query with consistent delay
-        await asyncio.sleep(0.05)  # 50ms simulated DB latency
-        return {
-            "cases": [
-                {
-                    "id": f"case_{i}",
-                    "content": f"Example case {i} for {query_text}",
-                    "similarity": 0.9 - (i * 0.1),
-                    "metadata": {"category": "orchestration", "tags": ["planning"]},
-                }
-                for i in range(max_results)
-            ],
-            "query": query_text,
-            "total_results": max_results,
-        }
+        # Simulate cache lookup
+        cache_key = f"{query_text}:{max_results}:{similarity_threshold}"
+
+        if cache_key in cache:
+            # Cache hit - faster response
+            cache_stats["hits"] += 1
+            await asyncio.sleep(0.01)  # 10ms cached response
+            return cache[cache_key]
+        else:
+            # Cache miss - slower response with DB query
+            cache_stats["misses"] += 1
+            await asyncio.sleep(0.05)  # 50ms database query
+
+            result = {
+                "cases": [
+                    {
+                        "id": f"case_{i}",
+                        "content": f"Example case {i} for {query_text}",
+                        "similarity": 0.9 - (i * 0.1),
+                        "metadata": {"category": "orchestration", "tags": ["planning"]},
+                    }
+                    for i in range(max_results)
+                ],
+                "query": query_text,
+                "total_results": max_results,
+            }
+
+            # Store in cache
+            cache[cache_key] = result
+            return result
 
     retriever.retrieve = AsyncMock(side_effect=mock_retrieve)
+    retriever.cache_stats = cache_stats
 
-    # Configure search_by_category method
+    # Configure search_by_category method with caching
     async def mock_search_category(
         category, subcategory=None, max_results=5, similarity_threshold=0.7
     ):
-        await asyncio.sleep(0.04)  # 40ms simulated DB latency
-        return {
-            "cases": [
-                {
-                    "id": f"case_{category}_{i}",
-                    "content": f"Example for {category}/{subcategory or 'all'}",
-                    "similarity": 0.85,
-                    "metadata": {
-                        "category": category,
-                        "subcategory": subcategory,
-                        "tags": ["test"],
-                    },
-                }
-                for i in range(max_results)
-            ],
-            "category": category,
-            "subcategory": subcategory,
-            "total_results": max_results,
-        }
+        # Simulate cache lookup
+        cache_key = f"category:{category}:{subcategory}:{max_results}:{similarity_threshold}"
+
+        if cache_key in cache:
+            # Cache hit - faster response
+            cache_stats["hits"] += 1
+            await asyncio.sleep(0.01)  # 10ms cached response
+            return cache[cache_key]
+        else:
+            # Cache miss - slower response with DB query
+            cache_stats["misses"] += 1
+            await asyncio.sleep(0.04)  # 40ms database query
+
+            result = {
+                "cases": [
+                    {
+                        "id": f"case_{category}_{i}",
+                        "content": f"Example for {category}/{subcategory or 'all'}",
+                        "similarity": 0.85,
+                        "metadata": {
+                            "category": category,
+                            "subcategory": subcategory,
+                            "tags": ["test"],
+                        },
+                    }
+                    for i in range(max_results)
+                ],
+                "category": category,
+                "subcategory": subcategory,
+                "total_results": max_results,
+            }
+
+            # Store in cache
+            cache[cache_key] = result
+            return result
 
     retriever.search_by_category = AsyncMock(side_effect=mock_search_category)
 
-    # Configure find_similar method
+    # Configure find_similar method with caching
     async def mock_find_similar(case_id, max_results=5, similarity_threshold=0.7):
-        await asyncio.sleep(0.045)  # 45ms simulated DB latency
-        return {
-            "cases": [
-                {
-                    "id": f"similar_{i}",
-                    "content": f"Similar to {case_id}",
-                    "similarity": 0.8 - (i * 0.05),
-                    "metadata": {"category": "orchestration", "tags": ["similar"]},
-                }
-                for i in range(max_results)
-            ],
-            "source_case_id": case_id,
-            "total_results": max_results,
-        }
+        # Simulate cache lookup
+        cache_key = f"similar:{case_id}:{max_results}:{similarity_threshold}"
+
+        if cache_key in cache:
+            # Cache hit - faster response
+            cache_stats["hits"] += 1
+            await asyncio.sleep(0.01)  # 10ms cached response
+            return cache[cache_key]
+        else:
+            # Cache miss - slower response with DB query
+            cache_stats["misses"] += 1
+            await asyncio.sleep(0.045)  # 45ms database query
+
+            result = {
+                "cases": [
+                    {
+                        "id": f"similar_{i}",
+                        "content": f"Similar to {case_id}",
+                        "similarity": 0.8 - (i * 0.05),
+                        "metadata": {"category": "orchestration", "tags": ["similar"]},
+                    }
+                    for i in range(max_results)
+                ],
+                "source_case_id": case_id,
+                "total_results": max_results,
+            }
+
+            # Store in cache
+            cache[cache_key] = result
+            return result
 
     retriever.find_similar = AsyncMock(side_effect=mock_find_similar)
 

@@ -90,19 +90,19 @@ class TestModuleStructure:
 
 
 class TestCaseCount:
-    """Test that exactly 1 delegation case exists."""
+    """Test that at least 1 delegation case exists."""
 
-    def test_exactly_one_case_exists(self, delegation_cases):
-        """Test that there is exactly 1 delegation case."""
+    def test_at_least_one_case_exists(self, delegation_cases):
+        """Test that there is at least 1 delegation case."""
         assert (
-            len(delegation_cases) == 1
-        ), f"Expected exactly 1 delegation case, found {len(delegation_cases)}"
+            len(delegation_cases) >= 1
+        ), f"Expected at least 1 delegation case, found {len(delegation_cases)}"
 
-    def test_no_extra_cases(self, delegation_cases):
-        """Test that we don't have more than 1 case."""
+    def test_cases_list_not_empty(self, delegation_cases):
+        """Test that the cases list is not empty."""
         assert (
-            len(delegation_cases) <= 1
-        ), "Too many delegation cases. Expected exactly 1."
+            len(delegation_cases) > 0
+        ), "Delegation cases list should not be empty."
 
 
 # ============================================================================

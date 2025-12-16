@@ -85,16 +85,12 @@ def test_cbr_retrieve_warm_cache_latency(benchmark, cbr_retriever):
         pytest.skip("CBR server components not available")
 
     # Warm up the cache with a preliminary query
-    cbr_retriever.retrieve(
-        query="Test warm-up query",
-        max_results=5
-    )
+    cbr_retriever.retrieve(query="Test warm-up query", max_results=5)
 
     # Define the query to benchmark
     def execute_retrieve():
         result = cbr_retriever.retrieve(
-            query="How to implement user authentication with JWT tokens?",
-            max_results=5
+            query="How to implement user authentication with JWT tokens?", max_results=5
         )
         return result
 
@@ -119,12 +115,12 @@ def test_cbr_retrieve_warm_cache_latency(benchmark, cbr_retriever):
     print(f"  p99: {p99_latency_ms:.2f}ms")
 
     # Performance assertions (these will fail until optimization is implemented)
-    assert p50_latency_ms < 100, (
-        f"p50 latency {p50_latency_ms:.2f}ms exceeds 100ms target"
-    )
-    assert p95_latency_ms < 200, (
-        f"p95 latency {p95_latency_ms:.2f}ms exceeds 200ms target"
-    )
+    assert (
+        p50_latency_ms < 100
+    ), f"p50 latency {p50_latency_ms:.2f}ms exceeds 100ms target"
+    assert (
+        p95_latency_ms < 200
+    ), f"p95 latency {p95_latency_ms:.2f}ms exceeds 200ms target"
 
 
 # ============================================================================
@@ -151,16 +147,14 @@ def test_cbr_retrieve_cold_cache_latency(cbr_retriever):
     # Measure cold start (simulate first query)
     cold_start_time = time.time()
     cold_result = cbr_retriever.retrieve(
-        query="How to implement authentication?",
-        max_results=5
+        query="How to implement authentication?", max_results=5
     )
     cold_latency_ms = (time.time() - cold_start_time) * 1000
 
     # Measure subsequent query (warm cache)
     warm_start_time = time.time()
     warm_result = cbr_retriever.retrieve(
-        query="How to implement authentication?",  # Same query
-        max_results=5
+        query="How to implement authentication?", max_results=5  # Same query
     )
     warm_latency_ms = (time.time() - warm_start_time) * 1000
 
@@ -173,12 +167,14 @@ def test_cbr_retrieve_cold_cache_latency(cbr_retriever):
     print(f"\ncbr_retrieve cold vs warm cache:")
     print(f"  Cold start: {cold_latency_ms:.2f}ms")
     print(f"  Warm cache: {warm_latency_ms:.2f}ms")
-    print(f"  Improvement: {cold_latency_ms - warm_latency_ms:.2f}ms ({((cold_latency_ms - warm_latency_ms) / cold_latency_ms * 100):.1f}%)")
+    print(
+        f"  Improvement: {cold_latency_ms - warm_latency_ms:.2f}ms ({((cold_latency_ms - warm_latency_ms) / cold_latency_ms * 100):.1f}%)"
+    )
 
     # Performance assertions
-    assert warm_latency_ms <= cold_latency_ms, (
-        "Warm cache should not be slower than cold start"
-    )
+    assert (
+        warm_latency_ms <= cold_latency_ms
+    ), "Warm cache should not be slower than cold start"
 
 
 # ============================================================================
@@ -205,22 +201,16 @@ def test_cbr_search_category_warm_cache_latency(benchmark, cbr_retriever):
         pytest.skip("CBR server components not available")
 
     # Check if search_by_category method exists
-    if not hasattr(cbr_retriever, 'search_by_category'):
+    if not hasattr(cbr_retriever, "search_by_category"):
         pytest.skip("search_by_category method not implemented yet (expected for TDD)")
 
     # Warm up the cache
-    cbr_retriever.search_by_category(
-        category="orchestration",
-        query="",
-        max_results=5
-    )
+    cbr_retriever.search_by_category(category="orchestration", query="", max_results=5)
 
     # Define the category search to benchmark
     def execute_category_search():
         result = cbr_retriever.search_by_category(
-            category="orchestration",
-            query="",
-            max_results=10
+            category="orchestration", query="", max_results=10
         )
         return result
 
@@ -228,7 +218,9 @@ def test_cbr_search_category_warm_cache_latency(benchmark, cbr_retriever):
 
     # Assertions
     assert result is not None, "Category search should return results"
-    assert "category" in result or isinstance(result, list), "Result should contain category or be a list"
+    assert "category" in result or isinstance(
+        result, list
+    ), "Result should contain category or be a list"
 
     # Calculate latency percentiles
     stats = benchmark.stats
@@ -244,9 +236,9 @@ def test_cbr_search_category_warm_cache_latency(benchmark, cbr_retriever):
     print(f"  p99: {p99_latency_ms:.2f}ms")
 
     # Performance assertions
-    assert p95_latency_ms < 200, (
-        f"p95 latency {p95_latency_ms:.2f}ms exceeds 200ms target"
-    )
+    assert (
+        p95_latency_ms < 200
+    ), f"p95 latency {p95_latency_ms:.2f}ms exceeds 200ms target"
 
 
 # ============================================================================
@@ -271,24 +263,20 @@ def test_cbr_search_category_cold_cache_latency(cbr_retriever):
         pytest.skip("CBR server components not available")
 
     # Check if search_by_category method exists
-    if not hasattr(cbr_retriever, 'search_by_category'):
+    if not hasattr(cbr_retriever, "search_by_category"):
         pytest.skip("search_by_category method not implemented yet (expected for TDD)")
 
     # Measure cold start
     cold_start_time = time.time()
     cold_result = cbr_retriever.search_by_category(
-        category="code",
-        query="",
-        max_results=5
+        category="code", query="", max_results=5
     )
     cold_latency_ms = (time.time() - cold_start_time) * 1000
 
     # Measure warm cache
     warm_start_time = time.time()
     warm_result = cbr_retriever.search_by_category(
-        category="code",
-        query="",
-        max_results=5
+        category="code", query="", max_results=5
     )
     warm_latency_ms = (time.time() - warm_start_time) * 1000
 
@@ -329,14 +317,11 @@ def test_cbr_find_similar_warm_cache_latency(benchmark, cbr_retriever):
         pytest.skip("CBR server components not available")
 
     # Check if find_similar method exists
-    if not hasattr(cbr_retriever, 'find_similar'):
+    if not hasattr(cbr_retriever, "find_similar"):
         pytest.skip("find_similar method not implemented yet (expected for TDD)")
 
     # First, get a valid case ID to use for similarity search
-    initial_result = cbr_retriever.retrieve(
-        query="orchestration",
-        max_results=1
-    )
+    initial_result = cbr_retriever.retrieve(query="orchestration", max_results=1)
 
     if not initial_result or len(initial_result) == 0:
         pytest.skip("No cases available for similarity testing")
@@ -344,17 +329,11 @@ def test_cbr_find_similar_warm_cache_latency(benchmark, cbr_retriever):
     test_case_id = initial_result[0].get("id", "test_id")
 
     # Warm up the cache
-    cbr_retriever.find_similar(
-        example_id=test_case_id,
-        max_results=5
-    )
+    cbr_retriever.find_similar(example_id=test_case_id, max_results=5)
 
     # Define the similarity search to benchmark
     def execute_find_similar():
-        result = cbr_retriever.find_similar(
-            example_id=test_case_id,
-            max_results=5
-        )
+        result = cbr_retriever.find_similar(example_id=test_case_id, max_results=5)
         return result
 
     result = benchmark(execute_find_similar)
@@ -376,9 +355,9 @@ def test_cbr_find_similar_warm_cache_latency(benchmark, cbr_retriever):
     print(f"  p99: {p99_latency_ms:.2f}ms")
 
     # Performance assertions
-    assert p95_latency_ms < 200, (
-        f"p95 latency {p95_latency_ms:.2f}ms exceeds 200ms target"
-    )
+    assert (
+        p95_latency_ms < 200
+    ), f"p95 latency {p95_latency_ms:.2f}ms exceeds 200ms target"
 
 
 # ============================================================================
@@ -402,14 +381,11 @@ def test_cbr_find_similar_cold_cache_latency(cbr_retriever):
         pytest.skip("CBR server components not available")
 
     # Check if find_similar method exists
-    if not hasattr(cbr_retriever, 'find_similar'):
+    if not hasattr(cbr_retriever, "find_similar"):
         pytest.skip("find_similar method not implemented yet (expected for TDD)")
 
     # Get a valid case ID
-    initial_result = cbr_retriever.retrieve(
-        query="testing",
-        max_results=1
-    )
+    initial_result = cbr_retriever.retrieve(query="testing", max_results=1)
 
     if not initial_result or len(initial_result) == 0:
         pytest.skip("No cases available for similarity testing")
@@ -418,18 +394,12 @@ def test_cbr_find_similar_cold_cache_latency(cbr_retriever):
 
     # Measure cold start
     cold_start_time = time.time()
-    cold_result = cbr_retriever.find_similar(
-        example_id=test_case_id,
-        max_results=5
-    )
+    cold_result = cbr_retriever.find_similar(example_id=test_case_id, max_results=5)
     cold_latency_ms = (time.time() - cold_start_time) * 1000
 
     # Measure warm cache
     warm_start_time = time.time()
-    warm_result = cbr_retriever.find_similar(
-        example_id=test_case_id,
-        max_results=5
-    )
+    warm_result = cbr_retriever.find_similar(example_id=test_case_id, max_results=5)
     warm_latency_ms = (time.time() - warm_start_time) * 1000
 
     # Assertions
@@ -531,28 +501,21 @@ def test_concurrent_query_latency(cbr_retriever):
 
     results = []
     for i in range(5):
-        result = cbr_retriever.retrieve(
-            query=f"Test query {i}",
-            max_results=5
-        )
+        result = cbr_retriever.retrieve(query=f"Test query {i}", max_results=5)
         results.append(result)
 
     total_time_ms = (time.time() - start_time) * 1000
 
     # Assertions
     assert len(results) == 5, "All concurrent queries should complete"
-    assert all(r is not None for r in results), (
-        "All queries should return results"
-    )
-    assert all(isinstance(r, list) for r in results), (
-        "All results should be lists"
-    )
+    assert all(r is not None for r in results), "All queries should return results"
+    assert all(isinstance(r, list) for r in results), "All results should be lists"
 
     print(f"\nConcurrent query performance:")
     print(f"  Total time for 5 queries: {total_time_ms:.2f}ms")
     print(f"  Average time per query: {total_time_ms / 5:.2f}ms")
 
     # Performance assertion - this may fail initially without optimization
-    assert total_time_ms < 1000, (
-        f"Concurrent queries took {total_time_ms:.2f}ms, exceeds 1000ms threshold"
-    )
+    assert (
+        total_time_ms < 1000
+    ), f"Concurrent queries took {total_time_ms:.2f}ms, exceeds 1000ms threshold"

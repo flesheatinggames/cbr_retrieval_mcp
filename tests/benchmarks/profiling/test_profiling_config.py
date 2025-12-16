@@ -11,21 +11,35 @@ profiling_config module is implemented.
 
 from pathlib import Path
 from typing import Dict, Optional
+import sys
+import importlib.util
 
 import pytest
 
+# Ensure project root is in sys.path for imports
+_project_root = Path(__file__).parent.parent.parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
 # Import will fail initially - this is expected in TDD
-try:
-    from benchmarks.profiling.profiling_config import (
-        CProfileConfig,
-        MemoryProfileConfig,
-        ProfilingConfig,
+CProfileConfig = None
+MemoryProfileConfig = None
+ProfilingConfig = None
+
+_config_file = _project_root / "benchmarks" / "profiling" / "profiling_config.py"
+if _config_file.exists():
+    # Module exists, load it dynamically
+    spec = importlib.util.spec_from_file_location(
+        "benchmarks.profiling.profiling_config",
+        _config_file
     )
-except ModuleNotFoundError:
-    # Expected failure for TDD - tests written before implementation
-    CProfileConfig = None
-    MemoryProfileConfig = None
-    ProfilingConfig = None
+    if spec and spec.loader:
+        module = importlib.util.module_from_spec(spec)
+        sys.modules["benchmarks.profiling.profiling_config"] = module
+        spec.loader.exec_module(module)
+        CProfileConfig = module.CProfileConfig
+        MemoryProfileConfig = module.MemoryProfileConfig
+        ProfilingConfig = module.ProfilingConfig
 
 
 # ============================================================================

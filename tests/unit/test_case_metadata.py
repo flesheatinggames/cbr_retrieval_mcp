@@ -53,6 +53,7 @@ CODE_PATTERNS = [
     r"\basync\b",  # Async keyword
     r"\bawait\b",  # Await keyword
     r"<sequential-thinking>",  # Orchestration thinking pattern
+    r"<thinking>",  # Orchestration thinking pattern (alternate)
     r"<TodoWrite>",  # Orchestration todo pattern
     r"<delegate_task>",  # Orchestration delegation pattern
 ]

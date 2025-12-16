@@ -51,9 +51,7 @@ class TestResultCache:
 
     def test_result_cache_initialization_with_custom_config(self):
         """Verify ResultCache initializes with custom configuration."""
-        policy = CachePolicy(
-            max_size=200, default_ttl=7200, eviction_policy="LRU"
-        )
+        policy = CachePolicy(max_size=200, default_ttl=7200, eviction_policy="LRU")
         cache = ResultCache(policy=policy)
 
         assert cache.max_size == 200

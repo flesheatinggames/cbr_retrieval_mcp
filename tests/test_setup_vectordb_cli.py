@@ -8,7 +8,7 @@ This test file verifies the command-line interface features added to setup_vecto
 - Main execution flow with early exits
 """
 
-# Add the scripts/utilities directory to path for importing setup_vectordb
+# Add the src directory to path for importing setup_vectordb
 import os
 import sys
 from argparse import Namespace
@@ -16,10 +16,8 @@ from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
-scripts_utilities_path = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "scripts", "utilities"
-)
-sys.path.insert(0, scripts_utilities_path)
+src_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "src")
+sys.path.insert(0, src_path)
 
 # Mock ChromaDB and SentenceTransformer before importing setup_vectordb
 # This prevents attempting to download models or connect to databases during import
@@ -27,7 +25,7 @@ with (
     patch("chromadb.PersistentClient"),
     patch("sentence_transformers.SentenceTransformer"),
 ):
-    from setup_vectordb import (
+    from cbr_mcp_server.utilities.setup_vectordb import (
         filter_cases,
         list_categories,
         list_subcategories,
@@ -541,8 +539,11 @@ class TestMainIntegration:
         monkeypatch.setattr(sys, "argv", ["setup_vectordb.py", "--list-categories"])
 
         with (
-            patch("setup_vectordb.load_all_cases", return_value=sample_cases),
-            patch("setup_vectordb.sys.exit") as mock_exit,
+            patch(
+                "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+                return_value=sample_cases,
+            ),
+            patch("cbr_mcp_server.utilities.setup_vectordb.sys.exit") as mock_exit,
         ):
             main()
 
@@ -555,8 +556,11 @@ class TestMainIntegration:
         )
 
         with (
-            patch("setup_vectordb.load_all_cases", return_value=sample_cases),
-            patch("setup_vectordb.sys.exit") as mock_exit,
+            patch(
+                "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+                return_value=sample_cases,
+            ),
+            patch("cbr_mcp_server.utilities.setup_vectordb.sys.exit") as mock_exit,
         ):
             main()
 
@@ -581,9 +585,18 @@ class TestMainIntegration:
         mock_client.get_or_create_collection.return_value = mock_collection
 
         with (
-            patch("setup_vectordb.load_all_cases", return_value=sample_cases),
-            patch("setup_vectordb.SentenceTransformer", return_value=mock_model),
-            patch("setup_vectordb.chromadb.PersistentClient", return_value=mock_client),
+            patch(
+                "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+                return_value=sample_cases,
+            ),
+            patch(
+                "cbr_mcp_server.utilities.setup_vectordb.SentenceTransformer",
+                return_value=mock_model,
+            ),
+            patch(
+                "cbr_mcp_server.utilities.setup_vectordb.chromadb.PersistentClient",
+                return_value=mock_client,
+            ),
         ):
             main()
 
@@ -611,9 +624,18 @@ class TestMainIntegration:
         mock_client.get_or_create_collection.return_value = mock_collection
 
         with (
-            patch("setup_vectordb.load_all_cases", return_value=sample_cases),
-            patch("setup_vectordb.SentenceTransformer", return_value=mock_model),
-            patch("setup_vectordb.chromadb.PersistentClient", return_value=mock_client),
+            patch(
+                "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+                return_value=sample_cases,
+            ),
+            patch(
+                "cbr_mcp_server.utilities.setup_vectordb.SentenceTransformer",
+                return_value=mock_model,
+            ),
+            patch(
+                "cbr_mcp_server.utilities.setup_vectordb.chromadb.PersistentClient",
+                return_value=mock_client,
+            ),
         ):
             main()
 
@@ -630,8 +652,11 @@ class TestMainIntegration:
         )
 
         with (
-            patch("setup_vectordb.load_all_cases", return_value=sample_cases),
-            patch("setup_vectordb.sys.exit") as mock_exit,
+            patch(
+                "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+                return_value=sample_cases,
+            ),
+            patch("cbr_mcp_server.utilities.setup_vectordb.sys.exit") as mock_exit,
         ):
             main()
 
@@ -654,9 +679,18 @@ class TestMainIntegration:
         mock_client.create_collection.return_value = mock_collection
 
         with (
-            patch("setup_vectordb.load_all_cases", return_value=sample_cases),
-            patch("setup_vectordb.SentenceTransformer", return_value=mock_model),
-            patch("setup_vectordb.chromadb.PersistentClient", return_value=mock_client),
+            patch(
+                "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+                return_value=sample_cases,
+            ),
+            patch(
+                "cbr_mcp_server.utilities.setup_vectordb.SentenceTransformer",
+                return_value=mock_model,
+            ),
+            patch(
+                "cbr_mcp_server.utilities.setup_vectordb.chromadb.PersistentClient",
+                return_value=mock_client,
+            ),
         ):
             main()
 
@@ -684,9 +718,18 @@ class TestMainIntegration:
         mock_client.get_or_create_collection.return_value = mock_collection
 
         with (
-            patch("setup_vectordb.load_all_cases", return_value=sample_cases),
-            patch("setup_vectordb.SentenceTransformer", return_value=mock_model),
-            patch("setup_vectordb.chromadb.PersistentClient", return_value=mock_client),
+            patch(
+                "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+                return_value=sample_cases,
+            ),
+            patch(
+                "cbr_mcp_server.utilities.setup_vectordb.SentenceTransformer",
+                return_value=mock_model,
+            ),
+            patch(
+                "cbr_mcp_server.utilities.setup_vectordb.chromadb.PersistentClient",
+                return_value=mock_client,
+            ),
         ):
             main()
 

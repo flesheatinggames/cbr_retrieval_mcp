@@ -8,7 +8,8 @@ Tests should initially fail (red phase) until the actual implementation is creat
 from typing import Tuple
 
 import pytest
-from metadata_migration import MetadataMigration
+
+from scripts.utilities.metadata_migration import MetadataMigration
 
 
 class TestMetadataMigrationDetectCategorySubcategory:

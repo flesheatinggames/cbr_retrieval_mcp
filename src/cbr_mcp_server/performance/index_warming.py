@@ -187,7 +187,7 @@ class IndexWarmer:
 
 
 def generate_warmup_queries(
-    embedding_dim: int, num_queries: int
+    embedding_dim: int, num_queries: int, seed: Optional[int] = None
 ) -> List[Dict[str, Any]]:
     """
     Generate diverse warm-up queries for ChromaDB.
@@ -195,6 +195,7 @@ def generate_warmup_queries(
     Args:
         embedding_dim: Dimensionality of embeddings
         num_queries: Number of queries to generate
+        seed: Optional random seed for reproducibility (useful for testing)
 
     Returns:
         List of query dictionaries with query_embeddings and n_results
@@ -208,10 +209,13 @@ def generate_warmup_queries(
     if embedding_dim <= 0:
         raise ValueError("embedding_dim must be positive")
 
+    # Use local RNG instance to avoid global state conflicts in parallel tests
+    rng = np.random.default_rng(seed)
+
     queries = []
     for i in range(num_queries):
-        # Generate random embedding for diversity
-        query_embedding = np.random.randn(embedding_dim).tolist()
+        # Generate random embedding for diversity using local RNG
+        query_embedding = rng.standard_normal(embedding_dim).tolist()
 
         # Vary n_results for different query patterns
         n_results = (i % 10) + 1  # Range 1-10

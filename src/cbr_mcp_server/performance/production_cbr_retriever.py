@@ -42,13 +42,16 @@ class LazyEmbeddingModel:
     until the first call to encode(), reducing server startup time by 2-4 seconds.
 
     Thread-safe implementation ensures the model is loaded only once even under
-    concurrent access scenarios.
+    concurrent access scenarios. Additionally, the encode() method is protected
+    by a lock to prevent tensor shape mismatch errors when multiple threads
+    encode queries of different lengths simultaneously.
 
     Attributes:
         model_name: Name of the sentence-transformers model to load
         trust_remote_code: Whether to trust remote code (required for some models)
         _model: The loaded SentenceTransformer instance (None until first use)
-        _lock: Threading lock for thread-safe model loading
+        _load_lock: Threading lock for thread-safe model loading
+        _encode_lock: Threading lock for thread-safe encoding operations
     """
 
     def __init__(
@@ -66,7 +69,8 @@ class LazyEmbeddingModel:
         self.model_name = model_name
         self.trust_remote_code = trust_remote_code
         self._model: Optional[Any] = None
-        self._lock = threading.Lock()
+        self._load_lock = threading.Lock()
+        self._encode_lock = threading.Lock()
 
     def _load_model(self) -> Any:
         """
@@ -83,7 +87,7 @@ class LazyEmbeddingModel:
         """
         # Double-checked locking for thread safety
         if self._model is None:
-            with self._lock:
+            with self._load_lock:
                 # Check again inside lock to prevent multiple loads
                 if self._model is None:
                     try:
@@ -117,6 +121,13 @@ class LazyEmbeddingModel:
         This method provides the same interface as SentenceTransformer.encode()
         but defers model loading until first use.
 
+        Thread-safety: The encode operation is protected by a lock to prevent
+        tensor shape mismatch errors when multiple threads encode queries of
+        different lengths simultaneously. The SentenceTransformer.encode()
+        method is not thread-safe due to internal batching that can cause
+        "The size of tensor a (X) must match the size of tensor b (Y)"
+        errors under concurrent access.
+
         Args:
             sentences: Text or list of texts to encode
             **kwargs: Additional arguments passed to SentenceTransformer.encode()
@@ -125,7 +136,9 @@ class LazyEmbeddingModel:
             Encoded embeddings as numpy array or list
         """
         model = self._load_model()
-        return model.encode(sentences, **kwargs)
+        # Lock encoding to prevent concurrent tensor shape mismatches
+        with self._encode_lock:
+            return model.encode(sentences, **kwargs)
 
     @property
     def is_loaded(self) -> bool:
@@ -622,6 +635,59 @@ class ProductionCBRRetriever:
             )
 
         return formatted
+
+    def close(self) -> None:
+        """
+        Close ChromaDB connections and clean up resources.
+
+        This method should be called explicitly when done using the retriever
+        to ensure proper cleanup of file descriptors and database connections.
+        """
+        try:
+            # Clear collection reference
+            if self.collection is not None:
+                self.collection = None
+                self._collection_initialized = False
+                logger.debug("Collection reference cleared")
+
+            # Close ChromaDB client
+            if self.client is not None:
+                # ChromaDB PersistentClient doesn't have explicit close method
+                # but clearing the reference helps with garbage collection
+                self.client = None
+                logger.debug("ChromaDB client reference cleared")
+
+            # Clear caches to free memory
+            if hasattr(self.result_cache, '_cache'):
+                self.result_cache._cache.clear()
+                logger.debug("Result cache cleared")
+
+            # Clear lazy loader cache if it exists
+            if hasattr(self.lazy_loader, '_loaded'):
+                self.lazy_loader._loaded.clear()
+                logger.debug("Lazy loader cache cleared")
+
+            logger.info("ProductionCBRRetriever closed successfully")
+
+        except Exception as e:
+            logger.error(f"Error during ProductionCBRRetriever cleanup: {str(e)}")
+
+    def __enter__(self):
+        """Context manager entry."""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit - ensures cleanup."""
+        self.close()
+        return False  # Don't suppress exceptions
+
+    def __del__(self):
+        """Destructor - ensures cleanup on garbage collection."""
+        try:
+            self.close()
+        except Exception:
+            # Silently ignore errors in destructor
+            pass
 
 
 class _SimpleCacheFallback:

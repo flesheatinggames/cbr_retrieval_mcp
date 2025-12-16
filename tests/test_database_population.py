@@ -22,14 +22,20 @@ import chromadb
 import pytest
 from sentence_transformers import SentenceTransformer
 
-# Add the scripts/utilities directory to path for importing setup_vectordb
-scripts_utilities_path = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "scripts", "utilities"
-)
-sys.path.insert(0, scripts_utilities_path)
+# Mark all tests in this module to run serially (not in parallel)
+# This prevents race conditions during database operations
+pytestmark = pytest.mark.xdist_group("serial")
+
+# Add the src directory to path for importing setup_vectordb
+src_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "src")
+sys.path.insert(0, src_path)
 
 # Import setup_vectordb functions after path is set
-from setup_vectordb import filter_cases, main, parse_arguments
+from cbr_mcp_server.utilities.setup_vectordb import (
+    filter_cases,
+    main,
+    parse_arguments,
+)
 
 # ============================================================================
 # Fixtures
@@ -165,12 +171,15 @@ def test_populate_empty_database_with_full_metadata(
     # Patch at the module level where it's imported
     with (
         patch(
-            "setup_vectordb.load_all_cases",
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
             return_value=sample_cases_with_complete_metadata,
         ),
-        patch("setup_vectordb.SentenceTransformer", return_value=mock_embedding_model),
         patch(
-            "setup_vectordb.chromadb.PersistentClient",
+            "cbr_mcp_server.utilities.setup_vectordb.SentenceTransformer",
+            return_value=mock_embedding_model,
+        ),
+        patch(
+            "cbr_mcp_server.utilities.setup_vectordb.chromadb.PersistentClient",
             side_effect=persistent_client_with_temp_path,
         ),
     ):
@@ -255,11 +264,17 @@ def test_force_rebuild_replaces_broken_metadata(
     # Mock load_all_cases to return our sample cases
     with (
         patch(
-            "setup_vectordb.load_all_cases",
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
             return_value=sample_cases_with_complete_metadata,
         ),
-        patch("setup_vectordb.SentenceTransformer", return_value=mock_embedding_model),
-        patch("setup_vectordb.chromadb.PersistentClient", return_value=client),
+        patch(
+            "cbr_mcp_server.utilities.setup_vectordb.SentenceTransformer",
+            return_value=mock_embedding_model,
+        ),
+        patch(
+            "cbr_mcp_server.utilities.setup_vectordb.chromadb.PersistentClient",
+            return_value=client,
+        ),
     ):
 
         # Run the main setup function with --force
@@ -362,10 +377,16 @@ def test_metadata_preserved_during_filtered_load(
 
     # Patch at the module level where it's imported
     with (
-        patch("setup_vectordb.load_all_cases", return_value=all_cases),
-        patch("setup_vectordb.SentenceTransformer", return_value=mock_embedding_model),
         patch(
-            "setup_vectordb.chromadb.PersistentClient",
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+            return_value=all_cases,
+        ),
+        patch(
+            "cbr_mcp_server.utilities.setup_vectordb.SentenceTransformer",
+            return_value=mock_embedding_model,
+        ),
+        patch(
+            "cbr_mcp_server.utilities.setup_vectordb.chromadb.PersistentClient",
             side_effect=persistent_client_with_temp_path,
         ),
     ):
@@ -433,12 +454,15 @@ def test_problem_field_backward_compatibility(
     # Patch at the module level where it's imported
     with (
         patch(
-            "setup_vectordb.load_all_cases",
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
             return_value=sample_cases_with_complete_metadata,
         ),
-        patch("setup_vectordb.SentenceTransformer", return_value=mock_embedding_model),
         patch(
-            "setup_vectordb.chromadb.PersistentClient",
+            "cbr_mcp_server.utilities.setup_vectordb.SentenceTransformer",
+            return_value=mock_embedding_model,
+        ),
+        patch(
+            "cbr_mcp_server.utilities.setup_vectordb.chromadb.PersistentClient",
             side_effect=persistent_client_with_temp_path,
         ),
     ):
@@ -502,12 +526,15 @@ def test_solution_stored_as_document(
     # Patch at the module level where it's imported
     with (
         patch(
-            "setup_vectordb.load_all_cases",
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
             return_value=sample_cases_with_complete_metadata,
         ),
-        patch("setup_vectordb.SentenceTransformer", return_value=mock_embedding_model),
         patch(
-            "setup_vectordb.chromadb.PersistentClient",
+            "cbr_mcp_server.utilities.setup_vectordb.SentenceTransformer",
+            return_value=mock_embedding_model,
+        ),
+        patch(
+            "cbr_mcp_server.utilities.setup_vectordb.chromadb.PersistentClient",
             side_effect=persistent_client_with_temp_path,
         ),
     ):

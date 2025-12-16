@@ -13,7 +13,7 @@ from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
-from test_performance_helpers import (
+from performance_helpers import (
     HAS_CBR,
     HAS_PSUTIL,
     measure_concurrent_mcp_tools,

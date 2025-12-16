@@ -123,6 +123,9 @@ def mock_server_config():
     mock_config.log_format = "structured"
     mock_config.log_correlation_id = True
 
+    # Use minimal init for tests
+    mock_config.minimal_init = True
+
     return mock_config
 
 

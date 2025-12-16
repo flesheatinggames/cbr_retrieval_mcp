@@ -873,52 +873,75 @@ class TestHealthDashboardIntegration:
             alert_system=alert_system,
         )
 
-        return dashboard
+        yield dashboard
+
+        # Cleanup: ensure server is shut down
+        try:
+            if hasattr(dashboard, 'is_running') and dashboard.is_running():
+                await dashboard.shutdown()
+        except Exception:
+            pass  # Ignore cleanup errors
 
     async def test_complete_dashboard_workflow(self, dashboard_server):
         """Test complete dashboard workflow from startup to metrics display."""
-        # Test server startup
-        await dashboard_server.start()
+        try:
+            # Test server startup
+            await dashboard_server.start()
 
-        # Assert server is running
-        assert dashboard_server.is_running()
-        assert dashboard_server.config.port == 8080
+            # Assert server is running
+            assert dashboard_server.is_running()
+            assert dashboard_server.config.port == 8080
 
-        # Test metrics collection and broadcasting
-        await dashboard_server.update_metrics()
+            # Test metrics collection and broadcasting
+            await dashboard_server.update_metrics()
 
-        # Assert metrics were collected
-        dashboard_server.health_monitor.get_system_metrics.assert_called()
-        dashboard_server.health_monitor.get_application_metrics.assert_called()
+            # Assert metrics were collected
+            dashboard_server.health_monitor.get_system_metrics.assert_called()
+            dashboard_server.health_monitor.get_application_metrics.assert_called()
 
-        # Test WebSocket broadcasting
-        await dashboard_server.broadcast_metrics()
+            # Test WebSocket broadcasting
+            await dashboard_server.broadcast_metrics()
 
-        # Test server shutdown
-        await dashboard_server.shutdown()
-        assert not dashboard_server.is_running()
+            # Test server shutdown
+            await dashboard_server.shutdown()
+            assert not dashboard_server.is_running()
+        finally:
+            # Ensure cleanup even if test fails
+            try:
+                if dashboard_server.is_running():
+                    await dashboard_server.shutdown()
+            except Exception:
+                pass
 
     async def test_dashboard_error_resilience(self, dashboard_server):
         """Test dashboard handles errors gracefully."""
-        # Test startup with missing dependencies
-        dashboard_server.health_monitor.health_check.side_effect = Exception(
-            "Database unavailable"
-        )
+        try:
+            # Test startup with missing dependencies
+            dashboard_server.health_monitor.health_check.side_effect = Exception(
+                "Database unavailable"
+            )
 
-        # Dashboard should start but mark unhealthy
-        await dashboard_server.start()
-        assert dashboard_server.is_running()
+            # Dashboard should start but mark unhealthy
+            await dashboard_server.start()
+            assert dashboard_server.is_running()
 
-        # Test error recovery
-        dashboard_server.health_monitor.health_check.side_effect = None
-        dashboard_server.health_monitor.health_check.return_value = {
-            "status": "healthy"
-        }
+            # Test error recovery
+            dashboard_server.health_monitor.health_check.side_effect = None
+            dashboard_server.health_monitor.health_check.return_value = {
+                "status": "healthy"
+            }
 
-        await dashboard_server.update_metrics()
+            await dashboard_server.update_metrics()
 
-        # Assert recovery
-        dashboard_server.health_monitor.health_check.assert_called()
+            # Assert recovery
+            dashboard_server.health_monitor.health_check.assert_called()
+        finally:
+            # Ensure cleanup even if test fails
+            try:
+                if dashboard_server.is_running():
+                    await dashboard_server.shutdown()
+            except Exception:
+                pass
 
 
 @pytest.mark.skipif(HealthAPI is None, reason="HealthAPI class not implemented yet")

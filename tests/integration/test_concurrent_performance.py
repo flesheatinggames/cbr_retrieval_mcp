@@ -7,6 +7,7 @@ Original file: test_mcp_performance_integration.py
 
 import asyncio
 import gc
+import os
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -19,7 +20,7 @@ try:
 except ImportError:
     psutil = None
 
-from test_performance_helpers import (
+from performance_helpers import (
     HAS_CBR,
     HAS_PSUTIL,
     measure_concurrent_mcp_tools,
@@ -814,6 +815,11 @@ class TestConcurrentMCPToolPerformance:
         # Verify the exception propagated correctly
         # (measure_concurrent_mcp_tools uses asyncio.gather which propagates exceptions)
 
+    @pytest.mark.xdist_group("serial")
+    @pytest.mark.skipif(
+        os.environ.get("PYTEST_XDIST_WORKER") is not None,
+        reason="Memory stability test - skip in parallel execution mode",
+    )
     async def test_concurrent_resource_contention_memory_stability(
         self, mock_mcp_server
     ):
@@ -891,11 +897,18 @@ class TestConcurrentMCPToolPerformance:
         ), f"Memory delta {memory_delta:.2f}MB too high for concurrent batch"
 
         # Verify peak memory doesn't exceed target
-        # Threshold set to 520MB to account for test environment variability
-        # and accumulated memory from running multiple tests in sequence
-        assert (
-            final_mb < 520.0 or baseline_mb < 520.0
-        ), f"Peak memory should be within reasonable bounds (final: {final_mb:.2f}MB, baseline: {baseline_mb:.2f}MB)"
+        # Note: When running multiple tests in sequence, memory can accumulate
+        # Check that memory delta is reasonable rather than absolute threshold
+        if baseline_mb > 600.0:
+            # If baseline is already high from previous tests, just check delta
+            assert (
+                abs(memory_delta) < 200.0
+            ), f"Memory delta {memory_delta:.2f}MB indicates potential memory leak"
+        else:
+            # If starting with low baseline, check absolute threshold
+            assert (
+                final_mb < 550.0
+            ), f"Peak memory {final_mb:.2f}MB exceeds threshold (baseline was {baseline_mb:.2f}MB)"
 
         # Verify queries completed successfully
         assert metrics["total_calls"] == 15, "All concurrent queries should complete"

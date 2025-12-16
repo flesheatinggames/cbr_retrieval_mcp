@@ -1,5 +1,6 @@
 """Memory management for local performance optimization."""
 
+import gc
 import time
 from collections import OrderedDict
 from threading import Event, RLock, Thread
@@ -10,7 +11,26 @@ import psutil  # type: ignore[import-untyped]
 
 
 class MemoryManager:
-    """Central memory tracking and control for local execution."""
+    """
+    Central memory tracking and control for local execution.
+
+    Callback Lifecycle:
+        - Callbacks should be cleared when no longer needed to prevent memory leaks
+        - Avoid circular references: callbacks should not hold strong references to MemoryManager
+        - Use clear_eviction_callback() to unregister callbacks when done
+        - Long-lived callbacks that capture large objects can cause memory leaks
+
+    Example:
+        manager = MemoryManager(max_memory_mb=500)
+
+        # Set callback
+        def on_eviction(pct):
+            print(f"Evicting {pct*100}% of cache")
+        manager.set_eviction_callback(on_eviction)
+
+        # Clear when done
+        manager.clear_eviction_callback()
+    """
 
     def __init__(
         self,
@@ -80,8 +100,36 @@ class MemoryManager:
 
         Args:
             callback: Function to call with eviction percentage
+
+        Warning:
+            Callback should not hold strong references to MemoryManager to avoid
+            circular references. Use clear_eviction_callback() when done to prevent
+            memory leaks.
         """
         self._eviction_callback = callback
+
+    def clear_eviction_callback(self) -> bool:
+        """
+        Clear the eviction callback to prevent memory leaks.
+
+        This method should be called when the callback is no longer needed to:
+        - Break circular references if callback refers to MemoryManager
+        - Release memory held by callback closures
+        - Prevent unintended callback execution
+
+        Returns:
+            bool: True if callback was cleared, False if no callback was set
+
+        Example:
+            manager = MemoryManager(max_memory_mb=500)
+            manager.set_eviction_callback(my_callback)
+            # ... use manager ...
+            manager.clear_eviction_callback()  # Clean up when done
+        """
+        if self._eviction_callback is not None:
+            self._eviction_callback = None
+            return True
+        return False
 
     def trigger_cache_eviction(self, percentage: float) -> None:
         """
@@ -97,8 +145,11 @@ class MemoryManager:
         """
         Enforce memory limits by triggering eviction if necessary.
 
+        Aggressively evicts cache entries until memory is back under limit.
+        Forces garbage collection after eviction to release memory immediately.
+
         Returns:
-            True if under limit (no action needed), False if over limit
+            True if under limit, False if over limit after eviction
         """
         current_mb = self.check_memory_usage()
 
@@ -106,7 +157,7 @@ class MemoryManager:
         if current_mb <= self.max_memory_mb:
             return True
 
-        # Over limit - calculate eviction percentage
+        # Over limit - calculate aggressive eviction percentage
         overage_ratio = current_mb / self.max_memory_mb
 
         # Emergency eviction if way over limit (>=1.5x)
@@ -114,11 +165,9 @@ class MemoryManager:
             # Severe overage - use emergency eviction percentage
             eviction_percentage = self.emergency_eviction_percentage
         else:
-            # Moderate overage - scale eviction proportionally
-            # Use configured eviction percentage as maximum, scale down for smaller overages
-            base_eviction = (
-                self.emergency_eviction_percentage * 0.2
-            )  # 20% of emergency for base
+            # Moderate overage - use more aggressive eviction
+            # Start at 30% base (was 10%), scale up for larger overages
+            base_eviction = self.emergency_eviction_percentage * 0.6  # 30% base
             additional = (overage_ratio - 1.0) * (
                 self.emergency_eviction_percentage * 1.6
             )
@@ -128,11 +177,32 @@ class MemoryManager:
         if self._eviction_callback:
             self._eviction_callback(eviction_percentage)
 
+            # Force garbage collection to release memory immediately
+            gc.collect()
+            gc.collect()  # Second collection helps with circular references
+
         return False
 
 
 class EmbeddingCacheManager:
-    """Specialized cache for embedding vectors with LRU eviction and TTL expiration."""
+    """
+    Specialized cache for embedding vectors with LRU eviction and TTL expiration.
+
+    Memory Optimization:
+        Embeddings are stored and returned as-is (no copies) for memory efficiency.
+        This is safe because embeddings in this codebase are never modified after creation.
+
+    WARNING:
+        Do NOT modify returned embeddings in-place! All operations should create new arrays.
+        Examples of safe operations:
+            - embedding.tolist() ✓
+            - embedding[:100] ✓
+            - embedding + 1.0 ✓
+        Examples of UNSAFE operations:
+            - embedding[0] = 1.0 ✗
+            - embedding *= 2.0 ✗
+            - np.add(embedding, 1.0, out=embedding) ✗
+    """
 
     def __init__(self, max_entries: int, ttl_seconds: int):
         """
@@ -155,9 +225,13 @@ class EmbeddingCacheManager:
         """
         Cache an embedding vector with LRU tracking.
 
+        Memory Optimization:
+            Embeddings are stored as-is without copying to save memory.
+            This is safe because embeddings are never modified after caching.
+
         Args:
             text_key: Text key for the embedding
-            embedding: Numpy array embedding vector
+            embedding: Numpy array embedding vector (must not be modified after caching)
         """
         with self._lock:
             timestamp = time.time()
@@ -166,8 +240,8 @@ class EmbeddingCacheManager:
             if text_key in self._cache:
                 del self._cache[text_key]
 
-            # Add entry at the end (most recent)
-            self._cache[text_key] = (embedding.copy(), timestamp)
+            # Add entry at the end (most recent) - no copy for memory efficiency
+            self._cache[text_key] = (embedding, timestamp)
 
             # Evict oldest entries if over max_entries
             while len(self._cache) > self.max_entries:
@@ -178,11 +252,16 @@ class EmbeddingCacheManager:
         """
         Get cached embedding with TTL validation and LRU update.
 
+        Memory Optimization:
+            Returns cached embedding as-is without copying to save memory.
+            This is safe because embeddings are never modified after caching.
+
         Args:
             text_key: Text key for the embedding
 
         Returns:
-            Cached embedding if found and not expired, None otherwise
+            Cached embedding if found and not expired, None otherwise.
+            WARNING: Do NOT modify the returned array in-place!
         """
         with self._lock:
             if text_key not in self._cache:
@@ -204,7 +283,8 @@ class EmbeddingCacheManager:
             del self._cache[text_key]
             self._cache[text_key] = (embedding, timestamp)
 
-            return embedding.copy()
+            # Return without copy for memory efficiency
+            return embedding
 
     def evict_least_recently_used(self, count: int) -> int:
         """
@@ -227,6 +307,10 @@ class EmbeddingCacheManager:
         """
         Warm cache with embeddings from ChromaDB collection.
 
+        Memory Optimization:
+            Embeddings are stored as-is without copying to save memory.
+            This is safe because embeddings are never modified after caching.
+
         Args:
             collection: ChromaDB collection to fetch embeddings from
             case_ids: List of case IDs to pre-load
@@ -243,11 +327,11 @@ class EmbeddingCacheManager:
                 # Convert list to numpy array if needed
                 if isinstance(embedding, list):
                     embedding = np.array(embedding, dtype=np.float32)
-                # Use internal logic directly to avoid nested locking
+                # Use internal logic directly to avoid nested locking - no copy for memory efficiency
                 timestamp = time.time()
                 if doc in self._cache:
                     del self._cache[doc]
-                self._cache[doc] = (embedding.copy(), timestamp)
+                self._cache[doc] = (embedding, timestamp)
                 while len(self._cache) > self.max_entries:
                     self._cache.popitem(last=False)
 

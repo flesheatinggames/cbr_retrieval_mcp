@@ -26,6 +26,10 @@ import chromadb
 import pytest
 from sentence_transformers import SentenceTransformer
 
+# Mark all tests in this module to run serially (not in parallel)
+# This prevents race conditions during database operations
+pytestmark = pytest.mark.xdist_group("serial")
+
 # Add the src directory to path for importing cbr_mcp_server
 src_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "src")
 sys.path.insert(0, src_path)

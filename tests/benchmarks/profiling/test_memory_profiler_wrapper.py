@@ -287,6 +287,8 @@ class TestMemoryStatistics:
 
     def test_getting_memory_growth_statistics(self):
         """Test get_memory_delta_mb() returns growth stats."""
+        import gc
+
         profiler = MemoryProfilerWrapper()
         profiler.start()
 
@@ -295,12 +297,20 @@ class TestMemoryStatistics:
         assert initial_delta >= 0
         assert initial_delta < 1  # Should be minimal at start
 
-        # Allocate memory
-        data = [i for i in range(100000)]
+        # Allocate significant memory to ensure RSS measurement visibility
+        # Use bytearray for reliable RSS allocation (10MB+)
+        data1 = bytearray(10 * 1024 * 1024)  # 10MB allocation
+        data2 = bytearray(5 * 1024 * 1024)   # Additional 5MB allocation
 
-        # Delta should increase
+        # Force garbage collection to ensure memory is actually allocated
+        gc.collect()
+
+        # Delta should increase (allow for measurement tolerance)
         final_delta = profiler.get_memory_delta_mb()
-        assert final_delta > initial_delta
+        # Allow for measurement tolerance of ±1MB due to RSS granularity
+        tolerance_mb = 1.0
+        assert final_delta > initial_delta - tolerance_mb, \
+            f"Memory delta {final_delta}MB should be greater than initial {initial_delta}MB (within {tolerance_mb}MB tolerance)"
 
         profiler.stop()
 

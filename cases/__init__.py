@@ -314,8 +314,11 @@ def validate_case(case: Dict[str, Any]) -> bool:
     ----------------
     1. **Required Fields**: All of ['problem', 'solution', 'category', 'subcategory', 'tags']
        must be present in the case dictionary
-    2. **Tags Field**: Must be a list type (not string, tuple, or other type)
-    3. **Category Field**: Must be in ALLOWED_CATEGORIES whitelist
+    2. **Non-Empty Strings**: String fields ('problem', 'solution', 'category', 'subcategory')
+       must not be empty strings or contain only whitespace
+    3. **Tags Field**: Must be a list type (not string, tuple, or other type)
+    4. **Non-Empty Tags**: Tags list must contain at least one element
+    5. **Category Field**: Must be in ALLOWED_CATEGORIES whitelist
 
     Parameters
     ----------
@@ -332,8 +335,9 @@ def validate_case(case: Dict[str, Any]) -> bool:
     - This function logs warnings for validation failures using the configured logger
     - Validation is informational only and does not raise exceptions
     - Tags must be a list type specifically; other iterables like tuples are rejected
+    - String fields must not be empty or contain only whitespace
+    - Tags list must contain at least one element
     - Category must be in ALLOWED_CATEGORIES whitelist
-    - This function does NOT validate for empty strings or empty lists
 
     Examples
     --------
@@ -376,10 +380,25 @@ def validate_case(case: Dict[str, Any]) -> bool:
             logger.warning(f"Case validation failed: missing required field '{field}'")
             return False
 
+    # Validate string fields are not empty or whitespace-only
+    string_fields = ["problem", "solution", "category", "subcategory"]
+    for field in string_fields:
+        value = case.get(field)
+        if not value or not value.strip():
+            logger.warning(
+                f"Case validation failed: '{field}' must not be empty or whitespace-only"
+            )
+            return False
+
     # Validate tags is a list type (not tuple, dict, string, etc.)
     # Must be specifically a list type for consistency
     if not isinstance(case.get("tags"), list):
         logger.warning("Case validation failed: 'tags' must be a list")
+        return False
+
+    # Validate tags list is not empty
+    if len(case.get("tags")) == 0:
+        logger.warning("Case validation failed: 'tags' list must not be empty")
         return False
 
     # Validate category is in ALLOWED_CATEGORIES whitelist

@@ -464,12 +464,12 @@ class TestRustCasesCompatibility:
     """Test suite to verify rust cases work correctly with the dynamic loader."""
 
     def test_rust_cases_count_is_30(self):
-        """Test that exactly 30 rust cases are loaded by the dynamic loader."""
+        """Test that exactly 45 rust cases are loaded by the dynamic loader."""
         rust_cases = [case for case in ALL_CASES if case.get("category") == "rust"]
 
         assert (
-            len(rust_cases) == 30
-        ), f"Expected exactly 30 rust cases, but found {len(rust_cases)}"
+            len(rust_cases) == 45
+        ), f"Expected exactly 45 rust cases, but found {len(rust_cases)}"
 
     def test_all_rust_cases_have_metadata_fields(self):
         """Test that all rust cases have the required metadata fields."""

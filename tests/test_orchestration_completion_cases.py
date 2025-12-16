@@ -102,7 +102,7 @@ class TestModuleStructure:
 
 # Case Count Validation Tests
 class TestCaseCount:
-    """Test that exactly 1 case exists in the module."""
+    """Test that at least 1 case exists in the module."""
 
     def test_cases_is_list(self, completion_cases):
         """Test that ORCHESTRATION_COMPLETION_CASES is a list."""
@@ -110,11 +110,11 @@ class TestCaseCount:
             completion_cases, list
         ), "ORCHESTRATION_COMPLETION_CASES must be a list"
 
-    def test_exactly_one_case(self, completion_cases):
-        """Test that exactly 1 case exists."""
+    def test_at_least_one_case(self, completion_cases):
+        """Test that at least 1 case exists."""
         assert (
-            len(completion_cases) == 1
-        ), f"Expected exactly 1 case, found {len(completion_cases)}"
+            len(completion_cases) >= 1
+        ), f"Expected at least 1 case, found {len(completion_cases)}"
 
 
 # Metadata Schema Validation Tests

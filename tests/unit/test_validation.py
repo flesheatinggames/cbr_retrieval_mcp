@@ -10,6 +10,7 @@ This test module validates that migrated cases have:
 These are integration tests using actual ChromaDB collections.
 """
 
+import os
 import shutil
 import tempfile
 from typing import Any, Dict, List
@@ -20,6 +21,17 @@ from chromadb.config import Settings
 
 # Category taxonomy from tech_spec.md
 VALID_CATEGORIES = ["code", "orchestration", "best-practice", "anti-pattern"]
+
+
+# Mark all tests in this module for serial execution to avoid database conflicts
+# Skip in parallel mode to avoid file descriptor exhaustion (Errno 24: Too many open files)
+pytestmark = [
+    pytest.mark.xdist_group("serial"),
+    pytest.mark.skipif(
+        os.environ.get("PYTEST_XDIST_WORKER") is not None,
+        reason="ChromaDB file descriptor exhaustion - skip in parallel execution mode",
+    ),
+]
 
 # Subcategory mappings from tech_spec.md
 CATEGORY_SUBCATEGORIES = {

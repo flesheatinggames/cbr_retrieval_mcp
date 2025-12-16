@@ -735,7 +735,7 @@ class TestChromaDBReconnectionIntegration:
 class TestEmbeddingModelReinitialization:
     """Test suite for embedding model reinitialization."""
 
-    @patch("cbr_mcp_server.startup_configuration_validator")
+    @patch("cbr_mcp_server.server.startup_configuration_validator")
     @patch("sentence_transformers.SentenceTransformer")
     def test_model_reload_on_memory_error(
         self, mock_sentence_transformer, mock_startup_validator
@@ -764,7 +764,7 @@ class TestEmbeddingModelReinitialization:
         # Should have called model loading twice (initial + reload)
         assert mock_sentence_transformer.call_count == 2
 
-    @patch("cbr_mcp_server.startup_configuration_validator")
+    @patch("cbr_mcp_server.server.startup_configuration_validator")
     @patch("sentence_transformers.SentenceTransformer")
     def test_model_reload_on_loading_failure(
         self, mock_sentence_transformer, mock_startup_validator
@@ -795,7 +795,7 @@ class TestEmbeddingModelReinitialization:
             fallback_call[0][0] != "nomic-ai/nomic-embed-text-v1.5"
         )  # Different model
 
-    @patch("cbr_mcp_server.startup_configuration_validator")
+    @patch("cbr_mcp_server.server.startup_configuration_validator")
     @patch("sentence_transformers.SentenceTransformer")
     def test_embedding_retry_after_model_reload(
         self, mock_sentence_transformer, mock_startup_validator
@@ -830,17 +830,24 @@ class TestEmbeddingModelReinitialization:
         self, mock_psutil_memory, mock_sentence_transformer
     ):
         """Test monitoring model performance and health."""
-        from cbr_mcp_server import CBRMCPServer
+        from cbr_mcp_server import CBRMCPServer, CBRServerConfig
 
         # Mock memory usage monitoring
         mock_memory = Mock()
         mock_memory.percent = 85  # High memory usage
         mock_psutil_memory.return_value = mock_memory
 
+        # Mock the embedding model
         mock_model = Mock()
+        mock_model.encode.return_value = [[0.1, 0.2, 0.3]]  # Mock embedding response
         mock_sentence_transformer.return_value = mock_model
 
-        server = CBRMCPServer()
+        # Create server with minimal_init to avoid heavyweight initialization
+        config = CBRServerConfig(minimal_init=True)
+        server = CBRMCPServer(config=config)
+
+        # Mock the retriever's embedding_model for the health check
+        server.retriever.embedding_model = mock_model
 
         # Should detect performance degradation
         health_status = server.check_model_health()
@@ -898,7 +905,7 @@ class TestEmbeddingModelReinitialization:
         assert len(errors) == 0  # No thread safety errors
         assert len(results) <= 10  # Some requests may be blocked during reload
 
-    @patch("cbr_mcp_server.startup_configuration_validator")
+    @patch("cbr_mcp_server.server.startup_configuration_validator")
     @patch("sentence_transformers.SentenceTransformer")
     def test_model_fallback_strategies(
         self, mock_sentence_transformer, mock_startup_validator

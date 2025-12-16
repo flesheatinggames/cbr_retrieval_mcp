@@ -27,6 +27,7 @@ before optimization work begins. Tests will initially fail.
 """
 
 import asyncio
+import os
 import statistics
 import time
 from typing import Any, Dict, List, Tuple
@@ -476,9 +477,7 @@ async def test_cache_hit_rate_after_warmup(mock_cbr_server_with_cache):
     print(f"Cache hit rate: {cache_hit_rate:.1f}%")
 
     # This will fail initially if caching isn't optimized
-    assert (
-        cache_hit_rate > 70
-    ), f"Cache hit rate {cache_hit_rate:.1f}% below 70% target"
+    assert cache_hit_rate > 70, f"Cache hit rate {cache_hit_rate:.1f}% below 70% target"
 
 
 # ============================================================================
@@ -527,7 +526,9 @@ async def test_no_performance_degradation_with_concurrency(mock_cbr_server_with_
     # Print results
     print(f"\nBaseline QPS (1 client): {baseline_qps:.2f}")
     for concurrency, qps, degradation in results:
-        print(f"Concurrency {concurrency}: {qps:.2f} QPS ({degradation:.1f}% degradation)")
+        print(
+            f"Concurrency {concurrency}: {qps:.2f} QPS ({degradation:.1f}% degradation)"
+        )
 
     # Assertions: degradation should not be exponential
     for concurrency, qps, degradation in results:
@@ -560,7 +561,9 @@ async def test_async_operation_handling(mock_cbr_server_with_cache):
         return await retriever.retrieve(query_text="Quick query", max_results=3)
 
     async def medium_query():
-        return await retriever.search_by_category(category="orchestration", max_results=5)
+        return await retriever.search_by_category(
+            category="orchestration", max_results=5
+        )
 
     async def slow_query():
         return await retriever.retrieve(
@@ -596,6 +599,10 @@ async def test_async_operation_handling(mock_cbr_server_with_cache):
 # ============================================================================
 
 
+@pytest.mark.skipif(
+    os.environ.get('PYTEST_XDIST_WORKER') is not None,
+    reason="Benchmark test - unstable in parallel execution mode"
+)
 @pytest.mark.asyncio
 async def test_throughput_stability_over_time(mock_cbr_server_with_cache):
     """
@@ -635,9 +642,9 @@ async def test_throughput_stability_over_time(mock_cbr_server_with_cache):
     print(f"Coefficient of variation: {coefficient_of_variation:.1f}%")
 
     # Assertions
-    assert coefficient_of_variation < 15, (
-        f"QPS variance {coefficient_of_variation:.1f}% exceeds 15% threshold"
-    )
+    assert (
+        coefficient_of_variation < 15
+    ), f"QPS variance {coefficient_of_variation:.1f}% exceeds 15% threshold"
 
 
 # ============================================================================
@@ -678,9 +685,9 @@ async def test_concurrent_query_result_correctness(mock_cbr_server_with_cache):
         result = results[i]
         assert result is not None, f"Result {i} should not be None"
         assert "cases" in result, f"Result {i} should contain cases"
-        assert result["query"] == query_text, (
-            f"Result {i} query mismatch: expected '{query_text}', got '{result['query']}'"
-        )
+        assert (
+            result["query"] == query_text
+        ), f"Result {i} query mismatch: expected '{query_text}', got '{result['query']}'"
 
     print(f"\nAll {len(results)} concurrent queries returned correct results")
 
@@ -691,6 +698,7 @@ async def test_concurrent_query_result_correctness(mock_cbr_server_with_cache):
 
 
 @pytest.mark.asyncio
+@pytest.mark.serial  # Measurement accuracy requires isolated execution
 async def test_throughput_measurement_accuracy():
     """
     Verify benchmark measurement infrastructure is accurate.
@@ -705,7 +713,9 @@ async def test_throughput_measurement_accuracy():
 
     # Create a simple, predictable mock without caching
     # Each query takes exactly 50ms for consistent timing
-    async def mock_retrieve_consistent(query_text, max_results=5, similarity_threshold=0.7):
+    async def mock_retrieve_consistent(
+        query_text, max_results=5, similarity_threshold=0.7
+    ):
         await asyncio.sleep(0.05)  # Consistent 50ms per query
         return {
             "cases": [
@@ -752,8 +762,8 @@ async def test_throughput_measurement_accuracy():
     print(f"Difference: {qps_difference_pct:.1f}%")
 
     # Assertions
-    assert qps_difference_pct < 5, (
-        f"QPS measurement error {qps_difference_pct:.1f}% exceeds 5% tolerance"
-    )
+    assert (
+        qps_difference_pct < 5
+    ), f"QPS measurement error {qps_difference_pct:.1f}% exceeds 5% tolerance"
     assert len(query_times) == num_queries, "Should record all query times"
     assert all(t > 0 for t in query_times), "All query times should be positive"

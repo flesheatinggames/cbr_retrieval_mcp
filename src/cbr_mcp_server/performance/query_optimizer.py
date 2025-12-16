@@ -232,7 +232,10 @@ class QueryOptimizer:
     """
 
     def __init__(
-        self, cache_system: ResultCache, memory_manager: MemoryManager
+        self,
+        cache_system: ResultCache,
+        memory_manager: MemoryManager,
+        collection: Optional[Any] = None,
     ) -> None:
         """
         Initialize QueryOptimizer with required dependencies.
@@ -240,6 +243,7 @@ class QueryOptimizer:
         Args:
             cache_system: ResultCache instance for query result caching
             memory_manager: MemoryManager instance for memory tracking
+            collection: ChromaDB collection for queries (optional, but required for execute_with_optimization)
 
         Raises:
             TypeError: If cache_system or memory_manager is None
@@ -252,6 +256,7 @@ class QueryOptimizer:
 
         self.cache_system = cache_system
         self.memory_manager = memory_manager
+        self._collection = collection
 
         # Track query plan cache for similar queries
         self._query_plan_cache: Dict[str, Dict[str, Any]] = {}
@@ -476,15 +481,18 @@ class QueryOptimizer:
         """
         Get ChromaDB collection for querying.
 
-        This is a placeholder that will be mocked in tests.
-        In production, this would return an actual ChromaDB collection instance.
-
         Returns:
             ChromaDB collection instance
+
+        Raises:
+            ValueError: If collection was not provided during initialization
         """
-        # Placeholder - will be patched in tests
-        # In production, this would connect to actual ChromaDB
-        raise NotImplementedError("_get_chromadb_collection must be mocked in tests")
+        if self._collection is None:
+            raise ValueError(
+                "ChromaDB collection not provided. "
+                "Pass collection parameter to QueryOptimizer constructor."
+            )
+        return self._collection
 
     def _generate_cache_key(self, query: Dict[str, Any]) -> str:
         """
@@ -685,12 +693,23 @@ class BatchCoordinator:
         Raises:
             Exception: If executor.execute_batch fails
         """
+        import asyncio
+
         if not self._current_batch:
             return
 
-        # Cancel timer if active (just cancel, don't await to avoid deadlock)
+        # Cancel timer if active and await cancellation properly
+        # This is safe because:
+        # 1. We're calling from _execute_batch(), not from the timer callback
+        # 2. No circular dependency: timer → _execute_batch → cancel timer (linear flow)
+        # 3. The timer task will finish cancelling while we proceed with batch execution
+        # 4. Awaiting ensures proper cleanup and prevents resource leaks
         if self._batch_timer_task and not self._batch_timer_task.done():
             self._batch_timer_task.cancel()
+            try:
+                await self._batch_timer_task  # Properly await cancellation
+            except asyncio.CancelledError:
+                pass  # Expected - timer was cancelled before completion
 
         # Record batch execution start
         execution_start = time.time()

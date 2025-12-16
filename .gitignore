@@ -162,3 +162,27 @@ test_results.txt
 benchmark_output.txt
 *_TEST_RESULTS.md
 *_VERIFICATION_REPORT.md
+
+# Karen verification agent logs
+karen_*.txt
+
+# Additional test/verification output
+*_verification.txt
+serial_test_run*.txt
+pytest_*.txt
+*_summary.txt
+phase1_verification.txt
+remediation_verification.txt
+test_run_results.txt
+test_output.txt
+test_verification_output.txt
+
+# Temporary fix scripts
+fix_*.py
+run_failing_tests*.sh
+
+# Temporary analysis/fix documentation
+FIX_*.md
+*_ANALYSIS.md
+*_IMPLEMENTATION.md
+*_FIX_SUMMARY.md

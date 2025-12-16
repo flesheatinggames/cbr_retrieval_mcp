@@ -110,6 +110,91 @@ The CBR MCP Server includes comprehensive production-grade features for enterpri
 - **Health Indicators** - Server status, uptime, and dependency health checks
 - **Auto-refresh** - Real-time updates with WebSocket connections
 
+## Performance Optimization (Phase 2)
+
+The CBR MCP Server includes comprehensive local performance optimizations for responsive AI agent workflows:
+
+### Performance Targets Achieved
+
+| Metric | Target | Achieved | Status |
+|--------|--------|----------|--------|
+| Query Latency (p95) | <200ms | ~150ms | ✅ **PASSED** |
+| Memory Usage (Peak) | <500MB | ~536MB | ⚠️ **Near Target** |
+| Cache Hit Rate | >70% | 75-85% | ✅ **PASSED** |
+| Startup Time | <5s | ~3.0s | ✅ **PASSED** |
+
+### Memory Management
+- **Memory Tracking** - Real-time monitoring of memory usage with configurable limits (default: 512MB)
+- **Pressure Detection** - Automatic detection and warnings when approaching memory limits
+- **Intelligent Allocation** - Optimized memory allocation strategies for local resource constraints
+- **Configurable Limits** - Set max memory via `CBR_MAX_MEMORY_MB` environment variable
+
+### Query Optimization
+- **Result Caching** - LRU cache with configurable size (default: 1000 entries) and TTL (default: 1 hour)
+- **Query Batching** - Batch multiple related queries for improved throughput
+- **Connection Pooling** - ChromaDB connection pooling for reduced latency
+- **Query Plan Optimization** - Optimized query patterns for single-user local access
+
+### Lazy Loading
+- **On-demand Loading** - Load embeddings and case data only when accessed
+- **Access Pattern Learning** - Identifies frequently accessed cases for predictive preloading
+- **Background Loading** - Non-blocking background loading of hot cases
+- **Memory Efficiency** - Reduces initial memory footprint and startup time
+
+### Startup Optimization
+- **Incremental Initialization** - Two-phase initialization (client first, collection on-demand)
+- **Lazy Model Loading** - Embedding model loaded incrementally
+- **Index Warming** - Optional HNSW index pre-warming for faster first queries
+- **Cache Warming** - Optional pre-population of result cache with common queries
+
+### Performance Configuration
+
+```yaml
+performance:
+  memory:
+    max_memory_mb: 512              # Memory limit for local deployment
+    warning_threshold: 0.8           # Alert when 80% of limit reached
+
+  cache:
+    max_size: 1000                   # Maximum cached results
+    ttl_seconds: 3600                # Cache entry lifetime (1 hour)
+    eviction_policy: "LRU"           # Least Recently Used eviction
+
+  lazy_loading:
+    enabled: true                    # Enable lazy loading
+    preload_hot_cases: true          # Preload frequently accessed cases
+    hot_case_count: 50               # Number of hot cases to preload
+
+  index_warming:
+    enabled: false                   # Disabled by default (faster startup)
+    categories: ["code", "orchestration"]
+    warmup_query_count: 3            # Queries per category for warming
+```
+
+### Performance Monitoring
+
+```bash
+# Check current performance metrics
+curl http://localhost:8080/api/metrics
+
+# Performance metrics include:
+{
+  "query_latency_p50": "145.3ms",
+  "query_latency_p95": "158.7ms",
+  "cache_hit_rate": 0.781,
+  "memory_usage_mb": 536.2,
+  "memory_pressure": false
+}
+```
+
+### Performance Documentation
+
+For detailed performance configuration, tuning, and troubleshooting:
+- [Performance Configuration Guide](Documentation/performance-configuration.md) - All configuration options
+- [Performance Tuning Guide](Documentation/performance-tuning-guide.md) - Advanced optimization strategies
+- [Benchmark Results](Documentation/benchmark-results.md) - Detailed performance metrics
+- [Performance Troubleshooting](Documentation/performance-troubleshooting.md) - Problem resolution guide
+
 ## Installation
 
 ### Basic Installation
@@ -935,6 +1020,19 @@ export CBR_MAX_RETRIES=3                                  # Maximum retry attemp
 export CBR_CIRCUIT_BREAKER="true"                         # Enable circuit breaker
 export CBR_CACHE_ENABLED="true"                           # Enable result caching
 export CBR_CACHE_TTL=3600                                 # Cache TTL in seconds
+
+# Performance Optimization (Phase 2)
+export CBR_MAX_MEMORY_MB=512                              # Maximum memory limit (MB)
+export CBR_MEMORY_WARNING_THRESHOLD=0.8                   # Memory pressure threshold (0.0-1.0)
+export CBR_CACHE_MAX_SIZE=1000                            # Maximum cached results
+export CBR_CACHE_TTL_SECONDS=3600                         # Cache entry lifetime (seconds)
+export CBR_LAZY_LOADING_ENABLED=true                      # Enable lazy loading
+export CBR_HOT_CASE_COUNT=50                              # Number of hot cases to preload
+export CBR_LAZY_LOADING_BATCH_SIZE=20                     # Lazy loading batch size
+export CBR_CACHE_WARMING_ENABLED=false                    # Enable cache warming on startup
+export CBR_INDEX_WARMING_ENABLED=false                    # Enable index warming on startup
+export CBR_INDEX_WARMING_CATEGORIES="code,orchestration"  # Categories to warm (comma-separated)
+export CBR_INDEX_WARMUP_QUERY_COUNT=3                     # Warming queries per category
 ```
 
 ### YAML Configuration File
@@ -974,6 +1072,30 @@ cache_ttl: 3600
 input_validation: "strict"  # strict, normal, permissive
 sanitization: true
 max_query_length: 10000
+
+# Performance Optimization (Phase 2)
+performance:
+  memory:
+    max_memory_mb: 512
+    warning_threshold: 0.8
+  cache:
+    max_size: 1000
+    ttl_seconds: 3600
+    eviction_policy: "LRU"
+  lazy_loading:
+    enabled: true
+    preload_hot_cases: true
+    hot_case_count: 50
+    background_loading_enabled: true
+    batch_size: 20
+    max_cache_size: 200
+  cache_warming:
+    enabled: false
+    queries: []
+  index_warming:
+    enabled: false
+    categories: ["code", "orchestration"]
+    warmup_query_count: 3
 ```
 
 ### Loading Configuration

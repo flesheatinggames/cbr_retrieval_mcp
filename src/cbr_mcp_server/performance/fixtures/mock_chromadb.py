@@ -95,9 +95,7 @@ class MockCollection:
         for doc_id, doc_data in filtered_docs:
             doc_emb = doc_data["embedding"]
             # Simple distance calculation
-            distance = sum(
-                (q - d) ** 2 for q, d in zip(query_emb, doc_emb)
-            ) ** 0.5
+            distance = sum((q - d) ** 2 for q, d in zip(query_emb, doc_emb)) ** 0.5
             results_with_distances.append((distance, doc_id, doc_data))
 
         # Sort by distance and limit results
@@ -224,9 +222,7 @@ class MockChromaDBClient:
         self.connection_latency_ms = connection_latency_ms
         self._collections: Dict[str, MockCollection] = {}
 
-    def get_or_create_collection(
-        self, name: str, **kwargs: Any
-    ) -> MockCollection:
+    def get_or_create_collection(self, name: str, **kwargs: Any) -> MockCollection:
         """
         Get or create a collection by name.
 
@@ -327,10 +323,7 @@ def generate_mock_query_result(
         "ids": [[f"case_{i}" for i in range(n_results)]],
         "documents": [[f"Document {i}" for i in range(n_results)]],
         "metadatas": [
-            [
-                {"category": "test", "subcategory": f"sub{i}"}
-                for i in range(n_results)
-            ]
+            [{"category": "test", "subcategory": f"sub{i}"} for i in range(n_results)]
         ],
     }
 

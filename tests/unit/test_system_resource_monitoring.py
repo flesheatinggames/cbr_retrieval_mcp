@@ -920,6 +920,7 @@ class TestAlertSystem:
 @pytest.mark.skipif(
     MonitoringThread is None, reason="MonitoringThread class not implemented yet"
 )
+@pytest.mark.xdist_group("serial")
 class TestMonitoringThread:
     """Test suite for background monitoring thread."""
 
@@ -1145,6 +1146,7 @@ class TestMonitoringThread:
     ResourceMonitor is None or MetricsCollector is None,
     reason="System monitoring classes not implemented yet",
 )
+@pytest.mark.xdist_group("serial")
 class TestSystemMetricsIntegration:
     """Integration tests for complete system monitoring pipeline."""
 
