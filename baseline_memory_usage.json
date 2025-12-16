@@ -23,54 +23,18 @@
             "name": "test_single_query_memory_usage",
             "fullname": "tests/benchmarks/test_memory_baseline.py::test_single_query_memory_usage",
             "status": "passed",
-            "timestamp": "2025-12-15T17:04:04.216687+00:00",
+            "timestamp": "2025-12-16T23:21:05.458813+00:00",
             "memory_metrics": {
-                "baseline_mb": 1268.12,
-                "peak_mb": 1268.17,
-                "final_mb": 1268.17,
-                "delta_mb": 0.05
-            }
-        },
-        {
-            "name": "test_memory_growth_sequential_queries",
-            "fullname": "tests/benchmarks/test_memory_baseline.py::test_memory_growth_sequential_queries",
-            "status": "passed",
-            "timestamp": "2025-12-15T17:04:04.871921+00:00",
-            "memory_metrics": {
-                "baseline_mb": 1268.34,
-                "peak_mb": 1268.38,
-                "final_mb": 1268.34,
-                "delta_mb": 0.0
-            }
-        },
-        {
-            "name": "test_embedding_cache_memory_scaling",
-            "fullname": "tests/benchmarks/test_memory_baseline.py::test_embedding_cache_memory_scaling",
-            "status": "passed",
-            "timestamp": "2025-12-15T17:04:05.850400+00:00",
-            "memory_metrics": {
-                "baseline_mb": 1268.98,
-                "peak_mb": 1271.38,
-                "final_mb": 1271.38,
-                "delta_mb": 2.39
-            }
-        },
-        {
-            "name": "test_case_base_size_memory_scaling",
-            "fullname": "tests/benchmarks/test_memory_baseline.py::test_case_base_size_memory_scaling",
-            "status": "passed",
-            "timestamp": "2025-12-15T17:04:09.726375+00:00",
-            "memory_metrics": {
-                "baseline_mb": 1271.7,
-                "peak_mb": 1271.84,
-                "final_mb": 1271.78,
-                "delta_mb": 0.08
+                "baseline_mb": 505.05,
+                "peak_mb": 505.11,
+                "final_mb": 505.11,
+                "delta_mb": 0.06
             }
         }
     ],
-    "datetime": "2025-12-15T17:04:18.898993+00:00",
-    "total_tests": 4,
-    "passed": 4,
+    "datetime": "2025-12-16T23:21:05.459396+00:00",
+    "total_tests": 1,
+    "passed": 1,
     "failed": 0,
     "skipped": 0
 }
