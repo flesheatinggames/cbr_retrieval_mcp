@@ -23,11 +23,11 @@
             "name": "test_embedding_cache_memory_scaling",
             "fullname": "tests/benchmarks/test_memory_baseline.py::test_embedding_cache_memory_scaling",
             "status": "passed",
-            "timestamp": "2025-12-17T15:37:48.396206+00:00",
+            "timestamp": "2025-12-17T15:42:11.996037+00:00",
             "memory_metrics": {
-                "baseline_mb": 1270.33,
-                "peak_mb": 1272.72,
-                "final_mb": 1272.72,
+                "baseline_mb": 1268.23,
+                "peak_mb": 1270.62,
+                "final_mb": 1270.62,
                 "delta_mb": 2.39
             }
         },
@@ -35,16 +35,16 @@
             "name": "test_case_base_size_memory_scaling",
             "fullname": "tests/benchmarks/test_memory_baseline.py::test_case_base_size_memory_scaling",
             "status": "passed",
-            "timestamp": "2025-12-17T15:37:52.395985+00:00",
+            "timestamp": "2025-12-17T15:42:15.757399+00:00",
             "memory_metrics": {
-                "baseline_mb": 1273.23,
-                "peak_mb": 1273.3,
-                "final_mb": 1273.3,
-                "delta_mb": 0.06
+                "baseline_mb": 1271.11,
+                "peak_mb": 1271.19,
+                "final_mb": 1271.19,
+                "delta_mb": 0.08
             }
         }
     ],
-    "datetime": "2025-12-17T15:38:01.296422+00:00",
+    "datetime": "2025-12-17T15:42:17.919259+00:00",
     "total_tests": 2,
     "passed": 2,
     "failed": 0,
