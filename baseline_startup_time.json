@@ -23,45 +23,45 @@
             "name": "test_embedding_model_loading_time",
             "fullname": "tests/benchmarks/test_startup_baseline.py::TestServerStartupBaseline::test_embedding_model_loading_time",
             "status": "passed",
-            "timestamp": "2025-12-17T14:29:42.790842+00:00",
+            "timestamp": "2025-12-17T15:18:36.728104+00:00",
             "timing_metrics": {
-                "load_time": 2.84
+                "load_time": 3.853
             }
         },
         {
             "name": "test_database_connection_initialization_time",
             "fullname": "tests/benchmarks/test_startup_baseline.py::TestServerStartupBaseline::test_database_connection_initialization_time",
             "status": "passed",
-            "timestamp": "2025-12-17T14:29:42.836464+00:00",
+            "timestamp": "2025-12-17T15:18:36.831974+00:00",
             "timing_metrics": {
-                "db_init_time": 0.043
+                "db_init_time": 0.096
             }
         },
         {
             "name": "test_case_base_loading_time",
             "fullname": "tests/benchmarks/test_startup_baseline.py::TestServerStartupBaseline::test_case_base_loading_time",
             "status": "passed",
-            "timestamp": "2025-12-17T14:29:42.846636+00:00",
+            "timestamp": "2025-12-17T15:18:36.864164+00:00",
             "timing_metrics": {
-                "loading_time": 0.009
+                "loading_time": 0.029
             }
         },
         {
             "name": "test_warm_start_total_startup_time",
             "fullname": "tests/benchmarks/test_startup_baseline.py::TestServerStartupBaseline::test_warm_start_total_startup_time",
             "status": "passed",
-            "timestamp": "2025-12-17T14:29:48.485054+00:00",
+            "timestamp": "2025-12-17T15:18:43.826676+00:00",
             "timing_metrics": {
-                "warm_time": 2.835
+                "warm_time": 3.46
             }
         },
         {
             "name": "test_startup_phases_breakdown",
             "fullname": "tests/benchmarks/test_startup_baseline.py::TestServerStartupBaseline::test_startup_phases_breakdown",
             "status": "passed",
-            "timestamp": "2025-12-17T14:29:51.214145+00:00",
+            "timestamp": "2025-12-17T15:18:47.366988+00:00",
             "timing_metrics": {
-                "total_time": 2.727,
+                "total_time": 3.539,
                 "phase_timings": [
                     {
                         "phase": "Configuration",
@@ -69,7 +69,7 @@
                     },
                     {
                         "phase": "Server Instantiation",
-                        "time": 2.727
+                        "time": 3.539
                     }
                 ]
             }
@@ -78,31 +78,31 @@
             "name": "test_embedding_model_loading_time",
             "fullname": "tests/benchmarks/test_startup_benchmarks.py::TestStartupBenchmarks::test_embedding_model_loading_time",
             "status": "passed",
-            "timestamp": "2025-12-17T14:29:53.900958+00:00",
+            "timestamp": "2025-12-17T15:18:53.002778+00:00",
             "timing_metrics": {
-                "load_time": 2.672
+                "load_time": 5.619
             }
         },
         {
             "name": "test_chromadb_initialization_time",
             "fullname": "tests/benchmarks/test_startup_benchmarks.py::TestStartupBenchmarks::test_chromadb_initialization_time",
             "status": "passed",
-            "timestamp": "2025-12-17T14:29:53.910935+00:00",
+            "timestamp": "2025-12-17T15:18:53.015484+00:00",
             "timing_metrics": {
-                "db_init_time": 0.009
+                "db_init_time": 0.01
             }
         },
         {
             "name": "test_case_base_loading_time",
             "fullname": "tests/benchmarks/test_startup_benchmarks.py::TestStartupBenchmarks::test_case_base_loading_time",
             "status": "passed",
-            "timestamp": "2025-12-17T14:29:53.918986+00:00",
+            "timestamp": "2025-12-17T15:18:53.027384+00:00",
             "timing_metrics": {
-                "loading_time": 0.007
+                "loading_time": 0.009
             }
         }
     ],
-    "datetime": "2025-12-17T14:30:00.015753+00:00",
+    "datetime": "2025-12-17T15:18:59.599167+00:00",
     "total_tests": 8,
     "passed": 8,
     "failed": 0,
