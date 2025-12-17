@@ -273,6 +273,11 @@ def test_server_startup_memory_footprint(
 # ============================================================================
 
 
+@pytest.mark.skipif(
+    os.environ.get("PYTEST_XDIST_WORKER") is not None,
+    reason="Memory profiling incompatible with parallel execution - shared fixtures interfere with accurate memory measurements",
+)
+@pytest.mark.xdist_group("serial")
 async def test_single_query_memory_usage(
     mock_chromadb, mock_sentence_transformer, memory_result_tracker
 ):
@@ -281,6 +286,14 @@ async def test_single_query_memory_usage(
 
     This test will FAIL because memory optimizations for queries don't exist yet.
     Expected failure: Memory usage exceeds thresholds.
+
+    NOTE: This test MUST run in serial mode (without pytest-xdist) because:
+    - Memory profiling requires isolated process state
+    - Parallel execution with shared session-scoped fixtures can cause
+      memory measurements to include allocations from other workers
+    - This can result in inaccurate measurements when other workers allocate/deallocate memory
+
+    Run individually: pytest tests/benchmarks/test_memory_baseline.py::test_single_query_memory_usage
     """
     from cbr_mcp_server.server import CBRMCPServer, CBRServerConfig
 
@@ -400,6 +413,11 @@ async def test_concurrent_query_peak_memory(
 # ============================================================================
 
 
+@pytest.mark.skipif(
+    os.environ.get("PYTEST_XDIST_WORKER") is not None,
+    reason="Memory profiling incompatible with parallel execution - shared fixtures interfere with accurate memory measurements",
+)
+@pytest.mark.xdist_group("serial")
 async def test_memory_growth_sequential_queries(
     mock_chromadb, mock_sentence_transformer, memory_result_tracker
 ):
@@ -409,6 +427,13 @@ async def test_memory_growth_sequential_queries(
     This test will FAIL because memory leak prevention doesn't properly exist yet.
     Expected failure: Memory growth exceeds threshold, indicating memory leak.
     Note: Reduced from 100 to 10 queries for practical baseline collection.
+
+    NOTE: This test MUST run in serial mode (without pytest-xdist) because:
+    - Memory profiling requires isolated process state
+    - Parallel execution with shared session-scoped fixtures can cause
+      memory measurements to include allocations from other workers
+
+    Run individually: pytest tests/benchmarks/test_memory_baseline.py::test_memory_growth_sequential_queries
     """
     from cbr_mcp_server.server import CBRMCPServer, CBRServerConfig
 
