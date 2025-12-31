@@ -14,6 +14,9 @@ end-to-end after the metadata storage bug fix documented in:
 @.agent-os/specs/2025-11-04-metadata-storage-bug-fix/spec.md
 
 Test Group: End-to-End Category Search Integration (from tasks.md Task 9.1)
+
+NOTE: Tests use unique collection names per test to ensure isolation during
+parallel execution with pytest-xdist.
 """
 
 import os
@@ -21,6 +24,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import uuid
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -28,9 +32,10 @@ import chromadb
 import pytest
 from sentence_transformers import SentenceTransformer
 
-# Mark all tests in this module to run serially (not in parallel)
-# This prevents race conditions during database operations
-pytestmark = pytest.mark.xdist_group("serial")
+
+def get_unique_collection_name() -> str:
+    """Generate a unique collection name for test isolation in parallel execution."""
+    return f"test_collection_{uuid.uuid4().hex[:12]}"
 
 # Add the src directory to path for importing cbr_mcp_server
 src_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "src")
@@ -60,6 +65,12 @@ def temp_db_dir():
     # Cleanup after test
     if os.path.exists(temp_dir):
         shutil.rmtree(temp_dir)
+
+
+@pytest.fixture
+def unique_collection_name():
+    """Generate a unique collection name for test isolation."""
+    return get_unique_collection_name()
 
 
 @pytest.fixture
@@ -96,7 +107,7 @@ def mock_embedding_model():
 
 
 @pytest.mark.asyncio
-async def test_e2e_populate_and_search_by_category(temp_db_dir, mock_embedding_model):
+async def test_e2e_populate_and_search_by_category(temp_db_dir, mock_embedding_model, unique_collection_name):
     """
     End-to-end test: Verify complete flow from clean database to successful category search.
 
@@ -130,8 +141,8 @@ async def test_e2e_populate_and_search_by_category(temp_db_dir, mock_embedding_m
         # Load all cases
         all_cases = load_all_cases()
 
-        # Create collection
-        collection = client.get_or_create_collection(name="code_solutions_case_base")
+        # Create collection with unique name
+        collection = client.get_or_create_collection(name=unique_collection_name)
 
         # Prepare data
         problems = [case["problem"] for case in all_cases]
@@ -161,7 +172,7 @@ async def test_e2e_populate_and_search_by_category(temp_db_dir, mock_embedding_m
     # Step 4: Initialize CBR retriever with populated database
     config = CBRServerConfig(
         database_path=temp_db_dir,
-        collection_name="code_solutions_case_base",
+        collection_name=unique_collection_name,
         use_real_db=True,
     )
 
@@ -210,7 +221,7 @@ async def test_e2e_populate_and_search_by_category(temp_db_dir, mock_embedding_m
 # ============================================================================
 
 
-def test_e2e_force_rebuild_and_verify_metadata(temp_db_dir, mock_embedding_model):
+def test_e2e_force_rebuild_and_verify_metadata(temp_db_dir, mock_embedding_model, unique_collection_name):
     """
     End-to-end test: Verify migration from broken to fixed database using --force flag.
 
@@ -226,7 +237,7 @@ def test_e2e_force_rebuild_and_verify_metadata(temp_db_dir, mock_embedding_model
     """
     # Step 1: Create database with broken metadata (simulate legacy state)
     client = chromadb.PersistentClient(path=temp_db_dir)
-    collection = client.get_or_create_collection(name="code_solutions_case_base")
+    collection = client.get_or_create_collection(name=unique_collection_name)
 
     # Add a few cases with incomplete metadata (only problem field)
     broken_metadatas = [
@@ -264,8 +275,8 @@ def test_e2e_force_rebuild_and_verify_metadata(temp_db_dir, mock_embedding_model
         all_cases = load_all_cases()
 
         # Delete old collection and create new one (force rebuild)
-        client.delete_collection(name="code_solutions_case_base")
-        collection = client.create_collection(name="code_solutions_case_base")
+        client.delete_collection(name=unique_collection_name)
+        collection = client.create_collection(name=unique_collection_name)
 
         # Prepare data with fixed metadata
         problems = [case["problem"] for case in all_cases]
@@ -324,7 +335,7 @@ def test_e2e_force_rebuild_and_verify_metadata(temp_db_dir, mock_embedding_model
 
 
 @pytest.mark.asyncio
-async def test_e2e_filtered_load_and_category_search(temp_db_dir, mock_embedding_model):
+async def test_e2e_filtered_load_and_category_search(temp_db_dir, mock_embedding_model, unique_collection_name):
     """
     End-to-end test: Verify filtered loading preserves complete metadata.
 
@@ -361,8 +372,8 @@ async def test_e2e_filtered_load_and_category_search(temp_db_dir, mock_embedding
             case for case in all_cases if case.get("category") in filter_categories
         ]
 
-        # Create collection
-        collection = client.get_or_create_collection(name="code_solutions_case_base")
+        # Create collection with unique name
+        collection = client.get_or_create_collection(name=unique_collection_name)
 
         # Prepare filtered data
         problems = [case["problem"] for case in filtered_cases]
@@ -402,7 +413,7 @@ async def test_e2e_filtered_load_and_category_search(temp_db_dir, mock_embedding
     # Step 4: Initialize CBR retriever
     config = CBRServerConfig(
         database_path=temp_db_dir,
-        collection_name="code_solutions_case_base",
+        collection_name=unique_collection_name,
         use_real_db=True,
     )
 

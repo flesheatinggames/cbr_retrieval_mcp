@@ -9,12 +9,16 @@ for the metadata storage bug documented in:
 @.agent-os/specs/2025-11-04-metadata-storage-bug-fix/spec.md
 
 Test Group: Database Population with Metadata (from tests.md)
+
+NOTE: Tests use unique collection names per test to ensure isolation during
+parallel execution with pytest-xdist.
 """
 
 import os
 import shutil
 import sys
 import tempfile
+import uuid
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -22,9 +26,10 @@ import chromadb
 import pytest
 from sentence_transformers import SentenceTransformer
 
-# Mark all tests in this module to run serially (not in parallel)
-# This prevents race conditions during database operations
-pytestmark = pytest.mark.xdist_group("serial")
+
+def get_unique_collection_name() -> str:
+    """Generate a unique collection name for test isolation in parallel execution."""
+    return f"test_collection_{uuid.uuid4().hex[:12]}"
 
 # Add the src directory to path for importing setup_vectordb
 src_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "src")
@@ -55,6 +60,12 @@ def temp_db_dir():
     # Cleanup after test
     if os.path.exists(temp_dir):
         shutil.rmtree(temp_dir)
+
+
+@pytest.fixture
+def unique_collection_name():
+    """Generate a unique collection name for test isolation."""
+    return get_unique_collection_name()
 
 
 @pytest.fixture
@@ -113,14 +124,15 @@ def sample_cases_with_complete_metadata():
 
 
 @pytest.fixture
-def broken_metadata_database(temp_db_dir):
+def broken_metadata_database(temp_db_dir, unique_collection_name):
     """
     Create a database with broken metadata (only problem field) for testing --force rebuild.
 
     This simulates the buggy state where only {"problem": "..."} is stored.
+    Returns a tuple of (client, collection, collection_name) for use in tests.
     """
     client = chromadb.PersistentClient(path=temp_db_dir)
-    collection = client.create_collection(name="code_solutions_case_base")
+    collection = client.create_collection(name=unique_collection_name)
 
     # Add cases with BROKEN metadata (only problem field)
     collection.add(
@@ -136,7 +148,7 @@ def broken_metadata_database(temp_db_dir):
         ids=["id0", "id1"],
     )
 
-    return client, collection
+    return client, collection, unique_collection_name
 
 
 # ============================================================================
@@ -249,7 +261,7 @@ def test_force_rebuild_replaces_broken_metadata(
       - All cases have complete metadata (4 fields)
     """
     # The broken_metadata_database fixture already created a broken database
-    client, old_collection = broken_metadata_database
+    client, old_collection, collection_name = broken_metadata_database
 
     # Verify the broken state (only 2 cases, broken metadata)
     assert old_collection.count() == 2, "Broken database should have 2 cases initially"

@@ -24,13 +24,17 @@ import pytest
 # allowing us to test the infrastructure's memory efficiency (<500MB target)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def mock_chromadb() -> Any:
     """
     Mock ChromaDB for load testing.
 
     Prevents loading real ChromaDB (~690MB when initialized) so we can test
     the memory efficiency of the load testing infrastructure itself.
+
+    IMPORTANT: This fixture is function-scoped to prevent contaminating other
+    tests when running with pytest-xdist. Session-scoped patches can leak
+    across tests on the same worker, causing intermittent failures.
     """
     with patch("chromadb.PersistentClient") as mock_client:
         mock_collection = Mock()
@@ -51,13 +55,17 @@ def mock_chromadb() -> Any:
         yield mock_client
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def mock_sentence_transformer() -> Any:
     """
     Mock SentenceTransformer for load testing.
 
     Prevents loading real embedding model (~630MB) so we can test
     the memory efficiency of the load testing infrastructure itself.
+
+    IMPORTANT: This fixture is function-scoped to prevent contaminating other
+    tests when running with pytest-xdist. Session-scoped patches can leak
+    across tests on the same worker, causing intermittent failures.
     """
     with patch("sentence_transformers.SentenceTransformer") as mock_st:
         mock_instance = Mock()
@@ -163,10 +171,10 @@ def shared_cbr_retriever_REAL(request, shared_embedding_model_REAL):
             pass  # Best effort cleanup
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def shared_cbr_retriever(request, mock_chromadb, mock_sentence_transformer):
     """
-    Session-scoped MOCKED CBR retriever for load testing.
+    Function-scoped MOCKED CBR retriever for load testing.
 
     Uses mocks instead of real components to test infrastructure memory efficiency
     without the ~1.3GB overhead of real embedding models and ChromaDB.
@@ -176,6 +184,10 @@ def shared_cbr_retriever(request, mock_chromadb, mock_sentence_transformer):
 
     CRITICAL: Does NOT create CBRMCPServer to avoid loading real ProductionCBRRetriever.
     Instead returns a lightweight mock that matches the retriever interface.
+
+    IMPORTANT: This fixture is function-scoped to prevent contaminating other
+    tests when running with pytest-xdist. Session-scoped mocks can leak
+    across tests on the same worker, causing intermittent failures.
     """
     # DON'T import CBRMCPServer - it creates real ProductionCBRRetriever!
     # Just create a simple mock retriever directly

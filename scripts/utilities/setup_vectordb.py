@@ -46,10 +46,17 @@ This will:
 See Documentation/Metadata-Schema-Guide.md for complete details on the metadata system.
 """
 import argparse
+import logging
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional, Tuple
+
+# Configure logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 
 # Add project root to Python path for imports
 script_dir = Path(__file__).resolve().parent
@@ -61,6 +68,148 @@ from sentence_transformers import SentenceTransformer
 
 from cases import load_all_cases
 from cbr_mcp_server.metadata_extraction import extract_metadata_list
+
+
+def generate_case_id(case: Dict[str, Any]) -> str:
+    """
+    Generate a stable, content-based ID for a case using SHA-256 hashing.
+
+    Creates a deterministic ID based on the concatenation of problem, solution, category,
+    and subcategory, ensuring that cases with different categorizations get unique IDs
+    even if they share the same problem/solution content. This prevents duplicate ID
+    errors when the same code example appears in multiple categories.
+
+    Args:
+        case: Dictionary containing at least 'problem' and 'solution' keys.
+              Optional: 'category', 'subcategory' keys for unique categorization.
+              Note: 'tags' field does not affect ID generation.
+
+    Returns:
+        String in format 'case_<first_16_chars_of_sha256_hash>'
+        Example: "case_a7f3b2c1d4e5f6g7"
+
+    Algorithm:
+        1. Concatenate case["problem"] + case["solution"] + case["category"] + case["subcategory"]
+        2. Encode concatenated string as UTF-8
+        3. Compute SHA-256 hash
+        4. Extract first 16 characters of hexadecimal digest
+        5. Return formatted as "case_<hash_prefix>"
+
+    Notes:
+        - Missing keys are treated as empty strings
+        - Tags field does not affect ID (allows same categorization with different tags)
+        - Hash is deterministic: same content always produces same ID
+        - Hash is collision-resistant: different content produces different IDs
+        - Including category/subcategory allows same code to appear in multiple categories
+    """
+    import hashlib
+
+    # Extract all relevant fields, defaulting to empty string if missing
+    problem = case.get("problem", "")
+    solution = case.get("solution", "")
+    category = case.get("category", "")
+    subcategory = case.get("subcategory", "")
+
+    # Create canonical string representation
+    # Include category and subcategory to ensure unique IDs for different categorizations
+    # Convert None to empty string to handle both missing keys and None values
+    content = (
+        (problem or "") + (solution or "") + (category or "") + (subcategory or "")
+    )
+
+    # Generate SHA-256 hash
+    hash_object = hashlib.sha256(content.encode("utf-8"))
+    hash_hex = hash_object.hexdigest()
+
+    # Take first 16 characters of hash
+    hash_prefix = hash_hex[:16]
+
+    # Return formatted ID
+    case_id = f"case_{hash_prefix}"
+
+    # Log ID generation with truncated problem text
+    # Convert None to empty string before checking length to avoid TypeError
+    problem_str = problem or ""
+    problem_preview = (
+        (problem_str[:50] + "...") if len(problem_str) > 50 else problem_str
+    )
+    logger.debug(f"Generated ID {case_id} for problem: {problem_preview}")
+
+    return case_id
+
+
+def identify_new_cases(
+    all_cases: List[Dict[str, Any]], collection: Optional[Any]
+) -> Tuple[List[Dict[str, Any]], int]:
+    """Identify which cases are new vs. already existing in ChromaDB collection.
+
+    This function determines which cases need to be added to the database by:
+    1. Generating content-based IDs for all input cases
+    2. Querying the collection for existing case IDs
+    3. Comparing sets to identify new cases
+    4. Returning only new cases and count of duplicates skipped
+
+    Args:
+        all_cases: List of case dictionaries to check against database
+        collection: ChromaDB collection object to query for existing IDs
+
+    Returns:
+        Tuple containing:
+        - List of new cases (not in database)
+        - Count of skipped cases (already in database)
+
+    Raises:
+        KeyError: If case is missing 'problem' or 'solution' field
+    """
+    # Handle edge case: empty input
+    if not all_cases:
+        logger.warning("identify_new_cases called with empty case list")
+        return [], 0
+
+    # Handle edge case: None collection (defensive)
+    if collection is None:
+        logger.warning(
+            "identify_new_cases called with None collection, treating all cases as new"
+        )
+        return all_cases, 0
+
+    # Query database for existing IDs (defensive error handling)
+    try:
+        result = collection.get()
+        existing_ids = result.get("ids", []) if result else []
+
+        # Handle None ids
+        if existing_ids is None:
+            logger.warning("Database returned None for ids, treating as empty")
+            existing_ids = []
+
+    except Exception as e:
+        # On any database error, treat all cases as new (defensive behavior)
+        logger.error(
+            f"Error querying database for existing IDs: {e}, treating all cases as new"
+        )
+        return all_cases, 0
+
+    # Convert to set for O(1) lookup performance
+    existing_ids_set = set(existing_ids)
+
+    # Identify new cases (preserve original order)
+    # Generate ID for each case and check if it exists
+    new_cases = []
+    for case in all_cases:
+        case_id = generate_case_id(case)  # May raise KeyError for missing fields
+        if case_id not in existing_ids_set:
+            new_cases.append(case)
+
+    # Calculate skipped count
+    skipped_count = len(all_cases) - len(new_cases)
+
+    # Log deduplication decision
+    logger.info(
+        f"Deduplication: {len(new_cases)} new cases found, {skipped_count} duplicates skipped"
+    )
+
+    return new_cases, skipped_count
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -90,6 +239,9 @@ Examples:
 
   # Force rebuild even if database exists
   python setup_vectordb.py --force
+
+  # Validate database integrity (read-only)
+  python setup_vectordb.py --validate
 
   # List available categories
   python setup_vectordb.py --list-categories
@@ -131,17 +283,23 @@ Examples:
         help="Show subcategories for a specific category and exit",
     )
 
-    # Force rebuild option
-    parser.add_argument(
+    # Mutually exclusive group for --validate and --force
+    mode_group = parser.add_mutually_exclusive_group()
+    mode_group.add_argument(
         "--force", action="store_true", help="Force rebuild even if database exists"
+    )
+    mode_group.add_argument(
+        "--validate",
+        action="store_true",
+        help="Validate database integrity without modification (exit 0 if valid, 1 if discrepancies)",
     )
 
     return parser.parse_args()
 
 
-def list_categories(all_cases) -> None:
+def list_categories(all_cases: List[Dict[str, Any]]) -> None:
     """Display all categories with case counts."""
-    category_counts = defaultdict(int)
+    category_counts: Dict[str, int] = defaultdict(int)
 
     for case in all_cases:
         category = case.get("category", "unknown")
@@ -159,7 +317,7 @@ def list_categories(all_cases) -> None:
     print(f"Total: {len(all_cases)} cases across {len(category_counts)} categories\n")
 
 
-def list_subcategories(all_cases, category) -> None:
+def list_subcategories(all_cases: List[Dict[str, Any]], category: str) -> None:
     """Display subcategories for a specific category with counts."""
     # Verify category exists
     category_cases = [c for c in all_cases if c.get("category") == category]
@@ -172,7 +330,7 @@ def list_subcategories(all_cases, category) -> None:
         print()
         return
 
-    subcategory_counts = defaultdict(int)
+    subcategory_counts: Dict[str, int] = defaultdict(int)
 
     for case in category_cases:
         subcategory = case.get("subcategory", "unknown")
@@ -192,7 +350,9 @@ def list_subcategories(all_cases, category) -> None:
     )
 
 
-def filter_cases(all_cases, args) -> List[Dict[str, Any]]:
+def filter_cases(
+    all_cases: List[Dict[str, Any]], args: argparse.Namespace
+) -> List[Dict[str, Any]]:
     """Filter cases based on command-line arguments.
 
     Args:
@@ -241,6 +401,74 @@ def filter_cases(all_cases, args) -> List[Dict[str, Any]]:
     return filtered
 
 
+def validate_database(
+    all_cases: List[Dict[str, Any]], collection: Any
+) -> Dict[str, Any]:
+    """
+    Validate database integrity by comparing case files against ChromaDB contents.
+
+    This function compares the cases loaded from files with the cases stored in the
+    ChromaDB database to detect discrepancies. It identifies cases that are missing
+    from the database (in files but not in DB) and orphaned cases (in DB but not in files).
+
+    Algorithm:
+        1. Generate content-based IDs for all file cases using generate_case_id()
+        2. Retrieve all IDs from the database collection
+        3. Compare the two sets to find missing and orphaned cases
+        4. Return comprehensive validation report
+
+    Args:
+        all_cases: List of case dictionaries loaded from case files
+        collection: ChromaDB collection object
+
+    Returns:
+        Dictionary with validation report structure:
+        {
+            "cases_in_files": int,         # Total cases in files
+            "cases_in_db": int,            # Total cases in database
+            "matches": int,                # Number of matching cases
+            "missing_from_db": List[str],  # Case IDs in files but not in DB
+            "extra_in_db": List[str],      # Case IDs in DB but not in files
+            "has_discrepancies": bool      # True if any discrepancies exist
+        }
+
+    Raises:
+        Exception: Propagates any ChromaDB exceptions (connection errors, etc.)
+    """
+    # Generate IDs for all file cases
+    file_case_ids = set(generate_case_id(case) for case in all_cases)
+
+    # Retrieve all IDs from database (no limit to get all)
+    db_result = collection.get()
+    db_case_ids = set(db_result["ids"])
+
+    # Calculate set differences
+    matching_ids = file_case_ids & db_case_ids  # Intersection
+    missing_from_db = file_case_ids - db_case_ids  # In files but not in DB
+    extra_in_db = db_case_ids - file_case_ids  # In DB but not in files
+
+    # Build validation report
+    report = {
+        "cases_in_files": len(file_case_ids),
+        "cases_in_db": len(db_case_ids),
+        "matches": len(matching_ids),
+        "missing_from_db": sorted(list(missing_from_db)),
+        "extra_in_db": sorted(list(extra_in_db)),
+        "has_discrepancies": len(missing_from_db) > 0 or len(extra_in_db) > 0,
+    }
+
+    # Log validation results
+    logger.info(
+        f"Validation results: {len(matching_ids)} matches, {len(missing_from_db)} missing from DB, {len(extra_in_db)} extra in DB"
+    )
+    if report["has_discrepancies"]:
+        logger.warning(
+            f"Database validation found discrepancies: {len(missing_from_db)} missing, {len(extra_in_db)} extra"
+        )
+
+    return report
+
+
 def main() -> None:
     """
     Main execution function for vector database setup.
@@ -269,160 +497,254 @@ def main() -> None:
 
     This is required when upgrading from databases created before November 2025.
     """
-    # Parse command-line arguments
-    args = parse_arguments()
+    try:
+        # Parse command-line arguments
+        args = parse_arguments()
 
-    # Load all cases first (needed for list operations)
-    all_cases = load_all_cases()
+        # Load all cases first (needed for list operations)
+        all_cases = load_all_cases()
 
-    # Handle list operations (exit after displaying)
-    if args.list_categories:
-        list_categories(all_cases)
-        sys.exit(0)
+        # Handle list operations (exit after displaying)
+        if args.list_categories:
+            list_categories(all_cases)
+            sys.exit(0)
 
-    if args.list_subcategories:
-        list_subcategories(all_cases, args.list_subcategories)
-        sys.exit(0)
+        if args.list_subcategories:
+            list_subcategories(all_cases, args.list_subcategories)
+            sys.exit(0)
 
-    # Filter cases based on arguments
-    CASE_BASE = filter_cases(all_cases, args)
+        # Handle validation mode (read-only database check)
+        if args.validate:
+            print("\n=== Database Validation Mode ===\n")
+            print("Connecting to ChromaDB...")
+            client = chromadb.PersistentClient(path="./db")
 
-    # Print feedback about what's being loaded
-    if len(CASE_BASE) < len(all_cases):
-        print(f"Filtered to {len(CASE_BASE)} cases (out of {len(all_cases)} total)")
+            try:
+                collection = client.get_collection(name="code_solutions_case_base")
+            except Exception as e:
+                print(f"\nError: Unable to access database collection: {e}")
+                print("Database may not exist. Run without --validate to create it.")
+                sys.exit(1)
 
-        # Show breakdown of filtered cases
-        if args.category:
-            print(f"  Categories: {', '.join(args.category)}")
-        if args.subcategory:
-            print(f"  Subcategories: {', '.join(args.subcategory)}")
-        if args.tags:
-            print(f"  Tags: {', '.join(args.tags)}")
-    else:
-        print(f"Loading all {len(CASE_BASE)} cases from modular structure")
+            print("Running validation...\n")
+            report = validate_database(all_cases, collection)
 
-    # Check for empty result
-    if not CASE_BASE:
-        print("\nWarning: No cases match the specified filters.")
-        print("Use --list-categories to see available categories.")
-        sys.exit(1)
+            # Display validation report
+            print("=== Database Validation Report ===")
+            print(f"Cases in files:      {report['cases_in_files']}")
+            print(f"Cases in database:   {report['cases_in_db']}")
+            print(f"Matching cases:      {report['matches']}")
+            print(f"Missing from DB:     {len(report['missing_from_db'])}")
+            print(f"Extra in DB:         {len(report['extra_in_db'])}")
 
-    # 1. Initialize the Embedding Model (runs locally)
-    print("\nInitializing embedding model...")
-    embedding_model = SentenceTransformer(
-        "nomic-ai/nomic-embed-text-v1.5", trust_remote_code=True
-    )
+            if report["has_discrepancies"]:
+                print("\n⚠️  DISCREPANCIES FOUND")
 
-    # 2. Initialize ChromaDB Client
-    print("Connecting to ChromaDB...")
-    client = chromadb.PersistentClient(path="./db")
+                if report["missing_from_db"]:
+                    print(
+                        f"\nMissing from database ({len(report['missing_from_db'])} cases):"
+                    )
+                    for case_id in report["missing_from_db"][:10]:  # Show first 10
+                        print(f"  - {case_id}")
+                    if len(report["missing_from_db"]) > 10:
+                        print(f"  ... and {len(report['missing_from_db']) - 10} more")
 
-    # 3. Create or load a collection
-    collection = client.get_or_create_collection(name="code_solutions_case_base")
+                if report["extra_in_db"]:
+                    print(f"\nExtra in database ({len(report['extra_in_db'])} cases):")
+                    for case_id in report["extra_in_db"][:10]:  # Show first 10
+                        print(f"  - {case_id}")
+                    if len(report["extra_in_db"]) > 10:
+                        print(f"  ... and {len(report['extra_in_db']) - 10} more")
 
-    # 5. Populate the database
-    # Check if the collection is already populated to avoid duplicates
-    current_count = collection.count()
-    force_rebuild = args.force
+                print(
+                    "\nRecommendation: Run with --force to rebuild database from case files."
+                )
+                sys.exit(1)
+            else:
+                print("\n✅ Database is valid - no discrepancies found")
+                sys.exit(0)
 
-    if current_count == 0 or force_rebuild:
-        if force_rebuild and current_count > 0:
-            print(
-                f"\nForce rebuild requested. Clearing existing {current_count} cases..."
+        # Filter cases based on arguments
+        CASE_BASE = filter_cases(all_cases, args)
+
+        # Print feedback about what's being loaded
+        if len(CASE_BASE) < len(all_cases):
+            print(f"Filtered to {len(CASE_BASE)} cases (out of {len(all_cases)} total)")
+
+            # Show breakdown of filtered cases
+            if args.category:
+                print(f"  Categories: {', '.join(args.category)}")
+            if args.subcategory:
+                print(f"  Subcategories: {', '.join(args.subcategory)}")
+            if args.tags:
+                print(f"  Tags: {', '.join(args.tags)}")
+        else:
+            print(f"Loading all {len(CASE_BASE)} cases from modular structure")
+
+        # Check for empty result
+        if not CASE_BASE:
+            print("\nWarning: No cases match the specified filters.")
+            print("Use --list-categories to see available categories.")
+            sys.exit(1)
+
+        # 1. Initialize the Embedding Model (runs locally)
+        print("\nInitializing embedding model...")
+        embedding_model = SentenceTransformer(
+            "nomic-ai/nomic-embed-text-v1.5", trust_remote_code=True
+        )
+
+        # 2. Initialize ChromaDB Client
+        print("Connecting to ChromaDB...")
+        client = chromadb.PersistentClient(path="./db")
+
+        # 3. Create or load a collection
+        collection = client.get_or_create_collection(name="code_solutions_case_base")
+
+        # 5. Populate the database
+        # Check if the collection is already populated to avoid duplicates
+        current_count = collection.count()
+        force_rebuild = args.force
+
+        if current_count == 0 or force_rebuild:
+            if force_rebuild and current_count > 0:
+                print(
+                    f"\nForce rebuild requested. Clearing existing {current_count} cases..."
+                )
+                client.delete_collection(name="code_solutions_case_base")
+                collection = client.create_collection(name="code_solutions_case_base")
+
+            print("Populating the vector database...")
+            # Separate problems and solutions from the case base
+            problems = [case["problem"] for case in CASE_BASE]
+            solutions = [case["solution"] for case in CASE_BASE]
+
+            # Generate content-based IDs for deduplication
+            ids = [generate_case_id(case) for case in CASE_BASE]
+
+            # Generate embeddings for all the 'problem' descriptions
+            print(f"Generating embeddings for {len(problems)} cases...")
+            problem_embeddings = embedding_model.encode(
+                problems, normalize_embeddings=True
             )
-            client.delete_collection(name="code_solutions_case_base")
-            collection = client.create_collection(name="code_solutions_case_base")
 
-        print("Populating the vector database...")
-        # Separate problems and solutions from the case base
-        problems = [case["problem"] for case in CASE_BASE]
-        solutions = [case["solution"] for case in CASE_BASE]
+            # Prepare metadata
+            metadatas = extract_metadata_list(CASE_BASE)
 
-        # [FIX] Generate unique string IDs for each entry, as required by ChromaDB
-        ids = [f"id{i}" for i in range(len(problems))]
+            # Validate metadata before storage
+            assert len(metadatas) == len(
+                CASE_BASE
+            ), f"Metadata count mismatch: {len(metadatas)} != {len(CASE_BASE)}"
 
-        # Generate embeddings for all the 'problem' descriptions
-        print(f"Generating embeddings for {len(problems)} cases...")
-        problem_embeddings = embedding_model.encode(problems, normalize_embeddings=True)
+            # Print sample metadata for verification
+            print(f"Sample metadata (first case): {metadatas[0]}")
 
-        # Prepare metadata
-        metadatas = extract_metadata_list(CASE_BASE)
+            # Verify all metadata dicts have required fields
+            required_fields = {"problem", "category", "subcategory", "tags"}
+            for i, metadata in enumerate(metadatas):
+                missing_fields = required_fields - set(metadata.keys())
+                if missing_fields:
+                    print(f"Warning: Case {i} missing fields: {missing_fields}")
 
-        # Validate metadata before storage
-        assert len(metadatas) == len(
-            CASE_BASE
-        ), f"Metadata count mismatch: {len(metadatas)} != {len(CASE_BASE)}"
+            # Add the data to the collection
+            print("Adding cases to database...")
+            collection.add(
+                embeddings=problem_embeddings,
+                documents=solutions,  # Store the code solutions as the main document
+                metadatas=metadatas,  # Store complete metadata including problem, category, subcategory, tags
+                ids=ids,  # Provide the unique IDs
+            )
+            print(f"Successfully added {len(ids)} cases to the database.")
+        else:
+            # Incremental update mode: add only new cases
+            print(
+                f"Database has {current_count} existing cases. Checking for new cases..."
+            )
 
-        # Print sample metadata for verification
-        print(f"Sample metadata (first case): {metadatas[0]}")
+            # Identify new cases vs existing
+            new_cases, skipped_count = identify_new_cases(CASE_BASE, collection)
 
-        # Verify all metadata dicts have required fields
-        required_fields = {"problem", "category", "subcategory", "tags"}
-        for i, metadata in enumerate(metadatas):
-            missing_fields = required_fields - set(metadata.keys())
-            if missing_fields:
-                print(f"Warning: Case {i} missing fields: {missing_fields}")
+            if len(new_cases) > 0:
+                print(f"Found {len(new_cases)} new cases to add...")
 
-        # Add the data to the collection
-        print("Adding cases to database...")
-        collection.add(
-            embeddings=problem_embeddings,
-            documents=solutions,  # Store the code solutions as the main document
-            metadatas=metadatas,  # Store complete metadata including problem, category, subcategory, tags
-            ids=ids,  # Provide the unique IDs
-        )
-        print(f"Successfully added {len(ids)} cases to the database.")
-    elif current_count < len(CASE_BASE):
-        print(
-            f"WARNING: Database has {current_count} cases but filtered selection has {len(CASE_BASE)} cases."
-        )
-        print("Repopulating database with filtered cases...")
+                # Separate problems and solutions from new cases only
+                problems = [case["problem"] for case in new_cases]
+                solutions = [case["solution"] for case in new_cases]
 
-        # Clear existing collection and repopulate
-        client.delete_collection(name="code_solutions_case_base")
-        collection = client.create_collection(name="code_solutions_case_base")
+                # Generate content-based IDs for new cases
+                ids = [generate_case_id(case) for case in new_cases]
 
-        # Separate problems and solutions from the case base
-        problems = [case["problem"] for case in CASE_BASE]
-        solutions = [case["solution"] for case in CASE_BASE]
+                # Generate embeddings for new cases only
+                print(f"Generating embeddings for {len(problems)} new cases...")
+                problem_embeddings = embedding_model.encode(
+                    problems, normalize_embeddings=True
+                )
 
-        # Generate unique string IDs for each entry
-        ids = [f"id{i}" for i in range(len(problems))]
+                # Prepare metadata for new cases
+                metadatas = extract_metadata_list(new_cases)
 
-        # Generate embeddings for all the 'problem' descriptions
-        print(f"Generating embeddings for {len(problems)} cases...")
-        problem_embeddings = embedding_model.encode(problems, normalize_embeddings=True)
+                # Validate metadata before storage
+                assert len(metadatas) == len(
+                    new_cases
+                ), f"Metadata count mismatch: {len(metadatas)} != {len(new_cases)}"
 
-        # Prepare metadata
-        metadatas = extract_metadata_list(CASE_BASE)
+                # Add only new cases to the collection
+                print("Adding new cases to database...")
+                collection.add(
+                    embeddings=problem_embeddings,
+                    documents=solutions,
+                    metadatas=metadatas,
+                    ids=ids,
+                )
 
-        # Validate metadata before storage
-        assert len(metadatas) == len(
-            CASE_BASE
-        ), f"Metadata count mismatch: {len(metadatas)} != {len(CASE_BASE)}"
+                # Display statistics
+                final_count = collection.count()
+                print(f"\nIncremental update complete:")
+                print(f"  Added: {len(new_cases)} new cases")
+                print(f"  Skipped: {skipped_count} existing cases")
+                print(f"  Total: {final_count} cases in database")
+            else:
+                # No new cases to add
+                print(f"All {len(CASE_BASE)} cases already exist in database.")
+                print(f"  Skipped: {skipped_count} existing cases")
+                print(f"  Total: {current_count} cases in database")
+                print("\nUse --force to rebuild the database.")
 
-        # Print sample metadata for verification
-        print(f"Sample metadata (first case): {metadatas[0]}")
+    except Exception as e:
+        # Comprehensive error handling for ChromaDB, embedding, and general failures
+        error_msg = str(e).lower()
 
-        # Verify all metadata dicts have required fields
-        required_fields = {"problem", "category", "subcategory", "tags"}
-        for i, metadata in enumerate(metadatas):
-            missing_fields = required_fields - set(metadata.keys())
-            if missing_fields:
-                print(f"Warning: Case {i} missing fields: {missing_fields}")
+        # Determine error type and provide appropriate user message
+        if "chromadb" in error_msg or "database" in error_msg or "chroma" in error_msg:
+            # ChromaDB-specific error
+            logger.error(f"ChromaDB connection or operation failed: {e}")
+            print("\nError: Failed to connect to or operate ChromaDB database.")
+            print(f"Details: {e}")
+            print("\nPlease check:")
+            print("  - Database directory permissions")
+            print("  - Available disk space")
+            print("  - ChromaDB installation")
+        elif (
+            "embedding" in error_msg
+            or "model" in error_msg
+            or "encode" in error_msg
+            or "torch" in error_msg
+        ):
+            # Embedding model error
+            logger.error(f"Embedding model generation failed: {e}")
+            print("\nError: Failed to generate embeddings using the model.")
+            print(f"Details: {e}")
+            print("\nPlease check:")
+            print("  - SentenceTransformer installation")
+            print("  - Available memory")
+            print("  - Model download/cache directory permissions")
+        else:
+            # General unexpected error
+            logger.error(f"Unexpected error during database setup: {e}")
+            print("\nError: An unexpected error occurred during database setup.")
+            print(f"Details: {e}")
 
-        # Add the data to the collection
-        print("Adding cases to database...")
-        collection.add(
-            embeddings=problem_embeddings,
-            documents=solutions,
-            metadatas=metadatas,
-            ids=ids,
-        )
-        print(f"Successfully added {len(ids)} cases to the database.")
-    else:
-        print(f"Vector database already populated with {current_count} cases.")
-        print("Use --force to rebuild the database.")
+        # Exit with non-zero code
+        sys.exit(1)
 
 
 if __name__ == "__main__":

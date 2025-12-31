@@ -13,12 +13,16 @@ category/subcategory/tags), so category-based queries will fail. After the metad
 bug is fixed in setup_vectordb.py, these tests should pass.
 
 Test Group: Category-Based Search Functionality (from tests.md)
+
+NOTE: Tests use unique collection names per test to ensure isolation during
+parallel execution with pytest-xdist.
 """
 
 import os
 import shutil
 import sys
 import tempfile
+import uuid
 from pathlib import Path
 from unittest.mock import Mock, patch
 
@@ -26,9 +30,11 @@ import chromadb
 import pytest
 from sentence_transformers import SentenceTransformer
 
-# Mark all tests in this module to run serially (not in parallel)
-# This prevents race conditions during database operations
-pytestmark = pytest.mark.xdist_group("serial")
+
+def get_unique_collection_name() -> str:
+    """Generate a unique collection name for test isolation in parallel execution."""
+    return f"test_collection_{uuid.uuid4().hex[:12]}"
+
 
 # Add the src directory to path for importing cbr_mcp_server
 src_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "src")
@@ -55,6 +61,12 @@ def temp_db_dir():
     # Cleanup after test
     if os.path.exists(temp_dir):
         shutil.rmtree(temp_dir)
+
+
+@pytest.fixture
+def unique_collection_name():
+    """Generate a unique collection name for test isolation."""
+    return get_unique_collection_name()
 
 
 @pytest.fixture
@@ -172,17 +184,20 @@ def sample_cases_for_category_search():
 
 @pytest.fixture
 def populated_db_with_complete_metadata(
-    temp_db_dir, mock_embedding_model, sample_cases_for_category_search
+    temp_db_dir,
+    mock_embedding_model,
+    sample_cases_for_category_search,
+    unique_collection_name,
 ):
     """
     Create and populate a test database with complete metadata.
 
     This simulates what the database SHOULD look like after the metadata bug is fixed.
-    Returns a client and collection ready for category-based queries.
+    Returns a client, collection, and collection name ready for category-based queries.
     """
-    # Create ChromaDB client and collection
+    # Create ChromaDB client and collection with unique name
     client = chromadb.PersistentClient(path=temp_db_dir)
-    collection = client.create_collection(name="code_solutions_case_base")
+    collection = client.create_collection(name=unique_collection_name)
 
     # Extract data from cases
     problems = [case["problem"] for case in sample_cases_for_category_search]
@@ -211,20 +226,25 @@ def populated_db_with_complete_metadata(
         ids=ids,
     )
 
-    return client, collection
+    return client, collection, unique_collection_name
 
 
 @pytest.fixture
-def test_retriever(temp_db_dir, mock_embedding_model):
+def test_retriever(temp_db_dir, mock_embedding_model, unique_collection_name, populated_db_with_complete_metadata):
     """
     Create a ProductionCBRRetriever instance for testing.
 
     Returns a retriever configured with the temporary database and mock embedding model.
+    The retriever uses the same collection name as populated_db_with_complete_metadata
+    to ensure test isolation during parallel execution.
     """
-    # Create config pointing to temporary database
+    # Get the collection name from the populated database to ensure consistency
+    _, _, collection_name = populated_db_with_complete_metadata
+
+    # Create config pointing to temporary database with the SAME collection name
     config = CBRServerConfig(
         database_path=temp_db_dir,
-        collection_name="code_solutions_case_base",
+        collection_name=collection_name,
         use_real_db=True,
     )
 
@@ -264,7 +284,7 @@ async def test_search_by_category_orchestration(
       - All returned cases have category="orchestration" in metadata
     """
     # Ensure database is populated before test
-    client, collection = populated_db_with_complete_metadata
+    client, collection, _ = populated_db_with_complete_metadata
 
     # Execute category search using the test retriever
     results = await test_retriever.search_by_category(
@@ -306,7 +326,7 @@ async def test_search_by_category_firebase(
       - All returned cases have category="firebase"
     """
     # Ensure database is populated before test
-    client, collection = populated_db_with_complete_metadata
+    client, collection, _ = populated_db_with_complete_metadata
 
     # Execute category search using the test retriever
     results = await test_retriever.search_by_category(category="firebase", limit=50)
@@ -346,7 +366,7 @@ async def test_search_by_category_rust(
       - All returned cases have category="rust"
     """
     # Ensure database is populated before test
-    client, collection = populated_db_with_complete_metadata
+    client, collection, _ = populated_db_with_complete_metadata
 
     # Execute category search using the test retriever
     results = await test_retriever.search_by_category(category="rust", limit=50)
@@ -386,7 +406,7 @@ async def test_search_by_category_and_subcategory(
       - All returned cases have BOTH category="orchestration" AND subcategory="planning"
     """
     # Ensure database is populated before test
-    client, collection = populated_db_with_complete_metadata
+    client, collection, _ = populated_db_with_complete_metadata
 
     # Execute category + subcategory search using the test retriever
     results = await test_retriever.search_by_category(
@@ -437,7 +457,7 @@ async def test_search_by_category_with_query_text(
       - Results should be filtered/ranked by similarity (may be fewer than all orchestration cases)
     """
     # Ensure database is populated before test
-    client, collection = populated_db_with_complete_metadata
+    client, collection, _ = populated_db_with_complete_metadata
 
     # Execute category search with query text using the test retriever
     results = await test_retriever.search_by_category(
