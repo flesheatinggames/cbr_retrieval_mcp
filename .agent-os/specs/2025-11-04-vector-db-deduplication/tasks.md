@@ -39,7 +39,7 @@ Always run tests in parallel mode using `pytest -n auto`.
     - Compare input cases against existing IDs
     - Return list of new cases and count of skipped duplicates
     - Optimize for performance with batch ID lookups
-  - [ ] 2.3 Write integration tests for deduplication workflow
+  - [x] 2.3 Write integration tests for deduplication workflow
     - Test full workflow: load cases → identify new → add to collection
     - Test behavior with partially populated database
     - Test behavior with fully populated database (all duplicates)

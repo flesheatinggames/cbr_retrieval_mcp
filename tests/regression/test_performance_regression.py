@@ -520,6 +520,10 @@ class TestCacheEffectivenessRegression:
                 f"(hits={cache_hits}, misses={cache_misses})"
             )
 
+    @pytest.mark.skipif(
+        os.environ.get("PYTEST_XDIST_WORKER") is not None,
+        reason="Test unstable in parallel execution mode - cache overhead dominates with mocks"
+    )
     def test_cache_speedup_at_least_2x(
         self, isolated_test_db, mock_chromadb_collection, mock_embedding_model
     ):

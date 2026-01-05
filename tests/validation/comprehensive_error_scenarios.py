@@ -340,7 +340,7 @@ class ErrorScenarioRunner:
     async def run_scenario(self, scenario: ErrorScenario) -> ErrorTestResult:
         """Run a single error scenario"""
         test_start = datetime.now()
-        scenario_id = f"{scenario.scenario_id}_{uuid.uuid4().hex[:8]}"
+        scenario_id = f"{scenario.scenario_id}_{uuid.uuid4().hex}"
 
         result = ErrorTestResult(
             scenario_id=scenario_id,

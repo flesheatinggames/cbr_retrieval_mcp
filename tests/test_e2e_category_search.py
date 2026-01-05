@@ -35,7 +35,8 @@ from sentence_transformers import SentenceTransformer
 
 def get_unique_collection_name() -> str:
     """Generate a unique collection name for test isolation in parallel execution."""
-    return f"test_collection_{uuid.uuid4().hex[:12]}"
+    return f"test_collection_{uuid.uuid4().hex}"
+
 
 # Add the src directory to path for importing cbr_mcp_server
 src_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "src")
@@ -107,7 +108,9 @@ def mock_embedding_model():
 
 
 @pytest.mark.asyncio
-async def test_e2e_populate_and_search_by_category(temp_db_dir, mock_embedding_model, unique_collection_name):
+async def test_e2e_populate_and_search_by_category(
+    temp_db_dir, mock_embedding_model, unique_collection_name
+):
     """
     End-to-end test: Verify complete flow from clean database to successful category search.
 
@@ -221,7 +224,9 @@ async def test_e2e_populate_and_search_by_category(temp_db_dir, mock_embedding_m
 # ============================================================================
 
 
-def test_e2e_force_rebuild_and_verify_metadata(temp_db_dir, mock_embedding_model, unique_collection_name):
+def test_e2e_force_rebuild_and_verify_metadata(
+    temp_db_dir, mock_embedding_model, unique_collection_name
+):
     """
     End-to-end test: Verify migration from broken to fixed database using --force flag.
 
@@ -335,7 +340,9 @@ def test_e2e_force_rebuild_and_verify_metadata(temp_db_dir, mock_embedding_model
 
 
 @pytest.mark.asyncio
-async def test_e2e_filtered_load_and_category_search(temp_db_dir, mock_embedding_model, unique_collection_name):
+async def test_e2e_filtered_load_and_category_search(
+    temp_db_dir, mock_embedding_model, unique_collection_name
+):
     """
     End-to-end test: Verify filtered loading preserves complete metadata.
 

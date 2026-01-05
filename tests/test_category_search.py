@@ -33,7 +33,7 @@ from sentence_transformers import SentenceTransformer
 
 def get_unique_collection_name() -> str:
     """Generate a unique collection name for test isolation in parallel execution."""
-    return f"test_collection_{uuid.uuid4().hex[:12]}"
+    return f"test_collection_{uuid.uuid4().hex}"
 
 
 # Add the src directory to path for importing cbr_mcp_server
@@ -230,7 +230,12 @@ def populated_db_with_complete_metadata(
 
 
 @pytest.fixture
-def test_retriever(temp_db_dir, mock_embedding_model, unique_collection_name, populated_db_with_complete_metadata):
+def test_retriever(
+    temp_db_dir,
+    mock_embedding_model,
+    unique_collection_name,
+    populated_db_with_complete_metadata,
+):
     """
     Create a ProductionCBRRetriever instance for testing.
 

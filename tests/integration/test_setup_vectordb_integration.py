@@ -19,7 +19,9 @@ sys.path.insert(0, str(project_root))
 @pytest.fixture
 def mock_chromadb_client():
     """Mock ChromaDB PersistentClient."""
-    with patch("cbr_mcp_server.utilities.setup_vectordb.chromadb.PersistentClient") as mock_client:
+    with patch(
+        "cbr_mcp_server.utilities.setup_vectordb.chromadb.PersistentClient"
+    ) as mock_client:
         mock_instance = Mock()
         mock_collection = Mock()
 
@@ -41,7 +43,9 @@ def mock_chromadb_client():
 @pytest.fixture
 def mock_embedding_model():
     """Mock SentenceTransformer embedding model."""
-    with patch("cbr_mcp_server.utilities.setup_vectordb.SentenceTransformer") as mock_model:
+    with patch(
+        "cbr_mcp_server.utilities.setup_vectordb.SentenceTransformer"
+    ) as mock_model:
         mock_instance = Mock()
 
         # Configure encode to return mock embeddings
@@ -125,7 +129,10 @@ class TestSetupVectorDBImportsAllCases:
         expected_case_count = len(ACTUAL_ALL_CASES)
 
         # Mock the cases.load_all_cases import
-        with patch("cbr_mcp_server.utilities.setup_vectordb.load_all_cases", return_value=all_cases):
+        with patch(
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+            return_value=all_cases,
+        ):
             # Import setup_vectordb
             from cbr_mcp_server.utilities import setup_vectordb
 
@@ -169,7 +176,10 @@ class TestSetupVectorDBImportsAllCases:
 
         expected_case_count = len(ACTUAL_ALL_CASES)
 
-        with patch("cbr_mcp_server.utilities.setup_vectordb.load_all_cases", return_value=all_cases):
+        with patch(
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+            return_value=all_cases,
+        ):
             import importlib
 
             from cbr_mcp_server.utilities import setup_vectordb
@@ -188,15 +198,24 @@ class TestSetupVectorDBImportsAllCases:
             # Verify all IDs are unique
             assert len(ids) == len(set(ids))
 
-            # Verify ID format (id0, id1, ..., id{n-1})
-            expected_ids = [f"id{i}" for i in range(expected_case_count)]
-            assert ids == expected_ids
+            # Verify ID format (case_<hash>) - hash-based IDs from generate_case_id()
+            # All IDs should start with "case_"
+            for case_id in ids:
+                assert case_id.startswith(
+                    "case_"
+                ), f"ID should start with 'case_': {case_id}"
+                assert (
+                    len(case_id) == 21
+                ), f"ID should be 21 chars (case_ + 16 hex chars): {case_id}"
 
     def test_setup_vectordb_extracts_problems_and_solutions(
         self, mock_chromadb_client, mock_embedding_model, sample_cases
     ):
         """Verify that problems and solutions are correctly extracted."""
-        with patch("cbr_mcp_server.utilities.setup_vectordb.load_all_cases", return_value=sample_cases):
+        with patch(
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+            return_value=sample_cases,
+        ):
             import importlib
 
             from cbr_mcp_server.utilities import setup_vectordb
@@ -230,7 +249,10 @@ class TestSetupVectorDBHandlesMetadataFields:
         self, mock_chromadb_client, mock_embedding_model, sample_cases
     ):
         """Verify setup processes category, subcategory, tags without errors."""
-        with patch("cbr_mcp_server.utilities.setup_vectordb.load_all_cases", return_value=sample_cases):
+        with patch(
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+            return_value=sample_cases,
+        ):
             import importlib
 
             from cbr_mcp_server.utilities import setup_vectordb
@@ -254,7 +276,10 @@ class TestSetupVectorDBHandlesMetadataFields:
         self, mock_chromadb_client, mock_embedding_model, sample_cases
     ):
         """Verify metadata is correctly formatted for ChromaDB."""
-        with patch("cbr_mcp_server.utilities.setup_vectordb.load_all_cases", return_value=sample_cases):
+        with patch(
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+            return_value=sample_cases,
+        ):
             import importlib
 
             from cbr_mcp_server.utilities import setup_vectordb
@@ -288,7 +313,10 @@ class TestSetupVectorDBEmbeddingGeneration:
 
         expected_case_count = len(ACTUAL_ALL_CASES)
 
-        with patch("cbr_mcp_server.utilities.setup_vectordb.load_all_cases", return_value=all_cases):
+        with patch(
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+            return_value=all_cases,
+        ):
             import importlib
 
             from cbr_mcp_server.utilities import setup_vectordb
@@ -318,7 +346,10 @@ class TestSetupVectorDBEmbeddingGeneration:
         self, mock_chromadb_client, mock_embedding_model, sample_cases
     ):
         """Verify correct content is passed to embedding model."""
-        with patch("cbr_mcp_server.utilities.setup_vectordb.load_all_cases", return_value=sample_cases):
+        with patch(
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+            return_value=sample_cases,
+        ):
             import importlib
 
             from cbr_mcp_server.utilities import setup_vectordb
@@ -346,7 +377,10 @@ class TestSetupVectorDBChromaDBIntegration:
         self, mock_chromadb_client, mock_embedding_model, sample_cases
     ):
         """Verify ChromaDB client is initialized with correct parameters."""
-        with patch("cbr_mcp_server.utilities.setup_vectordb.load_all_cases", return_value=sample_cases):
+        with patch(
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+            return_value=sample_cases,
+        ):
             import importlib
 
             from cbr_mcp_server.utilities import setup_vectordb
@@ -366,7 +400,10 @@ class TestSetupVectorDBChromaDBIntegration:
         self, mock_chromadb_client, mock_embedding_model, sample_cases
     ):
         """Verify collection is created/retrieved with correct name."""
-        with patch("cbr_mcp_server.utilities.setup_vectordb.load_all_cases", return_value=sample_cases):
+        with patch(
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+            return_value=sample_cases,
+        ):
             import importlib
 
             from cbr_mcp_server.utilities import setup_vectordb
@@ -386,27 +423,71 @@ class TestSetupVectorDBChromaDBIntegration:
                 name="code_solutions_case_base"
             )
 
-    def test_setup_vectordb_skip_if_populated(
+    def test_setup_vectordb_skip_if_populated_checks_collection_count(
         self, mock_chromadb_client, mock_embedding_model, sample_cases
     ):
-        """Verify setup skips population if collection already has data."""
+        """Verify setup checks collection count when database already has data."""
         # Configure collection to return count > 0
         mock_chromadb_client["collection"].count.return_value = 10
 
-        with patch("cbr_mcp_server.utilities.setup_vectordb.load_all_cases", return_value=sample_cases):
-            import importlib
+        from cbr_mcp_server.utilities.setup_vectordb import generate_case_id
 
+        existing_ids = [generate_case_id(case) for case in sample_cases]
+        mock_chromadb_client["collection"].get.return_value = {"ids": existing_ids}
+
+        with patch(
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+            return_value=sample_cases,
+        ):
             from cbr_mcp_server.utilities import setup_vectordb
-
-            # Reset mocks after initial import to test only the reload behavior
-            mock_chromadb_client["client"].reset_mock()
-            mock_chromadb_client["instance"].reset_mock()
-            mock_chromadb_client["collection"].reset_mock()
-            mock_embedding_model.return_value.encode.reset_mock()
 
             setup_vectordb.main([])
 
-            # Verify add was NOT called
+            # Verify count was checked
+            mock_chromadb_client["collection"].count.assert_called()
+
+    def test_setup_vectordb_skip_if_populated_calls_deduplication(
+        self, mock_chromadb_client, mock_embedding_model, sample_cases
+    ):
+        """Verify setup calls deduplication check for populated database."""
+        mock_chromadb_client["collection"].count.return_value = 10
+
+        from cbr_mcp_server.utilities.setup_vectordb import generate_case_id
+
+        existing_ids = [generate_case_id(case) for case in sample_cases]
+        mock_chromadb_client["collection"].get.return_value = {"ids": existing_ids}
+
+        with patch(
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+            return_value=sample_cases,
+        ):
+            from cbr_mcp_server.utilities import setup_vectordb
+
+            setup_vectordb.main([])
+
+            # Verify get() was called for deduplication
+            mock_chromadb_client["collection"].get.assert_called()
+
+    def test_setup_vectordb_skip_if_all_cases_exist(
+        self, mock_chromadb_client, mock_embedding_model, sample_cases
+    ):
+        """Verify setup skips adding cases when all cases already exist."""
+        mock_chromadb_client["collection"].count.return_value = 10
+
+        from cbr_mcp_server.utilities.setup_vectordb import generate_case_id
+
+        existing_ids = [generate_case_id(case) for case in sample_cases]
+        mock_chromadb_client["collection"].get.return_value = {"ids": existing_ids}
+
+        with patch(
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+            return_value=sample_cases,
+        ):
+            from cbr_mcp_server.utilities import setup_vectordb
+
+            setup_vectordb.main([])
+
+            # Verify add was NOT called (all cases already exist)
             mock_chromadb_client["collection"].add.assert_not_called()
 
 
@@ -419,7 +500,10 @@ class TestSetupVectorDBEdgeCases:
         """Verify graceful handling when case list is empty."""
         empty_cases = []
 
-        with patch("cbr_mcp_server.utilities.setup_vectordb.load_all_cases", return_value=empty_cases):
+        with patch(
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+            return_value=empty_cases,
+        ):
             import importlib
 
             from cbr_mcp_server.utilities import setup_vectordb
@@ -451,7 +535,10 @@ class TestSetupVectorDBEdgeCases:
             {"problem": "Minimal problem 2", "solution": "Minimal solution 2"},
         ]
 
-        with patch("cbr_mcp_server.utilities.setup_vectordb.load_all_cases", return_value=minimal_cases):
+        with patch(
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+            return_value=minimal_cases,
+        ):
             import importlib
 
             from cbr_mcp_server.utilities import setup_vectordb
@@ -477,7 +564,10 @@ class TestSetupVectorDBDuplicateHandling:
         self, mock_chromadb_client, mock_embedding_model, all_cases
     ):
         """Verify all generated IDs are unique."""
-        with patch("cbr_mcp_server.utilities.setup_vectordb.load_all_cases", return_value=all_cases):
+        with patch(
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+            return_value=all_cases,
+        ):
             import importlib
 
             from cbr_mcp_server.utilities import setup_vectordb
@@ -499,8 +589,11 @@ class TestSetupVectorDBDuplicateHandling:
     def test_setup_vectordb_id_sequence(
         self, mock_chromadb_client, mock_embedding_model, sample_cases
     ):
-        """Verify IDs are sequential and predictable."""
-        with patch("cbr_mcp_server.utilities.setup_vectordb.load_all_cases", return_value=sample_cases):
+        """Verify IDs are deterministic and content-based."""
+        with patch(
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+            return_value=sample_cases,
+        ):
             import importlib
 
             from cbr_mcp_server.utilities import setup_vectordb
@@ -516,9 +609,18 @@ class TestSetupVectorDBDuplicateHandling:
             call_args = mock_chromadb_client["collection"].add.call_args
             ids = call_args[1]["ids"]
 
-            # Verify sequential IDs
-            expected = [f"id{i}" for i in range(len(sample_cases))]
-            assert ids == expected
+            # Verify IDs are deterministic (same input produces same output)
+            # Generate IDs twice and verify they match
+            from cbr_mcp_server.utilities.setup_vectordb import generate_case_id
+
+            expected_ids = [generate_case_id(case) for case in sample_cases]
+            assert ids == expected_ids
+
+            # Verify all IDs follow the hash-based format
+            for case_id in ids:
+                assert case_id.startswith(
+                    "case_"
+                ), f"ID should start with 'case_': {case_id}"
 
 
 class TestSetupVectorDBErrorHandling:
@@ -529,33 +631,49 @@ class TestSetupVectorDBErrorHandling:
     ):
         """Verify handling when embedding generation fails."""
         # Mock embedding model to raise an exception
-        with patch("cbr_mcp_server.utilities.setup_vectordb.SentenceTransformer") as mock_model:
+        with patch(
+            "cbr_mcp_server.utilities.setup_vectordb.SentenceTransformer"
+        ) as mock_model:
             mock_instance = Mock()
             mock_instance.encode.side_effect = RuntimeError(
                 "Embedding generation failed"
             )
             mock_model.return_value = mock_instance
 
-            with patch("cbr_mcp_server.utilities.setup_vectordb.load_all_cases", return_value=sample_cases):
-                # Should raise the embedding error during execution
-                with pytest.raises(RuntimeError, match="Embedding generation failed"):
+            with patch(
+                "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+                return_value=sample_cases,
+            ):
+                # Should exit with non-zero code due to error handling in main()
+                with pytest.raises(SystemExit) as exc_info:
                     from cbr_mcp_server.utilities import setup_vectordb
 
                     setup_vectordb.main([])
+
+                # Verify it exits with error code
+                assert exc_info.value.code == 1
 
     def test_setup_vectordb_handles_chromadb_connection_failure(
         self, mock_embedding_model, sample_cases
     ):
         """Verify handling when ChromaDB connection fails."""
-        with patch("cbr_mcp_server.utilities.setup_vectordb.chromadb.PersistentClient") as mock_client:
+        with patch(
+            "cbr_mcp_server.utilities.setup_vectordb.chromadb.PersistentClient"
+        ) as mock_client:
             mock_client.side_effect = ConnectionError("Cannot connect to ChromaDB")
 
-            with patch("cbr_mcp_server.utilities.setup_vectordb.load_all_cases", return_value=sample_cases):
-                # Should raise the connection error during execution
-                with pytest.raises(ConnectionError, match="Cannot connect to ChromaDB"):
+            with patch(
+                "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+                return_value=sample_cases,
+            ):
+                # Should exit with non-zero code due to error handling in main()
+                with pytest.raises(SystemExit) as exc_info:
                     from cbr_mcp_server.utilities import setup_vectordb
 
                     setup_vectordb.main([])
+
+                # Verify it exits with error code
+                assert exc_info.value.code == 1
 
 
 class TestSetupVectorDBFutureModularStructure:
@@ -568,59 +686,51 @@ class TestSetupVectorDBFutureModularStructure:
     def test_setup_vectordb_with_modular_cases_import(
         self, mock_chromadb_client, mock_embedding_model, all_cases
     ):
-        """Verify setup_vectordb works when importing from cases.ALL_CASES.
+        """Verify setup_vectordb works with modular case structure via direct call.
 
-        This test simulates the future state after setup_vectordb.py is updated
-        to import from the modular structure.
+        This test verifies that setup_vectordb.py works correctly with the modular
+        case structure by directly calling main() with mocked dependencies.
         """
         from cases import ALL_CASES as ACTUAL_ALL_CASES
 
         expected_case_count = len(ACTUAL_ALL_CASES)
 
-        # Create a modified version of setup_vectordb that imports from cases
-        setup_code = """
-import chromadb
-from sentence_transformers import SentenceTransformer
-from cases import ALL_CASES as CASE_BASE
+        # Use load_all_cases to get cases (this is what setup_vectordb.py does)
+        with patch(
+            "cbr_mcp_server.utilities.setup_vectordb.load_all_cases",
+            return_value=all_cases,
+        ):
+            from cbr_mcp_server.utilities import setup_vectordb
 
-# Initialize the Embedding Model
-embedding_model = SentenceTransformer('nomic-ai/nomic-embed-text-v1.5', trust_remote_code=True)
+            # Reset mocks to clean state
+            mock_chromadb_client["client"].reset_mock()
+            mock_chromadb_client["instance"].reset_mock()
+            mock_chromadb_client["collection"].reset_mock()
+            mock_embedding_model.return_value.encode.reset_mock()
 
-# Initialize ChromaDB Client
-client = chromadb.PersistentClient(path="./db")
-
-# Create or load a collection
-collection = client.get_or_create_collection(
-    name="code_solutions_case_base"
-)
-
-# Populate the database
-if collection.count() == 0:
-    problems = [case["problem"] for case in CASE_BASE]
-    solutions = [case["solution"] for case in CASE_BASE]
-    ids = [f"id{i}" for i in range(len(problems))]
-    problem_embeddings = embedding_model.encode(problems, normalize_embeddings=True)
-    collection.add(
-        embeddings=problem_embeddings,
-        documents=solutions,
-        metadatas=[{"problem": p} for p in problems],
-        ids=ids
-    )
-"""
-
-        # Mock cases.ALL_CASES
-        with patch("cases.ALL_CASES", all_cases):
-            # Execute the modified setup code
-            namespace = {}
-            exec(setup_code, namespace)
+            # Call main() which should process all cases
+            setup_vectordb.main([])
 
             # Verify all cases were processed
             call_args = mock_chromadb_client["collection"].add.call_args
+
+            # Verify the call was made
+            assert call_args is not None, "collection.add should have been called"
+
             embeddings = call_args[1]["embeddings"]
             # Embeddings can be list or numpy array
-            embeddings_count = len(embeddings) if isinstance(embeddings, list) else embeddings.shape[0]
-            assert embeddings_count == expected_case_count
-            assert len(call_args[1]["ids"]) == expected_case_count
+            embeddings_count = (
+                len(embeddings) if isinstance(embeddings, list) else embeddings.shape[0]
+            )
+            assert (
+                embeddings_count == expected_case_count
+            ), f"Expected {expected_case_count} embeddings, got {embeddings_count}"
+            assert (
+                len(call_args[1]["ids"]) == expected_case_count
+            ), f"Expected {expected_case_count} IDs, got {len(call_args[1]['ids'])}"
+            assert (
+                len(call_args[1]["documents"]) == expected_case_count
+            ), f"Expected {expected_case_count} documents, got {len(call_args[1]['documents'])}"
 
     def test_modular_structure_provides_all_required_fields(
         self, mock_chromadb_client, mock_embedding_model

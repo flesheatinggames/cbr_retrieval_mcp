@@ -29,7 +29,8 @@ from sentence_transformers import SentenceTransformer
 
 def get_unique_collection_name() -> str:
     """Generate a unique collection name for test isolation in parallel execution."""
-    return f"test_collection_{uuid.uuid4().hex[:12]}"
+    return f"test_collection_{uuid.uuid4().hex}"
+
 
 # Add the src directory to path for importing setup_vectordb
 src_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "src")
@@ -208,7 +209,11 @@ def test_populate_empty_database_with_full_metadata(
     ), "Collection count should match number of cases loaded"
 
     # Retrieve the first case to check metadata
-    results = collection.get(ids=["id0"], include=["metadatas", "documents"])
+    # Need to get the actual case ID from the database (hash-based ID)
+    from cbr_mcp_server.utilities.setup_vectordb import generate_case_id
+
+    first_case_id = generate_case_id(sample_cases_with_complete_metadata[0])
+    results = collection.get(ids=[first_case_id], include=["metadatas", "documents"])
 
     # Assertion 2: First case has all 4 required metadata fields
     first_metadata = results["metadatas"][0]
@@ -311,7 +316,11 @@ def test_force_rebuild_replaces_broken_metadata(
             ), f"All cases should have '{field}' after force rebuild"
 
     # Assertion 3: Verify first case has correct complete metadata
-    first_result = collection.get(ids=["id0"], include=["metadatas"])
+    # Need to get the actual case ID from the database (hash-based ID)
+    from cbr_mcp_server.utilities.setup_vectordb import generate_case_id
+
+    first_case_id = generate_case_id(sample_cases_with_complete_metadata[0])
+    first_result = collection.get(ids=[first_case_id], include=["metadatas"])
     first_metadata = first_result["metadatas"][0]
     assert (
         "category" in first_metadata
@@ -574,7 +583,11 @@ def test_solution_stored_as_document(
         ), "Solution should NOT be stored in metadata (should be in documents)"
 
     # Assertion 3: Document content is retrievable
-    first_result = collection.get(ids=["id0"], include=["documents"])
+    # Need to get the actual case ID from the database (hash-based ID)
+    from cbr_mcp_server.utilities.setup_vectordb import generate_case_id
+
+    first_case_id = generate_case_id(sample_cases_with_complete_metadata[0])
+    first_result = collection.get(ids=[first_case_id], include=["documents"])
     assert len(first_result["documents"]) == 1, "Should retrieve one document"
     assert (
         first_result["documents"][0]

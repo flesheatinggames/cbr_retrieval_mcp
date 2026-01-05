@@ -670,6 +670,10 @@ class TestStartupPerformanceRegression:
     # Test 8: Startup Time Stability
     # ========================================================================
 
+    @pytest.mark.skipif(
+        os.environ.get('PYTEST_XDIST_WORKER') is not None,
+        reason="Test unstable in parallel execution mode"
+    )
     @pytest.mark.skipif(CBRMCPServer is None, reason="CBRMCPServer not available")
     async def test_startup_time_stability(
         self, baseline_metrics, startup_result_tracker

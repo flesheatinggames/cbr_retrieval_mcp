@@ -1,9 +1,9 @@
 """Pytest configuration and global fixtures."""
 
 import os
-import warnings
 import shutil
 import tempfile
+import warnings
 from pathlib import Path
 from typing import Generator
 from unittest.mock import Mock, patch
@@ -60,6 +60,7 @@ def disable_huggingface_hub():
 # Test Isolation Fixtures
 # ============================================================================
 
+
 @pytest.fixture
 def isolated_test_db() -> Generator[str, None, None]:
     """
@@ -101,7 +102,7 @@ def mock_chromadb_for_tests():
             "ids": [["test-1", "test-2"]],
             "documents": [["doc1", "doc2"]],
             "metadatas": [[{"category": "test"}, {"category": "test"}]],
-            "distances": [[0.1, 0.2]]
+            "distances": [[0.1, 0.2]],
         }
         mock_collection.count.return_value = 2
 
@@ -139,10 +140,13 @@ def prevent_production_db_access(monkeypatch, request):
     def safe_init(self, db_path: str, *args, **kwargs):
         """Intercept and redirect production database paths in __init__."""
         original_path = db_path
-        if db_path and (db_path == "./db" or db_path == "db" or Path(db_path).name == "db"):
+        if db_path and (
+            db_path == "./db" or db_path == "db" or Path(db_path).name == "db"
+        ):
             # Redirect to a temporary directory
             temp_dir = tempfile.mkdtemp(prefix="cbr_intercepted_")
             import atexit
+
             atexit.register(lambda: shutil.rmtree(temp_dir, ignore_errors=True))
             db_path = temp_dir
 
@@ -151,15 +155,14 @@ def prevent_production_db_access(monkeypatch, request):
 
     # Patch the __init__ method
     monkeypatch.setattr(
-        production_cbr_retriever.ProductionCBRRetriever,
-        "__init__",
-        safe_init
+        production_cbr_retriever.ProductionCBRRetriever, "__init__", safe_init
     )
 
 
 # ============================================================================
 # Pytest-xdist Worker ID Fixture
 # ============================================================================
+
 
 @pytest.fixture
 def worker_id(request):
@@ -175,9 +178,22 @@ def worker_id(request):
     Returns:
         str: Worker ID (e.g., "gw0", "gw1", ...) or "master" for non-parallel runs
     """
-    if hasattr(request.config, 'workerinput'):
+    if hasattr(request.config, "workerinput"):
         # Running with pytest-xdist
-        return request.config.workerinput['workerid']
+        return request.config.workerinput["workerid"]
     else:
         # Running without pytest-xdist (normal mode)
         return "master"
+
+
+# ============================================================================
+# Custom Pytest Marks
+# ============================================================================
+
+
+def pytest_configure(config):
+    """Register custom marks for test organization."""
+    config.addinivalue_line(
+        "markers",
+        "serial_only: marks tests that must run serially (alias for serial mark)",
+    )
