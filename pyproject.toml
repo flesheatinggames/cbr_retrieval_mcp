@@ -11,7 +11,7 @@ authors = [
 ]
 dependencies = [
     "mcp",
-    "chromadb",
+    "chromadb<1.4.0", # Pinned to avoid Rust bindings bug
     "sentence-transformers",
     "pydantic",
     "einops",
