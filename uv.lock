@@ -205,7 +205,7 @@ dev = [
 requires-dist = [
     { name = "black", marker = "extra == 'dev'" },
     { name = "cachetools", specifier = ">=5.3.0" },
-    { name = "chromadb" },
+    { name = "chromadb", specifier = "<1.4.0" },
     { name = "einops" },
     { name = "isort", marker = "extra == 'dev'" },
     { name = "mcp" },
